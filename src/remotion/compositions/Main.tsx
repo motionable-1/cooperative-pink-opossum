@@ -16,32 +16,31 @@ import { OutrankScene } from "./scenes/OutrankScene";
 import { ScaleYourScene } from "./scenes/ScaleYourScene";
 
 /*
- * Full animation sequence:
+ * Full animation sequence (ref frames at 50ms each → output at 30fps):
  *
  * Scene 1  (ref 001-034): "Getting traffic" - black bg, purple graph line
  * Scene 2  (ref 035-050): "IS HAAARD!" - black bg, bouncy text
  * Scene 3  (ref 051-072): "INSANELY HARD." - white bg → perspective zoom
- * Scene 4  (ref 073-093): Purple morph (square → fills frame + "What if you could" appears)
+ * Scene 4  (ref 073-093): Purple morph (square → fills frame + "What if you could")
  * Scene 5  (ref 094-105): "What if you could" hold
  * Scene 6  (ref 106-136): "spot" - white text on black with purple arrows
- * Scene 7  (ref 137-169): "exactly what your customers" - word-by-word on purple gradient
- * Scene 8  (ref 170-175): "are searching for," - centered on purple gradient
- * Scene 9  (ref 176-211): Search bar typing + zoom (white bg)
+ * Scene 7  (ref 137-169): "exactly what your customers" word-by-word on purple
+ * Scene 8  (ref 170-175): "are searching for,"
+ * Scene 9  (ref 176-211): Search bar typing + zoom
  * Scene 10 (ref 212-213): Transition to black
- * Scene 11 (ref 214-225): Purple "!" rotating on black
- * Scene 12 (ref 226-234): "meet!" bouncy purple text on black
- * Scene 13 (ref 235-240): "Meet !" white centered text on black
- * Scene 14 (ref 241-249): Neon pill outline drawing on black
- * Scene 15 (ref 250-279): "OUTRANK" in neon pill with rotating glow
- * Scene 16 (ref 280-282): Neon pill fading (text gone, outline fades)
- * Scene 17 (ref 283+):   "Scale your" on purple gradient with sparkles
+ * Scene 11 (ref 214-225): Purple "!" rotating
+ * Scene 12 (ref 226-234): "meet!" bouncy purple
+ * Scene 13 (ref 235-240): "Meet !" white centered
+ * Scene 14 (ref 241-249): Neon pill outline drawing
+ * Scene 15 (ref 250-282): "OUTRANK" in neon pill (extended, includes tail fade)
+ * Scene 16 (ref 283-321): "Scale your" → "traffic on autopilot." + fade to black
  */
 
 // Timing: each ref frame ≈ 1.5 output frames at 30fps
 const SCENE_1_DURATION = 51;   // "Getting traffic" + graph
 const SCENE_2_DURATION = 24;   // "IS HAAARD!"
-const SCENE_3_DURATION = 39;   // "INSANELY HARD." perspective zoom (+ breathing room)
-const SCENE_4_DURATION = 32;   // Purple morph + "What if you could" overlap
+const SCENE_3_DURATION = 39;   // "INSANELY HARD." perspective zoom
+const SCENE_4_DURATION = 32;   // Purple morph + "What if you could"
 const SCENE_5_DURATION = 18;   // "What if you could" hold
 const SCENE_6_DURATION = 47;   // "spot" with arrows
 const SCENE_7_DURATION = 50;   // "exactly what your customers"
@@ -52,9 +51,8 @@ const SCENE_11_DURATION = 18;  // Purple "!" rotating
 const SCENE_12_DURATION = 14;  // "meet!" bouncy purple
 const SCENE_13_DURATION = 9;   // "Meet !" white
 const SCENE_14_DURATION = 14;  // Neon pill drawing
-const SCENE_15_DURATION = 45;  // "OUTRANK" in neon pill
-const SCENE_16_DURATION = 5;   // Neon pill fade
-const SCENE_17_DURATION = 30;  // "Scale your" on purple gradient + buffer
+const SCENE_15_DURATION = 50;  // "OUTRANK" in neon pill (ref 079-111, 33 ref = ~50 output)
+const SCENE_16_DURATION = 59;  // "Scale your traffic on autopilot." (ref 112-150, 39 ref = ~59 output)
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -71,7 +69,6 @@ const SCENE_13_START = SCENE_12_START + SCENE_12_DURATION;
 const SCENE_14_START = SCENE_13_START + SCENE_13_DURATION;
 const SCENE_15_START = SCENE_14_START + SCENE_14_DURATION;
 const SCENE_16_START = SCENE_15_START + SCENE_15_DURATION;
-const SCENE_17_START = SCENE_16_START + SCENE_16_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -146,18 +143,13 @@ export const Main: React.FC = () => {
         <NeonPillScene />
       </Sequence>
 
-      {/* Scene 15: "OUTRANK" in neon pill */}
+      {/* Scene 15: "OUTRANK" in neon pill (extended) */}
       <Sequence from={SCENE_15_START} durationInFrames={SCENE_15_DURATION}>
         <OutrankScene />
       </Sequence>
 
-      {/* Scene 16: Neon pill fade (reuse OutrankScene — text fades at end) */}
+      {/* Scene 16: "Scale your traffic on autopilot." + fade to black */}
       <Sequence from={SCENE_16_START} durationInFrames={SCENE_16_DURATION}>
-        <NeonPillScene />
-      </Sequence>
-
-      {/* Scene 17: "Scale your" on purple gradient */}
-      <Sequence from={SCENE_17_START} durationInFrames={SCENE_17_DURATION}>
         <ScaleYourScene />
       </Sequence>
     </AbsoluteFill>
