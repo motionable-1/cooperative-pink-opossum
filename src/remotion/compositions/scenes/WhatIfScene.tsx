@@ -1,4 +1,4 @@
-import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -18,15 +18,16 @@ export const WhatIfScene: React.FC = () => {
   const { fps, durationInFrames } = useVideoConfig();
 
   // Text fade in — quick
-  const textOpacity = interpolate(frame, [0, 8], [0, 1], {
+  const textOpacity = interpolate(frame, [0, 5], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const textScale = spring({
-    frame,
-    fps,
-    config: { damping: 20, stiffness: 180, mass: 0.7 },
+  // Continuous slow zoom-in throughout scene
+  const textScale = interpolate(frame, [0, durationInFrames], [0.96, 1.06], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
   });
 
   // Wing shapes subtle breathing
@@ -36,17 +37,8 @@ export const WhatIfScene: React.FC = () => {
     [0.98, 1.02],
   );
 
-  // Exit: fade to black
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 8, durationInFrames],
-    [1, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.in(Easing.quad),
-    },
-  );
+  // Exit: hard cut (no fade)
+  const exitOpacity = 1;
 
   return (
     <div

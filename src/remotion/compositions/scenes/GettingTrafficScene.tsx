@@ -227,14 +227,15 @@ export const GettingTrafficScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Text fade in
-  const textOpacity = interpolate(frame, [0, 15], [0, 1], {
+  // Text fade in (faster for shorter scene)
+  const textOpacity = interpolate(frame, [0, 8], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
 
-  const textScale = interpolate(frame, [0, 20], [0.9, 1], {
+  // Continuous slow zoom-in on text throughout scene
+  const textScale = interpolate(frame, [0, durationInFrames], [0.95, 1.08], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -248,28 +249,20 @@ export const GettingTrafficScene: React.FC = () => {
   );
 
   // Graph draw progress (starts after text appears, draws over most of the scene)
-  const graphProgress = interpolate(frame, [5, durationInFrames - 10], [0, 1], {
+  const graphProgress = interpolate(frame, [3, durationInFrames - 5], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
   // Purple gradient at top - fades in
-  const gradientOpacity = interpolate(frame, [0, 20], [0, 1], {
+  const gradientOpacity = interpolate(frame, [0, 10], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Exit animation
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 8, durationInFrames],
-    [1, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
+  // Exit: hard cut (no fade to avoid grey bleed)
+  const exitOpacity = 1;
 
   return (
     <div

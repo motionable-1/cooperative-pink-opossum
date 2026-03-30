@@ -1,4 +1,4 @@
-import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, spring, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -32,23 +32,15 @@ export const IsHaardScene: React.FC = () => {
   const shakeX = Math.sin(frame * 2.8) * 3 * shakePhase;
   const shakeY = Math.cos(frame * 3.4) * 1.5 * shakePhase;
 
-  // Subtle breathing pulse while text holds
-  const breathe = interpolate(
-    Math.sin((frame / fps) * 3.5),
-    [-1, 1],
-    [0.99, 1.01],
-  );
+  // Continuous slow zoom-in throughout scene
+  const zoomScale = interpolate(frame, [0, durationInFrames], [1.0, 1.06], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
+  });
 
-  // Exit opacity
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 5, durationInFrames],
-    [1, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
+  // Exit: hard cut
+  const exitOpacity = 1;
 
   // Letter rotations for the bouncy/jittery hand-lettered feel visible in reference
   const letterData = [
@@ -79,7 +71,7 @@ export const IsHaardScene: React.FC = () => {
     >
       <div
         style={{
-          transform: `translate(${translateX + shakeX}px, ${shakeY}px) scale(${breathe})`,
+          transform: `translate(${translateX + shakeX}px, ${shakeY}px) scale(${zoomScale})`,
           display: "inline-flex",
           alignItems: "baseline",
           fontFamily,

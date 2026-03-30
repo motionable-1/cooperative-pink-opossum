@@ -1,4 +1,4 @@
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -16,6 +16,7 @@ const { fontFamily } = loadFont("normal", {
 
 export const AreSearchingScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
 
   // Text entrance: quick fade + blur-in over first 4 frames
   const opacity = interpolate(frame, [0, 4], [0, 1], {
@@ -28,10 +29,17 @@ export const AreSearchingScene: React.FC = () => {
     easing: Easing.out(Easing.quad),
   });
 
-  const scale = interpolate(frame, [0, 4], [0.96, 1], {
+  // Entry scale + continuous zoom
+  const entryScale = interpolate(frame, [0, 4], [0.96, 1], {
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
+  const zoomScale = interpolate(frame, [0, durationInFrames], [1.0, 1.06], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
+  });
+  const scale = entryScale * zoomScale;
 
   return (
     <div

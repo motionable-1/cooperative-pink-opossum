@@ -1,4 +1,4 @@
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -32,6 +32,15 @@ const BLUR_DURATION = 4;
 
 export const ExactlyWhatScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  // Continuous slow zoom-in on text block
+  const textZoom = interpolate(frame, [0, durationInFrames], [1.0, 1.06], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
+  });
+
   // Subtle background glow drift
   const glowX = interpolate(frame, [0, 60], [-5, 5], {
     extrapolateRight: "clamp",
@@ -92,6 +101,7 @@ export const ExactlyWhatScene: React.FC = () => {
             flexDirection: "row",
             alignItems: "center",
             gap: 16,
+            transform: `scale(${textZoom})`,
           }}
         >
           {WORDS.map((word, i) => {

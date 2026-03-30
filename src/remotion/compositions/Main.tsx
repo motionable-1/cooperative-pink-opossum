@@ -23,15 +23,17 @@ import { AreSearchingScene } from "./scenes/AreSearchingScene";
  * Scene 9: "are searching for," - centered on purple radial gradient
  */
 
-const SCENE_1_DURATION = 85;
-const SCENE_2_DURATION = 45;
-const SCENE_3_DURATION = 65;
-const SCENE_4_DURATION = 12; // Brief hold before morph begins
-const SCENE_5_DURATION = 35; // Purple square morph → fills frame
-const SCENE_6_DURATION = 65; // "What if you could"
-const SCENE_7_DURATION = 65; // "spot" with arrows
-const SCENE_8_DURATION = 50; // "exactly what your customers" word-by-word
-const SCENE_9_DURATION = 45; // "are searching for," hold
+// Timing: 170 reference frames × 50ms each = 8.5s total
+// At 30fps: each reference frame ≈ 1.5 output frames
+const SCENE_1_DURATION = 51;  // Ref 1-34:   "Getting traffic" + graph
+const SCENE_2_DURATION = 24;  // Ref 35-50:  "IS HAAARD!"
+const SCENE_3_DURATION = 33;  // Ref 51-72:  "INSANELY HARD." perspective zoom
+const SCENE_4_DURATION = 5;   // Ref 73-75:  Purple square hold (brief)
+const SCENE_5_DURATION = 15;  // Ref 76-85:  Purple morph fills frame
+const SCENE_6_DURATION = 30;  // Ref 86-105: "What if you could"
+const SCENE_7_DURATION = 47;  // Ref 106-136: "spot" with arrows
+const SCENE_8_DURATION = 50;  // Ref 137-169: "exactly what your customers"
+const SCENE_9_DURATION = 10;  // Ref 170+:   "are searching for," + buffer
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;

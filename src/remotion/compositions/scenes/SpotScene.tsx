@@ -1,4 +1,4 @@
-import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, spring, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -90,7 +90,14 @@ const specks = [
 
 export const SpotScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
+
+  // Continuous slow zoom-in on text throughout scene
+  const textZoom = interpolate(frame, [0, durationInFrames], [1.0, 1.08], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
+  });
 
   // Specks fade in subtly
   const specksOpacity = interpolate(frame, [2, 10], [0, 0.35], {
@@ -181,6 +188,7 @@ export const SpotScene: React.FC = () => {
             fontSize: 240,
             color: "white",
             letterSpacing: "0.01em",
+            transform: `scale(${textZoom})`,
           }}
         >
           spot
