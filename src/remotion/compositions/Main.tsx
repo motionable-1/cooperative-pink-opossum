@@ -3,27 +3,36 @@ import { GettingTrafficScene } from "./scenes/GettingTrafficScene";
 import { IsHaardScene } from "./scenes/IsHaardScene";
 import { InsanelyHardScene } from "./scenes/InsanelyHardScene";
 import { PurpleEndScene } from "./scenes/PurpleEndScene";
+import { PurpleMorphScene } from "./scenes/PurpleMorphScene";
+import { WhatIfScene } from "./scenes/WhatIfScene";
+import { SpotScene } from "./scenes/SpotScene";
 
 /*
- * Animation sequence (from 70 reference frames at 50ms each):
+ * Full animation sequence:
  *
- * Scene 1 (ref 1-34): "Getting traffic" - black bg, purple gradient top,
- *          animated purple line graph drawing from left to right with glowing nodes
- * Scene 2 (ref 35-48): "IS HAAARD!" - black bg, white bold text, bouncy uneven letters
- * Scene 3 (ref 49-71): "INSANELY HARD." - white bg, black text starts centered,
- *          then extreme perspective rotation (right side zooms toward viewer,
- *          left recedes) until "D." fills the frame
- * Scene 4 (ref 72-75): Purple square centered on soft lavender gradient, scattered dots
+ * Scene 1: "Getting traffic" - black bg, purple gradient top, animated line graph
+ * Scene 2: "IS HAAARD!" - black bg, white bold bouncy text
+ * Scene 3: "INSANELY HARD." - white bg → extreme perspective zoom
+ * Scene 4: Purple square on lavender gradient with dots (brief hold)
+ * Scene 5: Purple morph - square rotates → diamond → abstract wing expansion
+ * Scene 6: "What if you could" - white text on deep purple with wing shapes
+ * Scene 7: "spot" - white lowercase on black with 4 purple hand-drawn arrows
  */
 
 const SCENE_1_DURATION = 85;
 const SCENE_2_DURATION = 45;
 const SCENE_3_DURATION = 65;
-const SCENE_4_DURATION = 55;
+const SCENE_4_DURATION = 12; // Brief hold before morph begins
+const SCENE_5_DURATION = 35; // Purple square morph → wings (faster transition)
+const SCENE_6_DURATION = 65; // "What if you could"
+const SCENE_7_DURATION = 65; // "spot" with arrows + buffer at end
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
 const SCENE_4_START = SCENE_3_START + SCENE_3_DURATION;
+const SCENE_5_START = SCENE_4_START + SCENE_4_DURATION;
+const SCENE_6_START = SCENE_5_START + SCENE_5_DURATION;
+const SCENE_7_START = SCENE_6_START + SCENE_6_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -43,9 +52,24 @@ export const Main: React.FC = () => {
         <InsanelyHardScene />
       </Sequence>
 
-      {/* Scene 4: Purple Logo Ending */}
+      {/* Scene 4: Purple square hold */}
       <Sequence from={SCENE_4_START} durationInFrames={SCENE_4_DURATION}>
         <PurpleEndScene />
+      </Sequence>
+
+      {/* Scene 5: Purple morph transition */}
+      <Sequence from={SCENE_5_START} durationInFrames={SCENE_5_DURATION}>
+        <PurpleMorphScene />
+      </Sequence>
+
+      {/* Scene 6: "What if you could" */}
+      <Sequence from={SCENE_6_START} durationInFrames={SCENE_6_DURATION}>
+        <WhatIfScene />
+      </Sequence>
+
+      {/* Scene 7: "spot" with arrows */}
+      <Sequence from={SCENE_7_START} durationInFrames={SCENE_7_DURATION}>
+        <SpotScene />
       </Sequence>
     </AbsoluteFill>
   );

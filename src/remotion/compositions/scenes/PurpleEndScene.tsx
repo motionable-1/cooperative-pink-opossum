@@ -1,4 +1,4 @@
-import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 
 interface Dot {
   x: number;
@@ -10,33 +10,32 @@ interface Dot {
 
 // Pre-defined dot positions (scattered around the center square)
 const dots: Dot[] = [
-  { x: 12, y: 38, size: 5, delay: 4, opacity: 0.6 },
-  { x: 45, y: 8, size: 4, delay: 6, opacity: 0.5 },
-  { x: 75, y: 18, size: 8, delay: 2, opacity: 0.7 },
-  { x: 82, y: 58, size: 4, delay: 8, opacity: 0.5 },
-  { x: 35, y: 78, size: 6, delay: 5, opacity: 0.6 },
-  { x: 15, y: 68, size: 5, delay: 3, opacity: 0.7 },
+  { x: 12, y: 38, size: 5, delay: 1, opacity: 0.6 },
+  { x: 45, y: 8, size: 4, delay: 2, opacity: 0.5 },
+  { x: 75, y: 18, size: 8, delay: 0, opacity: 0.7 },
+  { x: 82, y: 58, size: 4, delay: 3, opacity: 0.5 },
+  { x: 35, y: 78, size: 6, delay: 1, opacity: 0.6 },
+  { x: 15, y: 68, size: 5, delay: 0, opacity: 0.7 },
 ];
 
 export const PurpleEndScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Background gradient fades in
-  const bgOpacity = interpolate(frame, [0, 15], [0, 1], {
+  // Background appears immediately (hard cut from previous scene)
+  const bgOpacity = interpolate(frame, [0, 3], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
   });
 
-  // Center square appears with spring
+  // Center square appears with quick spring
   const squareScale = spring({
-    frame: frame - 8,
+    frame,
     fps,
-    config: { damping: 14, stiffness: 180, mass: 0.8 },
+    config: { damping: 14, stiffness: 200, mass: 0.7 },
   });
 
-  const squareOpacity = interpolate(frame, [8, 14], [0, 1], {
+  const squareOpacity = interpolate(frame, [0, 3], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
