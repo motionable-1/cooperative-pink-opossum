@@ -20,7 +20,7 @@ export const InsanelyHardScene: React.FC = () => {
   // In CSS 3D:
   //   rotateY(negative) with transform-origin on right side = right comes forward
   const perspStart = 15;
-  const perspEnd = durationInFrames - 4;
+  const perspEnd = durationInFrames;
 
   const t = interpolate(frame, [perspStart, perspEnd], [0, 1], {
     extrapolateLeft: "clamp",
@@ -29,16 +29,18 @@ export const InsanelyHardScene: React.FC = () => {
   });
 
   // Negative rotateY with right-side origin = right comes toward viewer
-  const rotateY = interpolate(t, [0, 1], [0, -65]);
+  // Push to -85 so the text fully rotates past the camera and exits
+  const rotateY = interpolate(t, [0, 1], [0, -85]);
 
-  // Scale dramatically so HARD fills the frame
-  const scale = interpolate(t, [0, 1], [1, 5]);
+  // Scale dramatically — go to 12x so text blows past the frame entirely
+  const scale = interpolate(t, [0, 1], [1, 12]);
 
   // Dynamic perspective (lower = more extreme foreshortening)
-  const perspective = interpolate(t, [0, 1], [1200, 280]);
+  const perspective = interpolate(t, [0, 1], [1200, 200]);
 
-  // Shift so the right portion stays in frame as it zooms
-  const translateX = interpolate(t, [0, 1], [0, 30]);
+  // Shift so the right portion stays in frame during mid-animation,
+  // then continues past
+  const translateX = interpolate(t, [0, 1], [0, 50]);
 
   // No fade-out: hard cut to next scene (avoids grey bleed from parent bg)
   const exitOpacity = 1;
