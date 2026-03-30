@@ -137,28 +137,28 @@ export const SpotScene: React.FC = () => {
           zIndex: 5,
         }}
       >
-        {/* Top-left → down-right */}
+        {/* Top-left → down-right (stop well before text) */}
         <HandDrawnArrow
-          fromX={150} fromY={120}
-          toX={440} toY={300}
+          fromX={130} fromY={100}
+          toX={370} toY={230}
           delay={3} fps={fps} frame={frame} seed={1}
         />
         {/* Top-right → down-left */}
         <HandDrawnArrow
-          fromX={1130} fromY={120}
-          toX={840} toY={300}
+          fromX={1150} fromY={100}
+          toX={910} toY={230}
           delay={5} fps={fps} frame={frame} seed={2}
         />
         {/* Bottom-left → up-right */}
         <HandDrawnArrow
-          fromX={150} fromY={600}
-          toX={440} toY={420}
+          fromX={130} fromY={620}
+          toX={370} toY={490}
           delay={7} fps={fps} frame={frame} seed={3}
         />
         {/* Bottom-right → up-left */}
         <HandDrawnArrow
-          fromX={1130} fromY={600}
-          toX={840} toY={420}
+          fromX={1150} fromY={620}
+          toX={910} toY={490}
           delay={9} fps={fps} frame={frame} seed={4}
         />
       </svg>
