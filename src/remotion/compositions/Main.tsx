@@ -24,7 +24,7 @@ import { AreSearchingScene } from "./scenes/AreSearchingScene";
 // Timing: each ref frame ≈ 1.5 output frames at 30fps
 const SCENE_1_DURATION = 51;  // Ref 001-034: "Getting traffic" + graph
 const SCENE_2_DURATION = 24;  // Ref 035-050: "IS HAAARD!"
-const SCENE_3_DURATION = 33;  // Ref 051-072: "INSANELY HARD." perspective zoom
+const SCENE_3_DURATION = 39;  // Ref 051-072: "INSANELY HARD." perspective zoom (+ breathing room)
 const SCENE_4_DURATION = 32;  // Ref 073-093: Purple morph + "What if you could" overlap
 const SCENE_5_DURATION = 18;  // Ref 094-105: "What if you could" hold
 const SCENE_6_DURATION = 47;  // Ref 106-136: "spot" with arrows

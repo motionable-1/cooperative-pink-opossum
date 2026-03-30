@@ -18,7 +18,7 @@ export const InsanelyHardScene: React.FC = () => {
 
   // Phase 2: Extreme perspective - RIGHT side ("HARD.") comes toward viewer
   // Delayed start so text has breathing room to be read first
-  const perspStart = 20; // Hold flat for ~0.67s before zoom kicks in
+  const perspStart = 18; // Hold flat before zoom kicks in
   const perspEnd = durationInFrames;
 
   const t = interpolate(frame, [perspStart, perspEnd], [0, 1], {
