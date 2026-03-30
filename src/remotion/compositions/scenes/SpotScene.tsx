@@ -1,4 +1,4 @@
-import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -9,50 +9,66 @@ const { fontFamily } = loadFont("normal", {
 /**
  * "spot" in white lowercase centered on black background.
  * 4 hand-drawn purple arrows from near-corners pointing inward toward text.
- * Arrows are thin, hand-drawn style with open chevron heads.
- * Text is large (~45-50% of frame width).
- * Text appears instantly. Arrows stagger in one by one quickly.
- * A few very faint purple specks scattered on the background.
+ * Text is large (~45-50% of frame width), instantly visible.
+ * Arrows animate in with spring-based stagger (draw-in from corners).
  */
 
-/** Single hand-drawn arrow with open chevron head */
+/** Hand-drawn arrow that animates in via spring */
 const HandDrawnArrow: React.FC<{
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  opacity: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  delay: number;
+  fps: number;
+  frame: number;
   seed: number;
-}> = ({ startX, startY, endX, endY, opacity, seed }) => {
-  // Arrow angle
-  const angle = Math.atan2(endY - startY, endX - startX);
-  const headLen = 22;
+}> = ({ fromX, fromY, toX, toY, delay, fps, frame, seed }) => {
+  // Spring-based draw-in
+  const drawProgress = spring({
+    frame: frame - delay,
+    fps,
+    config: { damping: 14, stiffness: 180, mass: 0.7 },
+  });
+
+  const opacity = interpolate(frame, [delay, delay + 3], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Current tip position (arrow draws from corner toward text)
+  const tipX = fromX + (toX - fromX) * drawProgress;
+  const tipY = fromY + (toY - fromY) * drawProgress;
+
+  // Arrow angle (always points toward final target)
+  const angle = Math.atan2(toY - fromY, toX - fromX);
+  const headLen = 20;
   const headAngle = 0.45;
 
-  // Open chevron arrowhead points
-  const head1X = endX - headLen * Math.cos(angle - headAngle);
-  const head1Y = endY - headLen * Math.sin(angle - headAngle);
-  const head2X = endX - headLen * Math.cos(angle + headAngle);
-  const head2Y = endY - headLen * Math.sin(angle + headAngle);
+  // Open chevron arrowhead
+  const head1X = tipX - headLen * Math.cos(angle - headAngle);
+  const head1Y = tipY - headLen * Math.sin(angle - headAngle);
+  const head2X = tipX - headLen * Math.cos(angle + headAngle);
+  const head2Y = tipY - headLen * Math.sin(angle + headAngle);
 
-  // Hand-drawn wobble: slight curve via control point offset
-  const midX = (startX + endX) / 2 + Math.sin(seed * 3.7) * 6;
-  const midY = (startY + endY) / 2 + Math.cos(seed * 2.3) * 6;
+  // Hand-drawn wobble via curved control point
+  const midX = (fromX + tipX) / 2 + Math.sin(seed * 3.7) * 5;
+  const midY = (fromY + tipY) / 2 + Math.cos(seed * 2.3) * 5;
 
   return (
     <g opacity={opacity}>
-      {/* Arrow shaft — slightly curved for hand-drawn feel */}
+      {/* Arrow shaft */}
       <path
-        d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`}
+        d={`M ${fromX} ${fromY} Q ${midX} ${midY} ${tipX} ${tipY}`}
         stroke="#A855F7"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Open chevron arrowhead */}
+      {/* Open chevron head */}
       <path
-        d={`M ${head1X} ${head1Y} L ${endX} ${endY} L ${head2X} ${head2Y}`}
+        d={`M ${head1X} ${head1Y} L ${tipX} ${tipY} L ${head2X} ${head2Y}`}
         stroke="#A855F7"
         strokeWidth="3"
         fill="none"
@@ -75,13 +91,6 @@ const specks = [
 export const SpotScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-
-  // Arrows stagger in quickly — each one appears over ~3 frames
-  const arrowOpacity = (delay: number) =>
-    interpolate(frame, [delay, delay + 3], [0, 1], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
 
   // Specks fade in subtly
   const specksOpacity = interpolate(frame, [2, 10], [0, 0.35], {
@@ -118,7 +127,7 @@ export const SpotScene: React.FC = () => {
         );
       })}
 
-      {/* 4 hand-drawn arrows pointing inward from near-corners */}
+      {/* 4 hand-drawn arrows — spring animated draw-in from corners */}
       <svg
         viewBox="0 0 1280 720"
         style={{
@@ -128,41 +137,29 @@ export const SpotScene: React.FC = () => {
           zIndex: 5,
         }}
       >
-        {/* Top-left → pointing down-right toward text */}
+        {/* Top-left → down-right */}
         <HandDrawnArrow
-          startX={150}
-          startY={120}
-          endX={440}
-          endY={300}
-          opacity={arrowOpacity(2)}
-          seed={1}
+          fromX={150} fromY={120}
+          toX={440} toY={300}
+          delay={3} fps={fps} frame={frame} seed={1}
         />
-        {/* Top-right → pointing down-left toward text */}
+        {/* Top-right → down-left */}
         <HandDrawnArrow
-          startX={1130}
-          startY={120}
-          endX={840}
-          endY={300}
-          opacity={arrowOpacity(4)}
-          seed={2}
+          fromX={1130} fromY={120}
+          toX={840} toY={300}
+          delay={5} fps={fps} frame={frame} seed={2}
         />
-        {/* Bottom-left → pointing up-right toward text */}
+        {/* Bottom-left → up-right */}
         <HandDrawnArrow
-          startX={150}
-          startY={600}
-          endX={440}
-          endY={420}
-          opacity={arrowOpacity(6)}
-          seed={3}
+          fromX={150} fromY={600}
+          toX={440} toY={420}
+          delay={7} fps={fps} frame={frame} seed={3}
         />
-        {/* Bottom-right → pointing up-left toward text */}
+        {/* Bottom-right → up-left */}
         <HandDrawnArrow
-          startX={1130}
-          startY={600}
-          endX={840}
-          endY={420}
-          opacity={arrowOpacity(8)}
-          seed={4}
+          fromX={1130} fromY={600}
+          toX={840} toY={420}
+          delay={9} fps={fps} frame={frame} seed={4}
         />
       </svg>
 
@@ -181,7 +178,7 @@ export const SpotScene: React.FC = () => {
           style={{
             fontFamily,
             fontWeight: 700,
-            fontSize: 130,
+            fontSize: 240,
             color: "white",
             letterSpacing: "0.01em",
           }}
