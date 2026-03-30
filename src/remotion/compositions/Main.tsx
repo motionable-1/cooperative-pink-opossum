@@ -7,29 +7,34 @@ import { WhatIfScene } from "./scenes/WhatIfScene";
 import { SpotScene } from "./scenes/SpotScene";
 import { ExactlyWhatScene } from "./scenes/ExactlyWhatScene";
 import { AreSearchingScene } from "./scenes/AreSearchingScene";
+import { SearchBarScene } from "./scenes/SearchBarScene";
 
 /*
- * Full animation sequence (170 ref frames × 50ms = 8.5s at 30fps = 255 frames):
+ * Full animation sequence:
  *
  * Scene 1 (ref 001-034): "Getting traffic" - black bg, purple graph line
  * Scene 2 (ref 035-050): "IS HAAARD!" - black bg, bouncy text
  * Scene 3 (ref 051-072): "INSANELY HARD." - white bg → perspective zoom
- * Scene 4 (ref 073-093): Purple morph (square → star → fills frame + "What if you could" appears)
- * Scene 5 (ref 094-105): "What if you could" hold (fully settled, wing shapes)
+ * Scene 4 (ref 073-093): Purple morph (square → fills frame + "What if you could" appears)
+ * Scene 5 (ref 094-105): "What if you could" hold
  * Scene 6 (ref 106-136): "spot" - white text on black with purple arrows
  * Scene 7 (ref 137-169): "exactly what your customers" - word-by-word on purple gradient
- * Scene 8 (ref 170+):    "are searching for," - centered on purple gradient
+ * Scene 8 (ref 170-175): "are searching for," - centered on purple gradient
+ * Scene 9 (ref 176-211): Search bar typing "and appear at the top automatically?" + zoom
+ * Scene 10: Fade to black
  */
 
 // Timing: each ref frame ≈ 1.5 output frames at 30fps
-const SCENE_1_DURATION = 51;  // Ref 001-034: "Getting traffic" + graph
-const SCENE_2_DURATION = 24;  // Ref 035-050: "IS HAAARD!"
-const SCENE_3_DURATION = 39;  // Ref 051-072: "INSANELY HARD." perspective zoom (+ breathing room)
-const SCENE_4_DURATION = 32;  // Ref 073-093: Purple morph + "What if you could" overlap
-const SCENE_5_DURATION = 18;  // Ref 094-105: "What if you could" hold
-const SCENE_6_DURATION = 47;  // Ref 106-136: "spot" with arrows
-const SCENE_7_DURATION = 50;  // Ref 137-169: "exactly what your customers"
-const SCENE_8_DURATION = 10;  // Ref 170+:    "are searching for," + buffer
+const SCENE_1_DURATION = 51;  // "Getting traffic" + graph
+const SCENE_2_DURATION = 24;  // "IS HAAARD!"
+const SCENE_3_DURATION = 39;  // "INSANELY HARD." perspective zoom (+ breathing room)
+const SCENE_4_DURATION = 32;  // Purple morph + "What if you could" overlap
+const SCENE_5_DURATION = 18;  // "What if you could" hold
+const SCENE_6_DURATION = 47;  // "spot" with arrows
+const SCENE_7_DURATION = 50;  // "exactly what your customers"
+const SCENE_8_DURATION = 13;  // "are searching for," (extended 3 frames for hold)
+const SCENE_9_DURATION = 54;  // Search bar typing + zoom
+const SCENE_10_DURATION = 3;  // Fade to black
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -38,6 +43,8 @@ const SCENE_5_START = SCENE_4_START + SCENE_4_DURATION;
 const SCENE_6_START = SCENE_5_START + SCENE_5_DURATION;
 const SCENE_7_START = SCENE_6_START + SCENE_6_DURATION;
 const SCENE_8_START = SCENE_7_START + SCENE_7_DURATION;
+const SCENE_9_START = SCENE_8_START + SCENE_8_DURATION;
+const SCENE_10_START = SCENE_9_START + SCENE_9_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -57,7 +64,7 @@ export const Main: React.FC = () => {
         <InsanelyHardScene />
       </Sequence>
 
-      {/* Scene 4: Purple morph transition (square → fills frame + text appears) */}
+      {/* Scene 4: Purple morph transition */}
       <Sequence from={SCENE_4_START} durationInFrames={SCENE_4_DURATION}>
         <PurpleMorphTransition />
       </Sequence>
@@ -80,6 +87,22 @@ export const Main: React.FC = () => {
       {/* Scene 8: "are searching for," */}
       <Sequence from={SCENE_8_START} durationInFrames={SCENE_8_DURATION}>
         <AreSearchingScene />
+      </Sequence>
+
+      {/* Scene 9: Search bar typing */}
+      <Sequence from={SCENE_9_START} durationInFrames={SCENE_9_DURATION}>
+        <SearchBarScene />
+      </Sequence>
+
+      {/* Scene 10: Fade to black (white bg fading out reveals black parent) */}
+      <Sequence from={SCENE_10_START} durationInFrames={SCENE_10_DURATION}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "#000000",
+          }}
+        />
       </Sequence>
     </AbsoluteFill>
   );
