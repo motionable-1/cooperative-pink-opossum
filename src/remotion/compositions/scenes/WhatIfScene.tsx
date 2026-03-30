@@ -47,25 +47,25 @@ export const WhatIfScene: React.FC = () => {
         }}
       />
 
-      {/* Left wing gradient */}
+      {/* Left wing gradient — visible lighter purple sweeping from left */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 55% 70% at 0% 50%, rgba(196, 181, 253, 0.5) 0%, rgba(196, 181, 253, 0.2) 50%, transparent 100%)",
+            "radial-gradient(ellipse 60% 80% at 0% 50%, rgba(216, 200, 255, 0.7) 0%, rgba(196, 181, 253, 0.4) 40%, transparent 80%)",
           transform: `scaleX(${wingBreath})`,
           transformOrigin: "left center",
         }}
       />
 
-      {/* Right wing gradient */}
+      {/* Right wing gradient — mirrored */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 55% 70% at 100% 50%, rgba(196, 181, 253, 0.5) 0%, rgba(196, 181, 253, 0.2) 50%, transparent 100%)",
+            "radial-gradient(ellipse 60% 80% at 100% 50%, rgba(216, 200, 255, 0.7) 0%, rgba(196, 181, 253, 0.4) 40%, transparent 80%)",
           transform: `scaleX(${wingBreath})`,
           transformOrigin: "right center",
         }}
