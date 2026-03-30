@@ -1,56 +1,51 @@
-import { AbsoluteFill, Artifact, useCurrentFrame, useVideoConfig } from "remotion";
-import { loadFont } from "@remotion/google-fonts/SpaceMono";
+import { AbsoluteFill, Sequence } from "remotion";
+import { GettingTrafficScene } from "./scenes/GettingTrafficScene";
+import { IsHaardScene } from "./scenes/IsHaardScene";
+import { InsanelyHardScene } from "./scenes/InsanelyHardScene";
+import { PurpleEndScene } from "./scenes/PurpleEndScene";
 
-const LoaderDots = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+/*
+ * Animation sequence breakdown (from reference frames):
+ * 
+ * Scene 1: "Getting traffic" - black bg, purple gradient top, animated line graph
+ *          Graph draws from bottom-left upward with 2 glowing white nodes
+ * Scene 2: "IS HAAARD!" - black bg, white bold text, slight bounce/hand-lettered feel
+ * Scene 3: "INSANELY HARD." - white bg, black text, then perspective zoom distortion
+ * Scene 4: Purple square + dots on soft lavender gradient - ending logo mark
+ */
 
-  const dot = (index: number) => {
-    const phase = (frame / fps) * 2 * Math.PI + index * 0.8;
-    return 0.35 + Math.max(0, Math.sin(phase)) * 0.65;
-  };
+// Scene durations (in frames at 30fps)
+const SCENE_1_DURATION = 100; // ~3.3s - Getting traffic with graph animation
+const SCENE_2_DURATION = 50;  // ~1.7s - IS HAAARD!
+const SCENE_3_DURATION = 70;  // ~2.3s - INSANELY HARD. with perspective
+const SCENE_4_DURATION = 60;  // ~2.0s - Purple ending
 
-  return (
-    <span className="inline-flex gap-1">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="inline-block text-sky-300"
-          style={{ opacity: dot(i) }}
-        >
-          .
-        </span>
-      ))}
-    </span>
-  );
-};
+const SCENE_2_START = SCENE_1_DURATION;
+const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
+const SCENE_4_START = SCENE_3_START + SCENE_3_DURATION;
 
 export const Main: React.FC = () => {
-  const { fontFamily } = loadFont();
-  const frame = useCurrentFrame();
   return (
-    <>
-      {/* Leave this here to generate a thumbnail */}
-      {frame === 0 && (
-        <Artifact content={Artifact.Thumbnail} filename="thumbnail.jpeg" />
-      )}
-      <AbsoluteFill className="flex items-center justify-center bg-[#0f1115]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.28),transparent_45%),radial-gradient(circle_at_70%_60%,rgba(16,185,129,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px] opacity-40" />
-        <div
-          className="flex flex-col items-center gap-4 text-center text-white drop-shadow-[0_12px_32px_rgba(0,0,0,0.55)]"
-          style={{ fontFamily, fontWeight: 700, letterSpacing: "0.01em" }}
-        >
-          <div className="text-4xl md:text-5xl font-bold">
-            <span className="font-extrabold text-sky-300">Motionabl</span> is
-            building your video
-            <LoaderDots />
-          </div>
-          <div className="text-base md:text-lg text-white/70">
-            Rendering scenes, timing transitions, and polishing frames.
-          </div>
-        </div>
-      </AbsoluteFill>
-    </>
+    <AbsoluteFill style={{ backgroundColor: "#000000" }}>
+      {/* Scene 1: Getting Traffic */}
+      <Sequence from={0} durationInFrames={SCENE_1_DURATION}>
+        <GettingTrafficScene />
+      </Sequence>
+
+      {/* Scene 2: IS HAAARD! */}
+      <Sequence from={SCENE_2_START} durationInFrames={SCENE_2_DURATION}>
+        <IsHaardScene />
+      </Sequence>
+
+      {/* Scene 3: INSANELY HARD. */}
+      <Sequence from={SCENE_3_START} durationInFrames={SCENE_3_DURATION}>
+        <InsanelyHardScene />
+      </Sequence>
+
+      {/* Scene 4: Purple Logo Ending */}
+      <Sequence from={SCENE_4_START} durationInFrames={SCENE_4_DURATION}>
+        <PurpleEndScene />
+      </Sequence>
+    </AbsoluteFill>
   );
 };
