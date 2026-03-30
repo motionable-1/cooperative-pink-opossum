@@ -10,55 +10,38 @@ export const InsanelyHardScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  // Phase 1: Text appears centered and flat (frames 0-40)
-  const entryOpacity = interpolate(frame, [0, 8], [0, 1], {
+  // Phase 1: Text fades in centered and flat
+  const entryOpacity = interpolate(frame, [0, 6], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const entryScale = interpolate(frame, [0, 10], [1.15, 1], {
+  // Phase 2: Extreme perspective - RIGHT side ("HARD.") comes toward viewer
+  // In CSS 3D:
+  //   rotateY(negative) with transform-origin on right side = right comes forward
+  const perspStart = 15;
+  const perspEnd = durationInFrames - 4;
+
+  const t = interpolate(frame, [perspStart, perspEnd], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
+    easing: Easing.bezier(0.25, 0, 0.85, 0.5),
   });
 
-  // Phase 2: Perspective zoom distortion starts (after frame 40)
-  const perspectiveStart = 40;
-  
-  // The perspective effect: text gets a dramatic 3D perspective tilt
-  const perspectiveProgress = interpolate(
-    frame,
-    [perspectiveStart, durationInFrames - 8],
-    [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.in(Easing.quad),
-    },
-  );
+  // Negative rotateY with right-side origin = right comes toward viewer
+  const rotateY = interpolate(t, [0, 1], [0, -65]);
 
-  // RotateY creates the perspective distortion (text swings away)
-  const rotateY = interpolate(perspectiveProgress, [0, 1], [0, -65]);
-  
-  // Scale increases as perspective kicks in
-  const perspectiveScale = interpolate(perspectiveProgress, [0, 1], [1, 1.8]);
-  
-  // Translate to the right as perspective distorts
-  const translateX = interpolate(perspectiveProgress, [0, 1], [0, 300]);
+  // Scale dramatically so HARD fills the frame
+  const scale = interpolate(t, [0, 1], [1, 5]);
 
-  // Overall scale combines entry + perspective
-  const totalScale = frame < perspectiveStart ? entryScale : perspectiveScale;
+  // Dynamic perspective (lower = more extreme foreshortening)
+  const perspective = interpolate(t, [0, 1], [1200, 280]);
 
-  // Exit opacity
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 8, durationInFrames],
-    [1, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
+  // Shift so the right portion stays in frame as it zooms
+  const translateX = interpolate(t, [0, 1], [0, 30]);
+
+  // No fade-out: hard cut to next scene (avoids grey bleed from parent bg)
+  const exitOpacity = 1;
 
   return (
     <div
@@ -66,28 +49,37 @@ export const InsanelyHardScene: React.FC = () => {
         position: "absolute",
         inset: 0,
         backgroundColor: "#FFFFFF",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         overflow: "hidden",
         opacity: exitOpacity,
-        perspective: "800px",
       }}
     >
       <div
         style={{
-          fontFamily,
-          fontWeight: 900,
-          fontSize: 82,
-          color: "#000000",
-          letterSpacing: "-0.02em",
-          opacity: entryOpacity,
-          transform: `scale(${totalScale}) rotateY(${rotateY}deg) translateX(${translateX}px)`,
-          transformOrigin: "right center",
-          whiteSpace: "nowrap",
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          perspective: `${perspective}px`,
+          perspectiveOrigin: "70% 50%",
         }}
       >
-        INSANELY HARD.
+        <div
+          style={{
+            fontFamily,
+            fontWeight: 900,
+            fontSize: 80,
+            color: "#000000",
+            letterSpacing: "-0.02em",
+            opacity: entryOpacity,
+            transform: `translateX(${translateX}%) rotateY(${rotateY}deg) scale(${scale})`,
+            transformOrigin: "85% 50%",
+            whiteSpace: "nowrap",
+            willChange: "transform",
+          }}
+        >
+          INSANELY HARD.
+        </div>
       </div>
     </div>
   );

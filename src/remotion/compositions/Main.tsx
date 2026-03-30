@@ -5,20 +5,21 @@ import { InsanelyHardScene } from "./scenes/InsanelyHardScene";
 import { PurpleEndScene } from "./scenes/PurpleEndScene";
 
 /*
- * Animation sequence breakdown (from reference frames):
- * 
- * Scene 1: "Getting traffic" - black bg, purple gradient top, animated line graph
- *          Graph draws from bottom-left upward with 2 glowing white nodes
- * Scene 2: "IS HAAARD!" - black bg, white bold text, slight bounce/hand-lettered feel
- * Scene 3: "INSANELY HARD." - white bg, black text, then perspective zoom distortion
- * Scene 4: Purple square + dots on soft lavender gradient - ending logo mark
+ * Animation sequence (from 70 reference frames at 50ms each):
+ *
+ * Scene 1 (ref 1-34): "Getting traffic" - black bg, purple gradient top,
+ *          animated purple line graph drawing from left to right with glowing nodes
+ * Scene 2 (ref 35-48): "IS HAAARD!" - black bg, white bold text, bouncy uneven letters
+ * Scene 3 (ref 49-71): "INSANELY HARD." - white bg, black text starts centered,
+ *          then extreme perspective rotation (right side zooms toward viewer,
+ *          left recedes) until "D." fills the frame
+ * Scene 4 (ref 72-75): Purple square centered on soft lavender gradient, scattered dots
  */
 
-// Scene durations (in frames at 30fps)
-const SCENE_1_DURATION = 100; // ~3.3s - Getting traffic with graph animation
-const SCENE_2_DURATION = 50;  // ~1.7s - IS HAAARD!
-const SCENE_3_DURATION = 70;  // ~2.3s - INSANELY HARD. with perspective
-const SCENE_4_DURATION = 60;  // ~2.0s - Purple ending
+const SCENE_1_DURATION = 85;
+const SCENE_2_DURATION = 45;
+const SCENE_3_DURATION = 65;
+const SCENE_4_DURATION = 55;
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -37,7 +38,7 @@ export const Main: React.FC = () => {
         <IsHaardScene />
       </Sequence>
 
-      {/* Scene 3: INSANELY HARD. */}
+      {/* Scene 3: INSANELY HARD. with extreme perspective zoom */}
       <Sequence from={SCENE_3_START} durationInFrames={SCENE_3_DURATION}>
         <InsanelyHardScene />
       </Sequence>

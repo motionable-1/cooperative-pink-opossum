@@ -10,55 +10,39 @@ export const IsHaardScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // "IS" appears first with a pop
-  const isScale = spring({
+  // Text slides/reveals in from the right quickly (reference shows "IS H" mid-reveal)
+  const revealProgress = spring({
     frame,
     fps,
-    config: { damping: 12, stiffness: 200, mass: 0.8 },
+    config: { damping: 18, stiffness: 200, mass: 0.7 },
   });
 
-  const isOpacity = interpolate(frame, [0, 4], [0, 1], {
+  // Translate from right: text slides left into position
+  const translateX = interpolate(revealProgress, [0, 1], [60, 0]);
+  const mainOpacity = interpolate(frame, [0, 3], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // "HAAARD!" slams in slightly after
-  const haardDelay = 4;
-  const haardScale = spring({
-    frame: frame - haardDelay,
-    fps,
-    config: { damping: 10, stiffness: 250, mass: 0.9 },
-  });
-
-  const haardOpacity = interpolate(frame, [haardDelay, haardDelay + 4], [0, 1], {
+  // Slight shake on settle
+  const shakePhase = interpolate(frame, [6, 12], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const shakeX = Math.sin(frame * 2.8) * 3 * shakePhase;
+  const shakeY = Math.cos(frame * 3.4) * 1.5 * shakePhase;
 
-  // Slight shake on impact
-  const shakeIntensity = interpolate(
-    frame,
-    [haardDelay, haardDelay + 3, haardDelay + 8],
-    [0, 4, 0],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
-  const shakeX = Math.sin(frame * 2.5) * shakeIntensity;
-  const shakeY = Math.cos(frame * 3.1) * shakeIntensity * 0.5;
-
-  // Subtle scale pulse throughout
-  const pulse = interpolate(
-    Math.sin((frame / fps) * 4),
+  // Subtle breathing pulse while text holds
+  const breathe = interpolate(
+    Math.sin((frame / fps) * 3.5),
     [-1, 1],
-    [0.98, 1.02],
+    [0.99, 1.01],
   );
 
-  // Exit
+  // Exit opacity
   const exitOpacity = interpolate(
     frame,
-    [durationInFrames - 6, durationInFrames],
+    [durationInFrames - 5, durationInFrames],
     [1, 0],
     {
       extrapolateLeft: "clamp",
@@ -66,8 +50,19 @@ export const IsHaardScene: React.FC = () => {
     },
   );
 
-  // Individual letter rotations for the "bouncy" hand-lettered feel
-  const letterRotations = [-1.5, 0.8, -0.5, 1.2, -0.8, 0.6, -1.0, 1.5];
+  // Letter rotations for the bouncy/jittery hand-lettered feel visible in reference
+  const letterData = [
+    { char: "I", rot: -1.2, yOff: 1 },
+    { char: "S", rot: 0.8, yOff: -1 },
+    { char: " ", rot: 0, yOff: 0 },
+    { char: "H", rot: -0.6, yOff: 2 },
+    { char: "A", rot: 1.0, yOff: -1 },
+    { char: "A", rot: -0.4, yOff: 1.5 },
+    { char: "A", rot: 0.7, yOff: -0.5 },
+    { char: "R", rot: -0.9, yOff: 1 },
+    { char: "D", rot: 0.5, yOff: -1.5 },
+    { char: "!", rot: 1.3, yOff: 2 },
+  ];
 
   return (
     <div
@@ -84,50 +79,38 @@ export const IsHaardScene: React.FC = () => {
     >
       <div
         style={{
-          transform: `translate(${shakeX}px, ${shakeY}px) scale(${pulse})`,
-          display: "flex",
+          transform: `translate(${translateX + shakeX}px, ${shakeY}px) scale(${breathe})`,
+          display: "inline-flex",
           alignItems: "baseline",
-          gap: "18px",
           fontFamily,
           fontWeight: 900,
+          opacity: mainOpacity,
         }}
       >
-        {/* IS */}
-        <span
-          style={{
-            fontSize: 88,
-            color: "white",
-            opacity: isOpacity,
-            transform: `scale(${isScale})`,
-            display: "inline-block",
-            letterSpacing: "0.02em",
-          }}
-        >
-          IS
-        </span>
+        {letterData.map((item, i) => {
+          // Stagger each letter's entry slightly
+          const letterDelay = i * 0.3;
+          const letterSpring = spring({
+            frame: frame - letterDelay,
+            fps,
+            config: { damping: 14, stiffness: 220, mass: 0.6 },
+          });
 
-        {/* HAAARD! with individual letter rotations */}
-        <span
-          style={{
-            display: "inline-flex",
-            opacity: haardOpacity,
-            transform: `scale(${haardScale})`,
-          }}
-        >
-          {"HAAARD!".split("").map((char, i) => (
+          return (
             <span
               key={i}
               style={{
                 fontSize: 88,
                 color: "white",
                 display: "inline-block",
-                transform: `rotate(${letterRotations[i] || 0}deg) translateY(${Math.sin(i * 1.2) * 2}px)`,
+                transform: `rotate(${item.rot * letterSpring}deg) translateY(${item.yOff * letterSpring}px)`,
+                marginRight: item.char === " " ? 18 : 0,
               }}
             >
-              {char}
+              {item.char === " " ? "\u00A0" : item.char}
             </span>
-          ))}
-        </span>
+          );
+        })}
       </div>
     </div>
   );
