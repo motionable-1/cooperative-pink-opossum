@@ -7,27 +7,38 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * "OUTRANK" in white bold text inside a neon pill shape on black bg.
+ * "OUTRANK" in white bold text inside a LARGE neon pill on black bg.
  * Ref frames 079-108 (30 ref frames = ~45 output frames)
  *
- * The pill shape has a neon-colored border (gradient: magenta → orange → cyan → blue → purple).
- * The neon glow ROTATES clockwise around the pill border throughout the scene.
- * Strong soft purple glow behind the pill.
+ * Pill: ~81% frame width, ~39% height. Interior black (blends with bg).
+ * Unlit edges are invisible — shape only defined by the lit neon segment.
  *
- * Text "OUTRANK" types in letter by letter in the first ~8 frames,
- * then holds. The last letter revealed may briefly appear gray before turning white.
+ * Neon border: very thin (1-2px core) lit segment (~55% of perimeter)
+ * that ROTATES CLOCKWISE throughout the scene. Wide soft glow behind it.
+ * Gradient: cyan (tail) → purple (middle) → magenta → orange (head).
  *
- * After the text is done, the scene continues with the rotating neon glow.
- * Near the end (frames 109-111), text fades and only outline remains.
+ * Background glow: diffuse purple/magenta that follows the lit segment.
+ *
+ * Text "OUTRANK": types letter by letter over first ~12 frames.
+ * Latest letter appears gray (#6B7280) briefly before turning white.
+ * Text stays visible the entire scene (no fade at end).
+ *
+ * ref 079: lit on left curve + partial bottom/top, ~3 letters visible
+ * ref 085: lit shifted to left+top, ~6 letters
+ * ref 090: lit top + partial right, full OUTRANK
+ * ref 097: lit left + partial top (continued rotation)
+ * ref 108: lit right side (end position)
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 520;
-const PILL_H = 72;
+const PILL_W = 1040;
+const PILL_H = 280;
 const PILL_R = PILL_H / 2;
-const PILL_X = (W - PILL_W) / 2;
-const PILL_Y = (H - PILL_H) / 2;
+const CX = W / 2;
+const CY = H / 2;
+const PILL_X = CX - PILL_W / 2;
+const PILL_Y = CY - PILL_H / 2;
 
 const LETTERS = "OUTRANK";
 
@@ -37,50 +48,55 @@ function getPillPath() {
   const t = PILL_Y;
   const b = PILL_Y + PILL_H;
   const rad = PILL_R;
-  return `
-    M ${l + rad} ${b}
-    A ${rad} ${rad} 0 0 1 ${l} ${t + rad}
-    A ${rad} ${rad} 0 0 1 ${l + rad} ${t}
-    L ${r - rad} ${t}
-    A ${rad} ${rad} 0 0 1 ${r} ${t + rad}
-    A ${rad} ${rad} 0 0 1 ${r - rad} ${b}
-    Z
-  `;
+  return [
+    `M ${l + rad} ${b}`,
+    `A ${rad} ${rad} 0 0 1 ${l} ${CY}`,
+    `A ${rad} ${rad} 0 0 1 ${l + rad} ${t}`,
+    `L ${r - rad} ${t}`,
+    `A ${rad} ${rad} 0 0 1 ${r} ${CY}`,
+    `A ${rad} ${rad} 0 0 1 ${r - rad} ${b}`,
+    `L ${l + rad} ${b}`,
+  ].join(" ");
 }
 
 export const OutrankScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  // Approximate perimeter
-  const perimeter = 2 * Math.PI * PILL_R + 2 * (PILL_W - 2 * PILL_R);
+  // Perimeter
+  const straightLen = (PILL_W - 2 * PILL_R) * 2;
+  const curveLen = 2 * Math.PI * PILL_R;
+  const perimeter = straightLen + curveLen;
 
-  // Rotating glow: the "lit" segment (~40% of perimeter) rotates clockwise
-  // We use dashoffset to animate the position of the lit segment
-  const litLength = perimeter * 0.4;
+  // Lit segment: ~55% of perimeter
+  const litLength = perimeter * 0.55;
   const gapLength = perimeter - litLength;
 
-  // Rotation: offset shifts from 0 to -perimeter over the scene (clockwise)
+  // Rotating neon: dashoffset shifts the lit segment clockwise
+  // Continue from where NeonPillScene left off (~45% drawn from bottom-left)
+  // Over the scene, rotate ~1.2 full loops
+  const startOffset = -perimeter * 0.15;
+  const endOffset = startOffset - perimeter * 1.2;
   const dashOffset = interpolate(
     frame,
     [0, durationInFrames],
-    [0, -perimeter * 1.5],
+    [startOffset, endOffset],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
-  // Glow bloom follows the neon position
-  // Map dashOffset to approximate angle for glow positioning
-  const glowAngle = interpolate(
+  // Glow follows the center of the lit segment
+  const rotationProgress = interpolate(
     frame,
     [0, durationInFrames],
-    [200, 200 + 540],
+    [0, 1.2],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
+  const glowAngle = 225 + rotationProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
-  const glowX = 50 + Math.cos(glowRad) * 30;
-  const glowY = 50 + Math.sin(glowRad) * 20;
+  const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.28);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.35);
 
-  // Text reveal: letters appear one by one
+  // Text reveal: one letter at a time over ~12 frames
   const lettersVisible = Math.min(
     LETTERS.length,
     Math.floor(
@@ -89,14 +105,6 @@ export const OutrankScene: React.FC = () => {
         extrapolateRight: "clamp",
       })
     )
-  );
-
-  // Exit: text fades near end
-  const textOpacity = interpolate(
-    frame,
-    [durationInFrames - 8, durationInFrames - 2],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   return (
@@ -108,18 +116,17 @@ export const OutrankScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Rotating purple glow behind pill */}
+      {/* Diffuse purple glow that follows the lit segment */}
       <div
         style={{
           position: "absolute",
-          left: `${glowX}%`,
-          top: `${glowY}%`,
-          width: 400,
-          height: 200,
-          transform: "translate(-50%, -50%)",
+          left: glowCenterX - 280,
+          top: glowCenterY - 180,
+          width: 560,
+          height: 360,
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(168, 85, 247, 0.5) 0%, rgba(139, 92, 246, 0.2) 50%, transparent 80%)",
-          filter: "blur(40px)",
+            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.4) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 75%)",
+          filter: "blur(45px)",
         }}
       />
 
@@ -129,16 +136,15 @@ export const OutrankScene: React.FC = () => {
         style={{ position: "absolute", width: "100%", height: "100%" }}
       >
         <defs>
-          <linearGradient id="outrankNeonGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient id="outrankNeon" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#F97316" />
             <stop offset="20%" stopColor="#EC4899" />
-            <stop offset="40%" stopColor="#A855F7" />
-            <stop offset="60%" stopColor="#06B6D4" />
-            <stop offset="80%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#8B5CF6" />
+            <stop offset="45%" stopColor="#A855F7" />
+            <stop offset="70%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#06B6D4" />
           </linearGradient>
           <filter id="outrankGlow">
-            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feGaussianBlur stdDeviation="8" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -146,24 +152,24 @@ export const OutrankScene: React.FC = () => {
           </filter>
         </defs>
 
-        {/* Outer glow layer */}
+        {/* Wide soft glow layer */}
         <path
           d={getPillPath()}
           fill="none"
-          stroke="url(#outrankNeonGrad)"
-          strokeWidth={8}
+          stroke="url(#outrankNeon)"
+          strokeWidth={10}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
           filter="url(#outrankGlow)"
-          opacity={0.5}
+          opacity={0.4}
         />
 
-        {/* Core neon line */}
+        {/* Core thin neon line */}
         <path
           d={getPillPath()}
           fill="none"
-          stroke="url(#outrankNeonGrad)"
+          stroke="url(#outrankNeon)"
           strokeWidth={2}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
@@ -179,15 +185,14 @@ export const OutrankScene: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          opacity: textOpacity,
         }}
       >
         <div
           style={{
             fontFamily,
             fontWeight: 800,
-            fontSize: 42,
-            letterSpacing: "0.05em",
+            fontSize: 72,
+            letterSpacing: "0.08em",
             display: "flex",
           }}
         >
@@ -198,9 +203,8 @@ export const OutrankScene: React.FC = () => {
               <span
                 key={i}
                 style={{
-                  color: isLatest ? "#9CA3AF" : "#FFFFFF",
+                  color: isLatest ? "#6B7280" : "#FFFFFF",
                   opacity: isVisible ? 1 : 0,
-                  transition: "none",
                 }}
               >
                 {letter}
