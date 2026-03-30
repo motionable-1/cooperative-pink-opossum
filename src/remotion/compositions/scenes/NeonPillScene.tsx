@@ -4,21 +4,19 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
  * Neon pill shape drawing on black background, no text inside.
  * Ref frames 070-078 (9 ref frames = ~14 output frames)
  *
- * A LARGE pill shape (~81% frame width, ~39% height).
- * The neon line draws clockwise starting from bottom-left.
- * By the end of this scene, ~40-50% of the outline is drawn.
- *
- * The line is very thin (1-2px core) with a soft wide glow.
- * Gradient: warm orange/yellow at the "head" → magenta middle → cyan "tail"
- * Unlit portions are invisible (no border, black interior = black background).
- * Strong purple/magenta diffuse glow behind the lit segment.
+ * Pill: ~55-60% frame width, ~15-20% height (thin horizontal pill).
+ * Neon line draws clockwise starting from bottom-left.
+ * By end: ~40-50% outline drawn.
+ * Line: 1-2px core, soft 8px glow.
+ * Gradient: orange (head) → magenta → cyan (tail).
+ * Unlit portions invisible. Purple glow behind lit segment.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 1040;
-const PILL_H = 280;
-const PILL_R = PILL_H / 2;
+const PILL_W = 740;    // ~58% of frame width
+const PILL_H = 130;    // ~18% of frame height
+const PILL_R = PILL_H / 2; // 65 — full rounding
 const CX = W / 2;
 const CY = H / 2;
 const PILL_X = CX - PILL_W / 2;
@@ -59,18 +57,17 @@ export const NeonPillScene: React.FC = () => {
   const dashLen = perimeter * drawProgress;
   const dashGap = perimeter - dashLen;
 
-  // Glow intensity ramps up
   const glowOpacity = interpolate(frame, [0, 6], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Glow position tracks the midpoint of the drawn segment
+  // Glow tracks midpoint of drawn segment
   const glowProgress = drawProgress / 2;
   const glowAngle = 180 + glowProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
   const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.4);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.6);
 
   return (
     <div
@@ -81,16 +78,15 @@ export const NeonPillScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Diffuse purple glow behind the lit segment */}
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 250,
-          top: glowCenterY - 150,
-          width: 500,
-          height: 300,
+          left: glowCenterX - 200,
+          top: glowCenterY - 120,
+          width: 400,
+          height: 240,
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.45) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 80%)",
+            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 80%)",
           filter: "blur(40px)",
           opacity: glowOpacity,
         }}
@@ -108,7 +104,7 @@ export const NeonPillScene: React.FC = () => {
             <stop offset="100%" stopColor="#06B6D4" />
           </linearGradient>
           <filter id="neonPillGlow">
-            <feGaussianBlur stdDeviation="8" result="blur" />
+            <feGaussianBlur stdDeviation="6" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -116,24 +112,22 @@ export const NeonPillScene: React.FC = () => {
           </filter>
         </defs>
 
-        {/* Wide soft glow layer */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={10}
+          strokeWidth={8}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
           filter="url(#neonPillGlow)"
           opacity={0.4}
         />
 
-        {/* Core thin neon line */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={2}
+          strokeWidth={1.5}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
         />
