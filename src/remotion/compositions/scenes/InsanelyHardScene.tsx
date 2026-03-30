@@ -17,15 +17,14 @@ export const InsanelyHardScene: React.FC = () => {
   });
 
   // Phase 2: Extreme perspective - RIGHT side ("HARD.") comes toward viewer
-  // In CSS 3D:
-  //   rotateY(negative) with transform-origin on right side = right comes forward
-  const perspStart = 15;
+  // Delayed start so text has breathing room to be read first
+  const perspStart = 20; // Hold flat for ~0.67s before zoom kicks in
   const perspEnd = durationInFrames;
 
   const t = interpolate(frame, [perspStart, perspEnd], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.bezier(0.25, 0, 0.85, 0.5),
+    easing: Easing.bezier(0.15, 0, 0.9, 0.4), // Slow start, aggressive acceleration
   });
 
   // Negative rotateY with right-side origin = right comes toward viewer
