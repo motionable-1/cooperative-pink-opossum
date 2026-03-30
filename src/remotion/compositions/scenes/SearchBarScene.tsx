@@ -9,102 +9,73 @@ const { fontFamily } = loadFont("normal", {
 /**
  * Search bar typing animation on white background.
  *
- * White bg, rounded search bar with thin purple border + purple glow behind it.
- * Black bold text types word-by-word: "and appear at the top automatically?"
- * After text completes, slow zoom INTO the bar (text gets cut off on sides).
- * Subtle text zoom throughout.
+ * Reference (36 frames at 50ms each = 54 output frames at 30fps):
  *
- * Timing (54 output frames at 30fps):
- *   Frame 0-2:   Bar slides in, "and" starts typing
- *   Frame 3-6:   "appear" types in
- *   Frame 7-9:   "at" types
- *   Frame 10-12: "the" types
- *   Frame 13-17: "top" types and holds
- *   Frame 18-25: "automatically?" types
- *   Frame 26-54: Slow zoom into bar, text getting cut off
+ * The bar is ALREADY partially zoomed from the very first frame — it's NOT small
+ * and centered. It fills ~80% width, ~30% height, left-aligned with rounded left
+ * edge visible, right edge extends off screen.
+ *
+ * Strong purple/magenta glow behind bar (top and bottom edges).
+ * Thin purple border lines on top and bottom.
+ * Black bold text types character by character: "and appear at the top automatically?"
+ *
+ * As text types, the "camera" slowly zooms into the bar, so by the end
+ * only "at the top automatically?" is visible and the bar fills most of the frame.
+ *
+ * Timing:
+ *   Ref 006 (frame 0):  "and app" — bar already large
+ *   Ref 012 (frame ~9):  "and appear at t"
+ *   Ref 014 (frame ~12): "and appear at the"
+ *   Ref 017 (frame ~17): "and appear at the top"
+ *   Ref 020 (frame ~21): "and appear at the top autom"
+ *   Ref 024 (frame ~27): "and appear at the top automatically?"
+ *   Ref 025-041 (frame 28-54): text done, zoom continues deeper
  */
 
 const FULL_TEXT = "and appear at the top automatically?";
 
-// Character-by-character typing with word-based timing
-const WORDS = ["and", " ", "appear", " ", "at", " ", "the", " ", "top", " ", "automatically?"];
-const WORD_FRAME_STARTS = [0, 2, 3, 6, 7, 9, 10, 12, 13, 16, 18];
-
-const getVisibleText = (frame: number): string => {
-  let text = "";
-  for (let i = 0; i < WORDS.length; i++) {
-    const wordStart = WORD_FRAME_STARTS[i];
-    if (frame < wordStart) break;
-
-    const word = WORDS[i];
-    if (word === " ") {
-      text += " ";
-      continue;
-    }
-
-    // Each character in the word takes ~0.5 frames
-    const wordLocalFrame = frame - wordStart;
-    const charsVisible = Math.min(
-      word.length,
-      Math.floor(wordLocalFrame * 2.5) + 1
-    );
-    text += word.substring(0, charsVisible);
-
-    if (charsVisible < word.length) break;
-  }
-  return text;
+// Character reveal timing (output frame when each char appears)
+// ~1.5 chars per frame to complete by frame ~27
+const getVisibleChars = (frame: number): number => {
+  if (frame < 0) return 0;
+  // Typing speed: roughly finishes at frame 27
+  const charsPerFrame = FULL_TEXT.length / 27;
+  return Math.min(FULL_TEXT.length, Math.floor(frame * charsPerFrame + 3));
 };
 
 export const SearchBarScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const visibleText = getVisibleText(frame);
+  const visibleCount = getVisibleChars(frame);
+  const visibleText = FULL_TEXT.substring(0, visibleCount);
 
-  // Bar entrance: slides in from right
-  const barTranslateX = interpolate(frame, [0, 4], [80, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
-  });
-
-  const barOpacity = interpolate(frame, [0, 3], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Zoom into bar after typing is complete (~frame 26+)
-  const zoomStart = 26;
-  const zoomProgress = interpolate(frame, [zoomStart, durationInFrames], [0, 1], {
+  // Continuous zoom throughout the entire scene
+  // Starts already "zoomed in" (scale ~1.8) and goes to ~5.5
+  const zoomScale = interpolate(frame, [0, durationInFrames], [1.8, 5.5], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Scale: 1 → 3.5 (zooms into the bar)
-  const zoomScale = interpolate(zoomProgress, [0, 1], [1, 3.5]);
-
-  // Subtle continuous text zoom before the big zoom kicks in
-  const preZoomScale = interpolate(frame, [0, zoomStart], [1.0, 1.03], {
+  // Translate to keep text area centered as zoom increases
+  // Shifts left and up slightly as we zoom deeper
+  const translateX = interpolate(frame, [0, durationInFrames], [10, -15], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
+    easing: Easing.inOut(Easing.quad),
   });
 
-  const totalScale = frame < zoomStart ? preZoomScale : zoomScale;
+  const translateY = interpolate(frame, [0, durationInFrames], [0, -2], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   // Purple glow intensity
-  const glowIntensity = interpolate(frame, [0, 8, durationInFrames - 5], [0, 1, 0.8], {
+  const glowIntensity = interpolate(frame, [0, 5], [0.7, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-
-  // The last character fading in (typewriter effect)
-  const lastCharOpacity = interpolate(
-    (frame * 3) % 2,
-    [0, 1],
-    [0.4, 1],
-  );
 
   return (
     <div
@@ -115,7 +86,7 @@ export const SearchBarScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Centered container that zooms */}
+      {/* Zoom container — everything inside scales up together */}
       <div
         style={{
           position: "absolute",
@@ -123,39 +94,57 @@ export const SearchBarScene: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transform: `scale(${totalScale})`,
+          transform: `scale(${zoomScale}) translate(${translateX}%, ${translateY}%)`,
+          transformOrigin: "50% 50%",
           willChange: "transform",
         }}
       >
-        {/* Purple glow behind bar */}
+        {/* Purple glow behind bar — top */}
         <div
           style={{
             position: "absolute",
-            width: 820,
-            height: 120,
+            width: 900,
+            height: 60,
+            top: "calc(50% - 55px)",
+            left: "calc(50% - 350px)",
             background:
-              "radial-gradient(ellipse 100% 180% at 60% 50%, rgba(139, 92, 246, 0.25) 0%, rgba(168, 85, 247, 0.1) 40%, transparent 70%)",
+              "radial-gradient(ellipse 100% 200% at 65% 100%, rgba(180, 60, 230, 0.35) 0%, rgba(168, 85, 247, 0.15) 50%, transparent 80%)",
             opacity: glowIntensity,
-            filter: "blur(20px)",
+            filter: "blur(15px)",
           }}
         />
 
-        {/* Search bar */}
+        {/* Purple glow behind bar — bottom (stronger) */}
+        <div
+          style={{
+            position: "absolute",
+            width: 900,
+            height: 80,
+            top: "calc(50% + 15px)",
+            left: "calc(50% - 350px)",
+            background:
+              "radial-gradient(ellipse 100% 200% at 65% 0%, rgba(180, 60, 230, 0.4) 0%, rgba(168, 85, 247, 0.18) 50%, transparent 80%)",
+            opacity: glowIntensity,
+            filter: "blur(18px)",
+          }}
+        />
+
+        {/* Search bar — pill shape */}
         <div
           style={{
             position: "relative",
             width: 780,
-            height: 72,
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: 40,
-            border: "1.5px solid rgba(139, 92, 246, 0.35)",
+            height: 68,
+            backgroundColor: "rgba(255, 255, 255, 0.97)",
+            borderRadius: 38,
+            borderTop: "1.5px solid rgba(160, 100, 240, 0.3)",
+            borderBottom: "1.5px solid rgba(160, 100, 240, 0.3)",
+            borderLeft: "1.5px solid rgba(160, 100, 240, 0.15)",
+            borderRight: "1.5px solid rgba(160, 100, 240, 0.15)",
             display: "flex",
             alignItems: "center",
-            paddingLeft: 32,
-            paddingRight: 32,
-            opacity: barOpacity,
-            transform: `translateX(${barTranslateX}px)`,
-            boxShadow: `0 4px 30px rgba(139, 92, 246, ${0.12 * glowIntensity}), 0 0 60px rgba(168, 85, 247, ${0.08 * glowIntensity})`,
+            paddingLeft: 30,
+            paddingRight: 30,
             overflow: "hidden",
           }}
         >
@@ -164,20 +153,13 @@ export const SearchBarScene: React.FC = () => {
             style={{
               fontFamily,
               fontWeight: 700,
-              fontSize: 28,
+              fontSize: 26,
               color: "#000000",
               whiteSpace: "nowrap",
               letterSpacing: "-0.01em",
             }}
           >
-            {visibleText.length > 0 && (
-              <>
-                <span>{visibleText.slice(0, -1)}</span>
-                <span style={{ opacity: visibleText.length === FULL_TEXT.length ? 1 : lastCharOpacity }}>
-                  {visibleText.slice(-1)}
-                </span>
-              </>
-            )}
+            {visibleText}
           </div>
         </div>
       </div>
