@@ -92,7 +92,7 @@ export const AreSearchingScene: React.FC = () => {
           style={{
             fontFamily,
             fontWeight: 700,
-            fontSize: 52,
+            fontSize: 72,
             color: "white",
             letterSpacing: "0.01em",
             opacity,

@@ -2,38 +2,34 @@ import { AbsoluteFill, Sequence } from "remotion";
 import { GettingTrafficScene } from "./scenes/GettingTrafficScene";
 import { IsHaardScene } from "./scenes/IsHaardScene";
 import { InsanelyHardScene } from "./scenes/InsanelyHardScene";
-import { PurpleEndScene } from "./scenes/PurpleEndScene";
-import { PurpleMorphScene } from "./scenes/PurpleMorphScene";
+import { PurpleMorphTransition } from "./scenes/PurpleMorphTransition";
 import { WhatIfScene } from "./scenes/WhatIfScene";
 import { SpotScene } from "./scenes/SpotScene";
 import { ExactlyWhatScene } from "./scenes/ExactlyWhatScene";
 import { AreSearchingScene } from "./scenes/AreSearchingScene";
 
 /*
- * Full animation sequence:
+ * Full animation sequence (170 ref frames × 50ms = 8.5s at 30fps = 255 frames):
  *
- * Scene 1: "Getting traffic" - black bg, purple gradient top, animated line graph
- * Scene 2: "IS HAAARD!" - black bg, white bold bouncy text
- * Scene 3: "INSANELY HARD." - white bg → extreme perspective zoom
- * Scene 4: Purple square on lavender gradient with dots (brief hold)
- * Scene 5: Purple morph - square rotates → diamond → fills frame
- * Scene 6: "What if you could" - white text on deep purple with wing shapes
- * Scene 7: "spot" - white lowercase on black with 4 purple hand-drawn arrows
- * Scene 8: "exactly what your customers" - word-by-word on purple gradient
- * Scene 9: "are searching for," - centered on purple radial gradient
+ * Scene 1 (ref 001-034): "Getting traffic" - black bg, purple graph line
+ * Scene 2 (ref 035-050): "IS HAAARD!" - black bg, bouncy text
+ * Scene 3 (ref 051-072): "INSANELY HARD." - white bg → perspective zoom
+ * Scene 4 (ref 073-093): Purple morph (square → star → fills frame + "What if you could" appears)
+ * Scene 5 (ref 094-105): "What if you could" hold (fully settled, wing shapes)
+ * Scene 6 (ref 106-136): "spot" - white text on black with purple arrows
+ * Scene 7 (ref 137-169): "exactly what your customers" - word-by-word on purple gradient
+ * Scene 8 (ref 170+):    "are searching for," - centered on purple gradient
  */
 
-// Timing: 170 reference frames × 50ms each = 8.5s total
-// At 30fps: each reference frame ≈ 1.5 output frames
-const SCENE_1_DURATION = 51;  // Ref 1-34:   "Getting traffic" + graph
-const SCENE_2_DURATION = 24;  // Ref 35-50:  "IS HAAARD!"
-const SCENE_3_DURATION = 33;  // Ref 51-72:  "INSANELY HARD." perspective zoom
-const SCENE_4_DURATION = 5;   // Ref 73-75:  Purple square hold (brief)
-const SCENE_5_DURATION = 15;  // Ref 76-85:  Purple morph fills frame
-const SCENE_6_DURATION = 30;  // Ref 86-105: "What if you could"
-const SCENE_7_DURATION = 47;  // Ref 106-136: "spot" with arrows
-const SCENE_8_DURATION = 50;  // Ref 137-169: "exactly what your customers"
-const SCENE_9_DURATION = 10;  // Ref 170+:   "are searching for," + buffer
+// Timing: each ref frame ≈ 1.5 output frames at 30fps
+const SCENE_1_DURATION = 51;  // Ref 001-034: "Getting traffic" + graph
+const SCENE_2_DURATION = 24;  // Ref 035-050: "IS HAAARD!"
+const SCENE_3_DURATION = 33;  // Ref 051-072: "INSANELY HARD." perspective zoom
+const SCENE_4_DURATION = 32;  // Ref 073-093: Purple morph + "What if you could" overlap
+const SCENE_5_DURATION = 18;  // Ref 094-105: "What if you could" hold
+const SCENE_6_DURATION = 47;  // Ref 106-136: "spot" with arrows
+const SCENE_7_DURATION = 50;  // Ref 137-169: "exactly what your customers"
+const SCENE_8_DURATION = 10;  // Ref 170+:    "are searching for," + buffer
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -42,7 +38,6 @@ const SCENE_5_START = SCENE_4_START + SCENE_4_DURATION;
 const SCENE_6_START = SCENE_5_START + SCENE_5_DURATION;
 const SCENE_7_START = SCENE_6_START + SCENE_6_DURATION;
 const SCENE_8_START = SCENE_7_START + SCENE_7_DURATION;
-const SCENE_9_START = SCENE_8_START + SCENE_8_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -62,33 +57,28 @@ export const Main: React.FC = () => {
         <InsanelyHardScene />
       </Sequence>
 
-      {/* Scene 4: Purple square hold */}
+      {/* Scene 4: Purple morph transition (square → fills frame + text appears) */}
       <Sequence from={SCENE_4_START} durationInFrames={SCENE_4_DURATION}>
-        <PurpleEndScene />
+        <PurpleMorphTransition />
       </Sequence>
 
-      {/* Scene 5: Purple morph transition */}
+      {/* Scene 5: "What if you could" hold */}
       <Sequence from={SCENE_5_START} durationInFrames={SCENE_5_DURATION}>
-        <PurpleMorphScene />
-      </Sequence>
-
-      {/* Scene 6: "What if you could" */}
-      <Sequence from={SCENE_6_START} durationInFrames={SCENE_6_DURATION}>
         <WhatIfScene />
       </Sequence>
 
-      {/* Scene 7: "spot" with arrows */}
-      <Sequence from={SCENE_7_START} durationInFrames={SCENE_7_DURATION}>
+      {/* Scene 6: "spot" with arrows */}
+      <Sequence from={SCENE_6_START} durationInFrames={SCENE_6_DURATION}>
         <SpotScene />
       </Sequence>
 
-      {/* Scene 8: "exactly what your customers" word-by-word */}
-      <Sequence from={SCENE_8_START} durationInFrames={SCENE_8_DURATION}>
+      {/* Scene 7: "exactly what your customers" word-by-word */}
+      <Sequence from={SCENE_7_START} durationInFrames={SCENE_7_DURATION}>
         <ExactlyWhatScene />
       </Sequence>
 
-      {/* Scene 9: "are searching for," */}
-      <Sequence from={SCENE_9_START} durationInFrames={SCENE_9_DURATION}>
+      {/* Scene 8: "are searching for," */}
+      <Sequence from={SCENE_8_START} durationInFrames={SCENE_8_DURATION}>
         <AreSearchingScene />
       </Sequence>
     </AbsoluteFill>

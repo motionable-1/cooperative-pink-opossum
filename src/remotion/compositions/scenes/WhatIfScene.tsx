@@ -7,38 +7,28 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * "What if you could" — white text centered on solid medium purple background.
- * Two soft lighter-purple gradient "wing" shapes sweep in from left and right sides,
- * widest at the edges and tapering toward center, creating a subtle hourglass effect.
- * The text sits in the slightly darker central channel between the wings.
- * No dots, no particles, no SVG paths — pure CSS gradients.
+ * "What if you could" — HOLD portion after morph completes.
+ * Text is already visible, wings already present.
+ * Just continuous slow zoom and subtle wing breathing.
+ * Solid purple base with lighter wing gradients from left/right.
  */
 export const WhatIfScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Text fade in — quick
-  const textOpacity = interpolate(frame, [0, 5], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Continuous slow zoom-in throughout scene
-  const textScale = interpolate(frame, [0, durationInFrames], [0.96, 1.06], {
+  // Continuous slow zoom
+  const textScale = interpolate(frame, [0, durationInFrames], [1.02, 1.08], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
 
-  // Wing shapes subtle breathing
+  // Wing breathing
   const wingBreath = interpolate(
     Math.sin((frame / fps) * 1.2),
     [-1, 1],
     [0.98, 1.02],
   );
-
-  // Exit: hard cut (no fade)
-  const exitOpacity = 1;
 
   return (
     <div
@@ -46,10 +36,9 @@ export const WhatIfScene: React.FC = () => {
         position: "absolute",
         inset: 0,
         overflow: "hidden",
-        opacity: exitOpacity,
       }}
     >
-      {/* Solid medium purple base */}
+      {/* Solid purple base */}
       <div
         style={{
           position: "absolute",
@@ -58,7 +47,7 @@ export const WhatIfScene: React.FC = () => {
         }}
       />
 
-      {/* Left wing gradient — lighter purple sweeping from left edge, tapering to center */}
+      {/* Left wing gradient */}
       <div
         style={{
           position: "absolute",
@@ -70,7 +59,7 @@ export const WhatIfScene: React.FC = () => {
         }}
       />
 
-      {/* Right wing gradient — mirrored from right edge */}
+      {/* Right wing gradient */}
       <div
         style={{
           position: "absolute",
@@ -82,7 +71,7 @@ export const WhatIfScene: React.FC = () => {
         }}
       />
 
-      {/* Center text */}
+      {/* Center text — already fully visible */}
       <div
         style={{
           position: "absolute",
@@ -97,9 +86,8 @@ export const WhatIfScene: React.FC = () => {
           style={{
             fontFamily,
             fontWeight: 700,
-            fontSize: 52,
+            fontSize: 72,
             color: "white",
-            opacity: textOpacity,
             transform: `scale(${textScale})`,
             letterSpacing: "-0.01em",
             textAlign: "center",
