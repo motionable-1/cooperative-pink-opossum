@@ -40,22 +40,23 @@ export const BusinessFormScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // === Continuous slow zoom — camera travels from top of form down into description ===
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 3.5], {
+  // === Continuous slow zoom — camera travels from full form view down to Business Name + Description ===
+  // Reference end frame shows Business Name "SuperX" and Description fields clearly visible
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.85], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
 
-  // Zoom origin Y: travels from top of form (tabs/heading) down to description area
-  const originY = interpolate(frame, [0, durationInFrames], [20, 75], {
+  // Zoom origin Y: form is centered at 50%. Start at center, drift down to Description area.
+  const originY = interpolate(frame, [0, durationInFrames], [50, 62], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Zoom origin X: slightly left of center so left-aligned labels stay visible at high zoom
-  const originX = 42;
+  // Zoom origin X: centered on the form
+  const originX = 50;
 
   // === URL typing (frames 20-38) ===
   const urlCharCount = Math.floor(
