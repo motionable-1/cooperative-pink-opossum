@@ -7,17 +7,19 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * Search bar typing animation on white background.
+ * Search bar typing + zoom animation on white background.
  *
  * Reference frames 006-041 at 50ms each = 54 output frames at 30fps.
  *
- * Start (006): bar fills ~80% width, left rounded edge visible, right off-screen.
- *   Purple glow above/below. Text "and app" typing.
+ * KEY INSIGHT: The bar height is ~30% of frame throughout (barely changes).
+ * The main animation is HORIZONTAL PANNING from left to right while
+ * typing happens. Zoom is nearly constant (~3.2x).
  *
- * End (041): VERY zoomed. Bar ~30% of frame height. Only "at the top automatically?"
- *   visible with "a" in "at" slightly cut off at left edge.
- *   No rounded edges — just straight horizontal purple border lines edge to edge.
- *   Purple glow band below bar.
+ * Start (006): left rounded edge visible ~23% from left, right edge off-screen.
+ *   Bar ~77% of frame width. Text "and app".
+ * End (041): bar extends fully edge-to-edge. No rounded edges visible.
+ *   Text "at the top automatically?" with "a" flush against left edge.
+ *   Purple glow below, thin purple border lines.
  */
 
 const FULL_TEXT = "and appear at the top automatically?";
@@ -35,19 +37,19 @@ export const SearchBarScene: React.FC = () => {
   const visibleCount = getVisibleChars(frame);
   const visibleText = FULL_TEXT.substring(0, visibleCount);
 
-  // Zoom: 1.5 → 2.8
-  const zoomScale = interpolate(frame, [0, durationInFrames], [1.5, 2.8], {
+  // Zoom barely changes: 3.15 → 3.3
+  // Bar is 68px tall. At 3.15x = 214px = ~30% of 720. At 3.3x = 224px = ~31%.
+  const zoomScale = interpolate(frame, [0, durationInFrames], [3.15, 3.3], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Transform origin shifts from center-left to center-right area
-  // to keep the later text ("at the top automatically?") centered at end.
-  // The bar is 780px wide at base. "at the top" starts ~40% from left of bar text.
-  // At start: origin at ~35% x (left side of bar, showing rounded edge)
-  // At end: origin at ~60% x (focusing on the "at the top" portion)
-  const originX = interpolate(frame, [0, durationInFrames], [35, 60], {
+  // The main animation is the horizontal pan (transformOrigin X shift).
+  // Start: origin at ~38% — shows left rounded edge, bar starts ~23% from left
+  // End: origin at ~68% — pans right to show "at the top automatically?"
+  //   with "at" flush against left edge
+  const originX = interpolate(frame, [0, durationInFrames], [38, 68], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
