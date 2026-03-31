@@ -23,7 +23,8 @@
       "Bash(/usr/local/bin/npx tsc:*)",
       "Read(//usr/local/bin/**)",
       "Read(//Users/chinmaysurve/.nvm/versions/node/**)",
-      "Bash(export PATH=\"/usr/local/bin:$PATH\")"
+      "Bash(export PATH=\"/usr/local/bin:$PATH\")",
+      "Bash(node /usr/local/bin/npx tsc --noEmit)"
     ]
   }
 }

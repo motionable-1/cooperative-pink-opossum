@@ -17,6 +17,10 @@ import { ScaleYourScene } from "./scenes/ScaleYourScene";
 import { TellUsScene } from "./scenes/TellUsScene";
 import { BusinessFormScene } from "./scenes/BusinessFormScene";
 import { LetOutrankScene } from "./scenes/LetOutrankScene";
+import { FindKeywordsScene } from "./scenes/FindKeywordsScene";
+import { SEOGraphScene } from "./scenes/SEOGraphScene";
+import { ContentPlanScene } from "./scenes/ContentPlanScene";
+import { CalendarScene } from "./scenes/CalendarScene";
 
 /*
  * Full animation sequence:
@@ -63,7 +67,11 @@ const SCENE_16_DURATION = 5;   // Neon pill fade
 const SCENE_17_DURATION = 42;  // "Scale your" + "traffic on autopilot." on purple→dark gradient
 const SCENE_18_DURATION = 58;  // "Tell us what your business is about." word-by-word
 const SCENE_19_DURATION = 130; // UI mockup form with zoom + typing
-const SCENE_20_DURATION = 30;  // "Let Outrank automatically" typewriter on white
+const SCENE_20_DURATION = 33;  // "Let Outrank automatically" typewriter on white (extended)
+const SCENE_21_DURATION = 52;  // "find the relevant KEYWORDS for you," typewriter + cursor
+const SCENE_22_DURATION = 91;  // Purple circle → SEO graph + "From no visit to high SEO traffic."
+const SCENE_23_DURATION = 44;  // "Get a 30-day content plan." typewriter, "plan." in purple
+const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -84,6 +92,10 @@ const SCENE_17_START = SCENE_16_START + SCENE_16_DURATION;
 const SCENE_18_START = SCENE_17_START + SCENE_17_DURATION;
 const SCENE_19_START = SCENE_18_START + SCENE_18_DURATION;
 const SCENE_20_START = SCENE_19_START + SCENE_19_DURATION;
+const SCENE_21_START = SCENE_20_START + SCENE_20_DURATION;
+const SCENE_22_START = SCENE_21_START + SCENE_21_DURATION;
+const SCENE_23_START = SCENE_22_START + SCENE_22_DURATION;
+const SCENE_24_START = SCENE_23_START + SCENE_23_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -186,6 +198,26 @@ export const Main: React.FC = () => {
       {/* Scene 20: "Let Outrank automatically" typewriter on white */}
       <Sequence from={SCENE_20_START} durationInFrames={SCENE_20_DURATION}>
         <LetOutrankScene />
+      </Sequence>
+
+      {/* Scene 21: "find the relevant KEYWORDS for you," typewriter + cursor */}
+      <Sequence from={SCENE_21_START} durationInFrames={SCENE_21_DURATION}>
+        <FindKeywordsScene />
+      </Sequence>
+
+      {/* Scene 22: Purple circle → SEO graph + "From no visit to high SEO traffic." */}
+      <Sequence from={SCENE_22_START} durationInFrames={SCENE_22_DURATION}>
+        <SEOGraphScene />
+      </Sequence>
+
+      {/* Scene 23: "Get a 30-day content plan." typewriter, "plan." in purple */}
+      <Sequence from={SCENE_23_START} durationInFrames={SCENE_23_DURATION}>
+        <ContentPlanScene />
+      </Sequence>
+
+      {/* Scene 24: 30-day content calendar zoom-in + pan right */}
+      <Sequence from={SCENE_24_START} durationInFrames={SCENE_24_DURATION}>
+        <CalendarScene />
       </Sequence>
     </AbsoluteFill>
   );
