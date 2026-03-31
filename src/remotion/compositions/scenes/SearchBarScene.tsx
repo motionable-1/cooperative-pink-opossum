@@ -9,36 +9,21 @@ const { fontFamily } = loadFont("normal", {
 /**
  * Search bar typing animation on white background.
  *
- * Reference (36 frames at 50ms each = 54 output frames at 30fps):
+ * Reference frames 006-041 at 50ms each = 54 output frames at 30fps.
  *
- * The bar is ALREADY partially zoomed from the very first frame — it's NOT small
- * and centered. It fills ~80% width, ~30% height, left-aligned with rounded left
- * edge visible, right edge extends off screen.
+ * Start (006): bar fills ~80% width, left rounded edge visible, right off-screen.
+ *   Purple glow above/below. Text "and app" typing.
  *
- * Strong purple/magenta glow behind bar (top and bottom edges).
- * Thin purple border lines on top and bottom.
- * Black bold text types character by character: "and appear at the top automatically?"
- *
- * As text types, the "camera" slowly zooms into the bar, so by the end
- * only "at the top automatically?" is visible and the bar fills most of the frame.
- *
- * Timing:
- *   Ref 006 (frame 0):  "and app" — bar already large
- *   Ref 012 (frame ~9):  "and appear at t"
- *   Ref 014 (frame ~12): "and appear at the"
- *   Ref 017 (frame ~17): "and appear at the top"
- *   Ref 020 (frame ~21): "and appear at the top autom"
- *   Ref 024 (frame ~27): "and appear at the top automatically?"
- *   Ref 025-041 (frame 28-54): text done, zoom continues deeper
+ * End (041): VERY zoomed. Bar ~30% of frame height. Only "at the top automatically?"
+ *   visible with "a" in "at" slightly cut off at left edge.
+ *   No rounded edges — just straight horizontal purple border lines edge to edge.
+ *   Purple glow band below bar.
  */
 
 const FULL_TEXT = "and appear at the top automatically?";
 
-// Character reveal timing (output frame when each char appears)
-// ~1.5 chars per frame to complete by frame ~27
 const getVisibleChars = (frame: number): number => {
   if (frame < 0) return 0;
-  // Typing speed: roughly finishes at frame 27
   const charsPerFrame = FULL_TEXT.length / 27;
   return Math.min(FULL_TEXT.length, Math.floor(frame * charsPerFrame + 3));
 };
@@ -50,25 +35,22 @@ export const SearchBarScene: React.FC = () => {
   const visibleCount = getVisibleChars(frame);
   const visibleText = FULL_TEXT.substring(0, visibleCount);
 
-  // Continuous zoom throughout the entire scene
-  // Starts already "zoomed in" (scale ~1.8) and goes to ~5.5
-  const zoomScale = interpolate(frame, [0, durationInFrames], [1.8, 5.5], {
+  // Zoom: 1.5 → 2.8
+  const zoomScale = interpolate(frame, [0, durationInFrames], [1.5, 2.8], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Translate to keep text area centered as zoom increases
-  // Shifts left and up slightly as we zoom deeper
-  const translateX = interpolate(frame, [0, durationInFrames], [10, -15], {
+  // Transform origin shifts from center-left to center-right area
+  // to keep the later text ("at the top automatically?") centered at end.
+  // The bar is 780px wide at base. "at the top" starts ~40% from left of bar text.
+  // At start: origin at ~35% x (left side of bar, showing rounded edge)
+  // At end: origin at ~60% x (focusing on the "at the top" portion)
+  const originX = interpolate(frame, [0, durationInFrames], [35, 60], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
-  });
-
-  const translateY = interpolate(frame, [0, durationInFrames], [0, -2], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
   });
 
   // Purple glow intensity
@@ -86,7 +68,7 @@ export const SearchBarScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Zoom container — everything inside scales up together */}
+      {/* Zoom container */}
       <div
         style={{
           position: "absolute",
@@ -94,8 +76,8 @@ export const SearchBarScene: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transform: `scale(${zoomScale}) translate(${translateX}%, ${translateY}%)`,
-          transformOrigin: "50% 50%",
+          transform: `scale(${zoomScale})`,
+          transformOrigin: `${originX}% 50%`,
           willChange: "transform",
         }}
       >
