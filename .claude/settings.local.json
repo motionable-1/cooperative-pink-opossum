@@ -18,7 +18,12 @@
       "WebFetch(domain:gfxplugin.com)",
       "WebFetch(domain:motionbro.net)",
       "WebFetch(domain:dankreiness.com)",
-      "WebFetch(domain:motioncan.net)"
+      "WebFetch(domain:motioncan.net)",
+      "Bash(npx --yes tsc --noEmit)",
+      "Bash(/usr/local/bin/npx tsc:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/chinmaysurve/.nvm/versions/node/**)",
+      "Bash(export PATH=\"/usr/local/bin:$PATH\")"
     ]
   }
 }
