@@ -100,12 +100,26 @@ export const TellUsScene: React.FC = () => {
           const opacity = wordProgress;
 
           // Color: gray → white (via opacity on white text)
-          // At progress 0: very dim (#333), at progress 1: white (#fff)
           const colorValue = Math.round(interpolate(wordProgress, [0, 1], [50, 255]));
           const color = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
 
-          // Subtle Y translate (comes up slightly)
-          const translateY = interpolate(wordProgress, [0, 1], [8, 0]);
+          // Subtle Y translate (comes up slightly during fade-in)
+          const fadeInY = interpolate(wordProgress, [0, 1], [8, 0]);
+
+          // "business" shifts up once the full sentence is revealed (all words in by ~frame 37)
+          const SENTENCE_COMPLETE_FRAME = 40;
+          const businessLift = word.italic
+            ? interpolate(
+                frame,
+                [SENTENCE_COMPLETE_FRAME, SENTENCE_COMPLETE_FRAME + 12],
+                [0, -14],
+                {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                  easing: Easing.out(Easing.back(1.4)),
+                }
+              )
+            : 0;
 
           return (
             <span
@@ -117,7 +131,7 @@ export const TellUsScene: React.FC = () => {
                 fontStyle: word.italic ? "italic" : "normal",
                 color,
                 opacity,
-                transform: `translateY(${translateY}px)`,
+                transform: `translateY(${fadeInY + businessLift}px)`,
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 whiteSpace: "nowrap",
