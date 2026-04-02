@@ -1,8 +1,14 @@
 import { useCurrentFrame, interpolate, Easing } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
+import { loadFont as loadMono } from "@remotion/google-fonts/SpaceMono";
 
 const { fontFamily } = loadFont("normal", {
   weights: ["400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+});
+
+const { fontFamily: monoFont } = loadMono("normal", {
+  weights: ["700"],
   subsets: ["latin"],
 });
 
@@ -143,13 +149,14 @@ export const EveryDayScene: React.FC = () => {
           opacity: uhFadeOut,
         }}>
           <span style={{
-            fontSize: 70, fontWeight: 700, color: PURPLE,
+            fontSize: 70, fontWeight: 700,
+            fontFamily: monoFont,
             opacity: uncoversOp,
-            backgroundColor: "#FFFFFF",
-            padding: "4px 16px",
-            borderRadius: 8,
+            color: "transparent",
+            WebkitTextStroke: "2px #FFFFFF",
+            letterSpacing: 2,
           }}>
-            uncovers
+            Uncovers
           </span>
           <span style={{
             fontSize: 70, fontWeight: 700, color: "#FFFFFF",
