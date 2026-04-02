@@ -111,17 +111,19 @@ export const ContentHistoryScene: React.FC = () => {
     ? interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 4], [0.92, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
     : 1;
 
-  // 3D perspective tilt
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.2], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
-  const rotX = interpolate(frame, [0, durationInFrames], [2, 10], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
-  const rotY = interpolate(frame, [0, durationInFrames], [-2, -12], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
-  const rotZ = interpolate(frame, [0, durationInFrames], [0, -2], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
-  const origX = interpolate(frame, [0, durationInFrames], [50, 42], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
-  const origY = interpolate(frame, [0, durationInFrames], [50, 45], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  // 3D perspective tilt — kicks in AFTER planner view appears, zooms into first calendar block
+  const TILT_START = CLICK_FRAME + 15; // after planner fully fades in
+  const zoom = interpolate(frame, [TILT_START, durationInFrames], [1, 3.8], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
+  const rotX = interpolate(frame, [TILT_START, durationInFrames], [0, 18], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const rotY = interpolate(frame, [TILT_START, durationInFrames], [0, -22], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const rotZ = interpolate(frame, [TILT_START, durationInFrames], [0, -4], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  // Origin targets first calendar cell: sidebar ~210px/1232px ≈ 17%, cell is ~first 1/7th of remaining = ~29% total X; top header 50 + title 30 + DOW 20 + half row ≈ 160/672 ≈ 24% Y
+  const origX = interpolate(frame, [TILT_START, durationInFrames], [50, 30], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const origY = interpolate(frame, [TILT_START, durationInFrames], [50, 28], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
 
   return (
-    <div style={{ position: "absolute", inset: 0, backgroundColor: "#A358F9", overflow: "hidden", opacity: fadeIn }}>
-      {/* 3D perspective wrapper */}
+    <div style={{ position: "absolute", inset: 0, backgroundColor: "#A358F9", opacity: fadeIn }}>
+      {/* 3D perspective wrapper — NO overflow hidden so tilt isn't clipped */}
       <div style={{ position: "absolute", top: 24, left: 24, right: 24, bottom: 24, perspective: 1200 }}>
       {/* App container with 3D tilt */}
       <div
@@ -131,7 +133,6 @@ export const ContentHistoryScene: React.FC = () => {
           display: "flex",
           transformOrigin: `${origX}% ${origY}%`,
           transform: `scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`,
-          transformStyle: "preserve-3d" as const,
         }}
       >
         {/* ── WHITE Sidebar ── */}

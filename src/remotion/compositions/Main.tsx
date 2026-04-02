@@ -73,7 +73,7 @@ const SCENE_21_DURATION = 52;  // "find the relevant KEYWORDS for you," typewrit
 const SCENE_22_DURATION = 91;  // Purple circle → SEO graph + "From no visit to high SEO traffic."
 const SCENE_23_DURATION = 44;  // "Get a 30-day content plan." typewriter, "plan." in purple
 const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
-const SCENE_25_DURATION = 90;  // Dashboard UI: Content History → Content Planner sidebar switch
+const SCENE_25_DURATION = 120;  // Dashboard UI: Content History → Content Planner → 3D zoom into calendar block
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
