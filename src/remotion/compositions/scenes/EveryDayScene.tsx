@@ -150,14 +150,37 @@ export const EveryDayScene: React.FC = () => {
         }}>
           <div style={{
             opacity: uncoversOp,
-            backgroundColor: "#FFFFFF",
+            position: "relative",
             borderRadius: 12,
+            overflow: "hidden",
             padding: "8px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}>
-            <svg width="370" height="80" viewBox="0 0 370 80" style={{ overflow: "visible" }}>
+            <svg width="370" height="80" viewBox="0 0 370 80" style={{ overflow: "visible", position: "relative", zIndex: 2 }}>
+              {/* White bg with text cutout using mask */}
+              <defs>
+                <mask id="textMask">
+                  {/* White = visible, black = hidden */}
+                  <rect x="-30" y="-15" width="430" height="110" fill="white" />
+                  <text
+                    x="185"
+                    y="64"
+                    textAnchor="middle"
+                    fontFamily={monoFont}
+                    fontSize="68"
+                    fontWeight="700"
+                    fill="black"
+                    letterSpacing="1"
+                  >
+                    Uncovers
+                  </text>
+                </mask>
+              </defs>
+              {/* White rectangle with text knocked out */}
+              <rect x="-30" y="-15" width="430" height="110" rx="12" fill="white" mask="url(#textMask)" />
+              {/* Dotted outline on top */}
               <text
                 x="185"
                 y="64"
