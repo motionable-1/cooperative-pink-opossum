@@ -83,13 +83,12 @@ export const ApproveItScene: React.FC = () => {
     : interpolate(frame, [GUIDE_END, GUIDE_END + 4], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // ── Bounding box dimensions (around secondary text block) ──────
-  // Text block is centered. 3 lines at ~44px font, ~1.15 line height
-  // "or add your" ≈ 310px wide, "personal" ≈ 240px, "touch." ≈ 160px
-  // Box should tightly frame all 3 lines
-  const BOX_W = 360;
-  const BOX_H = 170;
+  // Text: 3 lines at 58px font × 1.2 line-height = ~209px tall, widest line ~380px
+  // Box = text + padding (~20px each side) — must NOT touch/overlap text
+  const BOX_W = 430;
+  const BOX_H = 250;
   const BOX_X = (1280 - BOX_W) / 2;
-  const BOX_Y = 290;
+  const BOX_Y = (720 - BOX_H) / 2 - 5; // centered vertically, slight nudge up to match text center
   const HANDLE_SIZE = 8;
   const ROTATION_HANDLE_LEN = 22;
 
@@ -130,7 +129,7 @@ export const ApproveItScene: React.FC = () => {
         >
           <span
             style={{
-              fontSize: 52,
+              fontSize: 62,
               fontWeight: 700,
               color: "#000000",
               opacity: approveOp,
@@ -141,7 +140,7 @@ export const ApproveItScene: React.FC = () => {
           </span>
           <span
             style={{
-              fontSize: 52,
+              fontSize: 62,
               fontWeight: 700,
               color: "#000000",
               opacity: itOp,
@@ -168,7 +167,7 @@ export const ApproveItScene: React.FC = () => {
           <span
             key={i}
             style={{
-              fontSize: 48,
+              fontSize: 58,
               fontWeight: 700,
               color: "#000000",
               opacity: lineOpacities[i],
