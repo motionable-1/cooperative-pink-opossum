@@ -7,26 +7,11 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * EveryDayScene — Purple bg, white text morphing sequence → tool logo cards fan.
+ * EveryDayScene — Purple bg, white text morphing sequence → diagonal card flow.
  *
- * 16 ref frames at 300ms = 9 output frames each:
- *
- * 01 (f0-8):     "Every day" sharp white on purple
- * 02 (f9-17):    "Every day" slightly blurred (still fading in)
- * 03 (f18-26):   "Outrank scours the web," fully solid (Every day gone)
- * 04 (f27-35):   "Outrank scours the web," hold
- * 05 (f36-44):   "Outrank scours the web," heavy horizontal motion blur exit
- * 06 (f45-53):   "hidden" solid center-right, ghost of "uncovers" fading in left
- * 07 (f54-62):   "uncovers hidden" — "uncovers" lower opacity, "hidden" full white
- * 08 (f63-71):   "uncovers hidden" both fully solid
- * 09 (f72-80):   "uncovers hidden" + "data sources." appearing below
- * 10 (f81-89):   "data sources." only (uncovers hidden gone)
- * 11 (f90-98):   "data sources." hold
- * 12 (f99-107):  "data sources." hold
- * 13 (f108-116): "data sources." blurred fading. Ahrefs card enters from bottom.
- * 14 (f117-125): Ahrefs card centered
- * 15 (f126-134): Ahrefs slides LEFT, Google Ads enters from right
- * 16 (f135-148): All 4 cards fanned/stacked at angles
+ * Text phases with subtle breathing room between each:
+ *   "Every day" → "Outrank scours the web," → "uncovers hidden" → "data sources."
+ * Then cards flow diagonally from top-right to bottom-left, tilted, larger.
  */
 
 const PURPLE = "#9D62F0";
@@ -39,12 +24,12 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-const CARD_W = 380;
-const CARD_H = 200;
+const CARD_W = 440;
+const CARD_H = 230;
 
 // Simple Google Ads icon as SVG
 const GoogleAdsIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="36" height="36" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="18" y="4" width="8" height="24" rx="4" fill="#4285F4" transform="rotate(15 22 16)" />
     <rect x="6" y="4" width="8" height="24" rx="4" fill="#FBBC04" transform="rotate(15 10 16)" />
     <circle cx="10" cy="26" r="4" fill="#34A853" />
@@ -53,7 +38,7 @@ const GoogleAdsIcon = () => (
 
 // Simple Google Analytics icon as SVG
 const GAIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="36" height="36" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="22" y="4" width="6" height="24" rx="3" fill="#F9AB00" />
     <rect x="13" y="10" width="6" height="18" rx="3" fill="#E37400" />
     <circle cx="7" cy="25" r="3.5" fill="#E37400" />
@@ -64,84 +49,68 @@ export const EveryDayScene: React.FC = () => {
   const frame = useCurrentFrame();
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE: "Every day"  (f0–17)
+  // TEXT PHASE 1: "Every day"  (f0–22)  — added ~4f breathing room
   // ═══════════════════════════════════════════════════════════════
-  // f0: sharp, f9-17: slightly blurred (ref says still blurring in on frame 2)
-  const edFadeIn = interpolate(frame, [0, 3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const edFadeOut = interpolate(frame, [14, 18], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
+  const edFadeIn = interpolate(frame, [0, 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const edFadeOut = interpolate(frame, [16, 22], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
   const edOp = Math.min(edFadeIn, edFadeOut);
-  // Slight blur on entrance that clears, then blurs again on exit
-  const edBlurIn = interpolate(frame, [0, 6], [4, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const edBlurOut = interpolate(frame, [14, 18], [0, 12], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const edBlur = frame < 14 ? edBlurIn : edBlurOut;
-  const edScale = frame >= 14 ? interpolate(frame, [14, 18], [1, 0.92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+  const edBlurIn = interpolate(frame, [0, 7], [4, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const edBlurOut = interpolate(frame, [16, 22], [0, 12], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const edBlur = frame < 16 ? edBlurIn : edBlurOut;
+  const edScale = frame >= 16 ? interpolate(frame, [16, 22], [1, 0.92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE: "Outrank scours the web,"  (f18–44)
+  // TEXT PHASE 2: "Outrank scours the web,"  (f22–50)  — +4f gap before, +4f hold
   // ═══════════════════════════════════════════════════════════════
-  const osFadeIn = interpolate(frame, [16, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const osBlurIn = interpolate(frame, [16, 20], [8, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const osFadeOut = interpolate(frame, [36, 42], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
+  const osFadeIn = interpolate(frame, [20, 26], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const osBlurIn = interpolate(frame, [20, 26], [8, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const osFadeOut = interpolate(frame, [42, 50], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
   const osOp = Math.min(osFadeIn, osFadeOut);
-  // Horizontal motion blur on exit (ref frame 5)
-  const osMotionBlur = frame >= 36 ? interpolate(frame, [36, 42], [0, 20], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : osBlurIn;
-  const osXShift = frame >= 36 ? interpolate(frame, [36, 42], [0, -80], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
+  const osMotionBlur = frame >= 42 ? interpolate(frame, [42, 50], [0, 22], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : osBlurIn;
+  const osXShift = frame >= 42 ? interpolate(frame, [42, 50], [0, -90], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE: "hidden" appears first, then "uncovers" fades in  (f44–80)
+  // TEXT PHASE 3: "uncovers hidden"  (f50–92)  — +6f gap, wider hold
+  // "hidden" appears first, then "uncovers" fades in
   // ═══════════════════════════════════════════════════════════════
-  // "hidden" appears solid first (f44)
-  const hiddenOp = interpolate(frame, [44, 48], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const hiddenBlur = interpolate(frame, [44, 48], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  // "uncovers" fades in later at lower opacity, then solidifies
-  const uncoversOp = interpolate(frame, [50, 64], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  // Both fade out together
-  const uhFadeOut = interpolate(frame, [78, 84], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
+  const hiddenOp = interpolate(frame, [50, 55], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const hiddenBlur = interpolate(frame, [50, 55], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const uncoversOp = interpolate(frame, [57, 72], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const uhFadeOut = interpolate(frame, [86, 94], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE: "data sources."  (f72–116)
+  // TEXT PHASE 4: "data sources."  (f80–128)  — overlaps with uh exit, then alone
+  // Positioned BELOW center when "uncovers hidden" is still visible, then moves to center
   // ═══════════════════════════════════════════════════════════════
-  // Appears as 2nd line under "uncovers hidden" first (f72-80), then alone (f81+)
-  const dsFadeIn = interpolate(frame, [72, 78], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const dsYShift = interpolate(frame, [72, 78], [16, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const dsFadeOut = interpolate(frame, [108, 114], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
+  const dsFadeIn = interpolate(frame, [80, 88], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const dsVerticalShift = interpolate(frame, [80, 88], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const dsFadeOut = interpolate(frame, [120, 128], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
   const dsOp = Math.min(dsFadeIn, dsFadeOut);
-  const dsBlur = frame >= 108 ? interpolate(frame, [108, 114], [0, 14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
-  // Text shifts up-left as it fades (ref frame 13)
-  const dsExitX = frame >= 108 ? interpolate(frame, [108, 116], [0, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
-  const dsExitY = frame >= 108 ? interpolate(frame, [108, 116], [0, -80], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
+  const dsBlur = frame >= 120 ? interpolate(frame, [120, 128], [0, 14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
+  const dsExitX = frame >= 120 ? interpolate(frame, [120, 130], [0, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
+  const dsExitY = frame >= 120 ? interpolate(frame, [120, 130], [0, -80], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
+  // When "uncovers hidden" is still visible (before f94), push "data sources." down
+  const dsBelow = frame < 94 ? 110 : 0;
 
   // ═══════════════════════════════════════════════════════════════
-  // CARDS PHASE: Ahrefs enters from bottom → centered → slides left
-  //              Google Ads enters from right → all 4 fan out
+  // CARDS PHASE: Diagonal flow from top-right to bottom-left
+  // Cards are bigger, tilted ~-15deg, sliding diagonally across screen
   // ═══════════════════════════════════════════════════════════════
-  const CARDS_ENTER = 110;
-  const AHREFS_CENTER = 117;
-  const SLIDE_START = 126;
-  const FAN_START = 135;
+  const CARDS_START = 122;
+  const TILT = -15; // all cards tilted this angle
 
-  // Ahrefs card: enter from bottom (f110), center (f117), slide left (f126)
-  const ahrefsY = frame < AHREFS_CENTER
-    ? interpolate(frame, [CARDS_ENTER, AHREFS_CENTER], [500, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.1)) })
-    : 0;
-  const ahrefsX = frame >= SLIDE_START
-    ? interpolate(frame, [SLIDE_START, SLIDE_START + 6], [0, -300], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) })
-    : 0;
-  const ahrefsOp = frame < CARDS_ENTER ? 0 
-    : frame < SLIDE_START ? interpolate(frame, [CARDS_ENTER, CARDS_ENTER + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
-    : interpolate(frame, [SLIDE_START, SLIDE_START + 6], [1, 0.7], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ahrefsBlur = frame >= SLIDE_START ? interpolate(frame, [SLIDE_START, SLIDE_START + 6], [0, 8], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
+  // Diagonal flow positions: top-right → center → bottom-left
+  // Start position (off-screen top-right)
+  const startX = 1280 + CARD_W;
+  const startY = -CARD_H - 100;
+  // End position (off-screen bottom-left)
+  const endX = -CARD_W - 200;
+  const endY = 720 + CARD_H + 100;
 
-  // Google Ads: enter from right (f126)
-  const gadsX = frame >= SLIDE_START
-    ? interpolate(frame, [SLIDE_START, SLIDE_START + 6], [400, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) })
-    : 400;
-  const gadsOp = frame >= SLIDE_START
-    ? interpolate(frame, [SLIDE_START, SLIDE_START + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
-    : 0;
-
-  // Final fan: all 4 cards visible stacked at angles (f135+)
-  const fanProg = interpolate(frame, [FAN_START, FAN_START + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  // Stagger: each card enters 10 frames after the previous
+  const CARD_STAGGER = 10;
+  // Each card takes ~20 frames to cross the visible area
+  const CARD_TRAVEL = 28;
 
   // Card rendering helper
   const renderCard = (tool: typeof TOOLS[0], style: React.CSSProperties) => (
@@ -152,32 +121,29 @@ export const EveryDayScene: React.FC = () => {
         width: CARD_W,
         height: CARD_H,
         backgroundColor: tool.bg,
-        borderRadius: 20,
+        borderRadius: 24,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 12,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+        gap: 14,
+        boxShadow: "0 12px 40px rgba(0,0,0,0.22)",
         ...style,
       }}
     >
       {tool.hasGoogleIcon && <GoogleAdsIcon />}
       {tool.hasGAIcon && <GAIcon />}
       {tool.accentChar ? (
-        <span style={{ fontSize: 38, fontWeight: 800, fontFamily }}>
+        <span style={{ fontSize: 44, fontWeight: 800, fontFamily }}>
           <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
           <span style={{ color: tool.restColor }}>{tool.restText}</span>
         </span>
       ) : (
-        <span style={{ fontSize: tool.name.length > 10 ? 24 : 32, fontWeight: 700, color: tool.textColor, fontFamily }}>
+        <span style={{ fontSize: tool.name.length > 10 ? 28 : 36, fontWeight: 700, color: tool.textColor, fontFamily }}>
           {tool.text}
         </span>
       )}
     </div>
   );
-
-  const cx = (1280 - CARD_W) / 2;
-  const cy = (720 - CARD_H) / 2;
 
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: PURPLE, fontFamily, overflow: "hidden" }}>
@@ -210,7 +176,7 @@ export const EveryDayScene: React.FC = () => {
       {(hiddenOp > 0.01 && uhFadeOut > 0.01) && (
         <div style={{
           position: "absolute", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 16,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 18,
           opacity: uhFadeOut,
         }}>
           <span style={{
@@ -228,63 +194,54 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── "data sources." ── */}
+      {/* ── "data sources." — sits below center when "uncovers hidden" visible, then centers ── */}
       {dsOp > 0.01 && (
         <div style={{
           position: "absolute", inset: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          paddingTop: frame < 84 ? 100 : 0,
+          paddingTop: dsBelow,
           opacity: dsOp,
           filter: `blur(${dsBlur}px)`,
-          transform: `translate(${dsExitX}px, ${dsYShift + dsExitY}px)`,
+          transform: `translate(${dsExitX}px, ${dsVerticalShift + dsExitY}px)`,
         }}>
           <span style={{ fontSize: 70, fontWeight: 700, color: "#FFFFFF" }}>data sources.</span>
         </div>
       )}
 
-      {/* ── TOOL CARDS ── */}
+      {/* ── DIAGONAL CARD FLOW: top-right → bottom-left, tilted ── */}
+      {TOOLS.map((tool, i) => {
+        const cardStart = CARDS_START + i * CARD_STAGGER;
+        const cardEnd = cardStart + CARD_TRAVEL;
 
-      {/* Card 0: Ahrefs — enters from bottom, centers, then slides left */}
-      {frame >= CARDS_ENTER && frame < FAN_START && (
-        renderCard(TOOLS[0], {
-          left: cx + ahrefsX,
-          top: cy + ahrefsY,
-          opacity: ahrefsOp,
-          filter: `blur(${ahrefsBlur}px)`,
-        })
-      )}
+        // Progress through diagonal path: 0 = top-right off-screen, 1 = bottom-left off-screen
+        const prog = interpolate(frame, [cardStart, cardEnd], [0, 1], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+          easing: Easing.inOut(Easing.cubic),
+        });
 
-      {/* Card 1: Google Ads — enters from right during slide phase */}
-      {frame >= SLIDE_START && frame < FAN_START && (
-        renderCard(TOOLS[1], {
-          left: cx + gadsX,
-          top: cy,
-          opacity: gadsOp,
-        })
-      )}
+        if (prog <= 0) return null;
 
-      {/* Final fan: all 4 cards stacked at angles */}
-      {frame >= FAN_START && (
-        <>
-          {TOOLS.slice().reverse().map((tool, i) => {
-            // i=0 is Google Analytics (back), i=3 is Ahrefs (front)
-            const ri = 3 - i; // reverse index: 0=ahrefs, 1=gads, 2=sem, 3=ga
-            const angle = interpolate(fanProg, [0, 1], [0, -6 + ri * 4]);
-            const xOff = interpolate(fanProg, [0, 1], [0, -30 + ri * 20]);
-            const yOff = interpolate(fanProg, [0, 1], [0, -10 + ri * 7]);
-            const cardOp = ri < 2
-              ? interpolate(fanProg, [0, 1], [ri === 0 ? 1 : 0, 1])
-              : interpolate(fanProg, [0, 1], [0, 0.95]);
-            return renderCard(tool, {
-              left: cx + xOff,
-              top: cy + yOff,
-              opacity: cardOp,
-              transform: `rotate(${angle}deg)`,
-              zIndex: 10 + ri,
-            });
-          })}
-        </>
-      )}
+        const x = interpolate(prog, [0, 1], [startX, endX]);
+        const y = interpolate(prog, [0, 1], [startY, endY]);
+
+        // Fade in as card enters view, fade out as it exits
+        const cardOp = interpolate(prog, [0, 0.1, 0.85, 1], [0, 1, 1, 0], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        // Subtle scale: slightly bigger in middle of travel
+        const cardScale = interpolate(prog, [0, 0.5, 1], [0.9, 1.05, 0.9], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        return renderCard(tool, {
+          left: x,
+          top: y,
+          opacity: cardOp,
+          transform: `rotate(${TILT}deg) scale(${cardScale})`,
+          zIndex: 10 + i,
+        });
+      })}
     </div>
   );
 };
