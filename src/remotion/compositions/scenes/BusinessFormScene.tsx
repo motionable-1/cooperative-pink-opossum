@@ -98,9 +98,9 @@ export const BusinessFormScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // === Description text typing (starts ~ref frame 120+ = output frame ~108) ===
+  // === Description text typing — finishes well before scene ends for hold time ===
   const descCharCount = Math.floor(
-    interpolate(frame, [110, durationInFrames - 2], [0, Math.min(DESCRIPTION_TEXT.length, 400)], {
+    interpolate(frame, [110, durationInFrames - 35], [0, Math.min(DESCRIPTION_TEXT.length, 400)], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
     })
