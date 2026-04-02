@@ -182,11 +182,41 @@ export const ContentHistoryScene: React.FC = () => {
         })
       : 1;
 
-  // Subtle zoom on calendar after it appears
-  const calZoom = interpolate(frame, [CLICK_FRAME + 15, durationInFrames], [1, 1.06], {
+  // 3D perspective tilt — matches the style used across the video
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.25], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
+    easing: Easing.inOut(Easing.cubic),
+  });
+
+  const rotateX = interpolate(frame, [0, durationInFrames], [2, 12], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const rotateY = interpolate(frame, [0, durationInFrames], [-2, -14], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const rotateZ = interpolate(frame, [0, durationInFrames], [0, -2], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const originX = interpolate(frame, [0, durationInFrames], [50, 40], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const originY = interpolate(frame, [0, durationInFrames], [50, 45], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
   });
 
   return (
@@ -199,7 +229,7 @@ export const ContentHistoryScene: React.FC = () => {
         opacity: fadeIn,
       }}
     >
-      {/* App container — white rounded card */}
+      {/* App container — white rounded card with 3D perspective */}
       <div
         style={{
           position: "absolute",
@@ -211,6 +241,10 @@ export const ContentHistoryScene: React.FC = () => {
           borderRadius: 16,
           overflow: "hidden",
           display: "flex",
+          perspective: 1200,
+          transformOrigin: `${originX}% ${originY}%`,
+          transform: `scale(${zoom}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+          transformStyle: "preserve-3d" as const,
         }}
       >
         {/* ── Sidebar ── */}
@@ -398,8 +432,7 @@ export const ContentHistoryScene: React.FC = () => {
               bottom: 0,
               opacity: plannerOpacity,
               padding: "16px 16px",
-              transform: `scale(${calZoom})`,
-              transformOrigin: "50% 30%",
+              
             }}
           >
             <div style={{ fontSize: 20, fontWeight: 700, color: "#111", fontFamily, marginBottom: 14 }}>
