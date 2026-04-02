@@ -28,8 +28,11 @@ export const ApproveItScene: React.FC = () => {
   const itOp = interpolate(frame, [3, 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const itBlur = interpolate(frame, [3, 9], [8, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
 
-  // "Approve it" fades OUT as secondary text takes over (f24-30)
-  const approveGroupOp = interpolate(frame, [24, 30], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.cubic) });
+  // "Approve it" exits — scale down + blur out + fade (f20-26), polished cinematic exit
+  const approveExitProg = interpolate(frame, [20, 26], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
+  const approveGroupOp = 1 - approveExitProg;
+  const approveGroupScale = interpolate(approveExitProg, [0, 1], [1, 0.88], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const approveGroupBlur = interpolate(approveExitProg, [0, 1], [0, 10], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // ── Phase 2: Secondary text appears ALL AT ONCE at very low opacity (f18), then lines solidify top→bottom ──
   // f18: all lines appear at ~12% opacity simultaneously
@@ -40,17 +43,16 @@ export const ApproveItScene: React.FC = () => {
   const lineOpacities = SECONDARY_LINES.map((_, i) => {
     // Phase A: all appear at ~12% together (f18-22)
     const ghostOp = secondaryGlobalAppear;
-    // Phase B: each line solidifies with stagger (line0 at f27, line1 at f29, line2 at f31)
-    const solidifyStart = 27 + i * 2;
-    const solidOp = interpolate(frame, [solidifyStart, solidifyStart + 8], [0.12, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-    // Use whichever is higher
-    return frame < 27 ? ghostOp : solidOp;
+    // Phase B: each line solidifies with wider stagger (line0 at f26, line1 at f30, line2 at f34)
+    const solidifyStart = 26 + i * 4;
+    const solidOp = interpolate(frame, [solidifyStart, solidifyStart + 7], [0.12, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+    return frame < solidifyStart ? ghostOp : solidOp;
   });
 
   // Slight upward shift as each line solidifies
   const lineYShifts = SECONDARY_LINES.map((_, i) => {
-    const solidifyStart = 27 + i * 2;
-    return interpolate(frame, [solidifyStart, solidifyStart + 8], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+    const solidifyStart = 26 + i * 4;
+    return interpolate(frame, [solidifyStart, solidifyStart + 7], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   });
 
   // ── Phase 3: Cursor ────────────────────────────────────────────
@@ -112,39 +114,44 @@ export const ApproveItScene: React.FC = () => {
         fontFamily,
       }}
     >
-      {/* ── "Approve it" — fades out when secondary text solidifies ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0, left: 0, right: 0, bottom: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: approveGroupOp,
-        }}
-      >
-        <span
+      {/* ── "Approve it" — scale+blur+fade exit ── */}
+      {approveGroupOp > 0.01 && (
+        <div
           style={{
-            fontSize: 52,
-            fontWeight: 700,
-            color: "#000000",
-            opacity: approveOp,
+            position: "absolute",
+            top: 0, left: 0, right: 0, bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: approveGroupOp,
+            transform: `scale(${approveGroupScale})`,
+            filter: `blur(${approveGroupBlur}px)`,
           }}
         >
-          Approve{" "}
-        </span>
-        <span
-          style={{
-            fontSize: 52,
-            fontWeight: 700,
-            color: "#000000",
-            opacity: itOp,
-            filter: `blur(${itBlur}px)`,
-          }}
-        >
-          it
-        </span>
-      </div>
+          <span
+            style={{
+              fontSize: 52,
+              fontWeight: 700,
+              color: "#000000",
+              opacity: approveOp,
+              whiteSpace: "pre",
+            }}
+          >
+            Approve{" "}
+          </span>
+          <span
+            style={{
+              fontSize: 52,
+              fontWeight: 700,
+              color: "#000000",
+              opacity: itOp,
+              filter: `blur(${itBlur}px)`,
+            }}
+          >
+            it
+          </span>
+        </div>
+      )}
 
       {/* ── "or add your / personal / touch." — centered in frame ── */}
       <div
