@@ -89,26 +89,36 @@ export const ContentHistoryScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const CLICK_FRAME = 28;
-  const activeIdx = frame < CLICK_FRAME ? 1 : 0;
-  const hoverPlanner = frame >= 16 && frame < CLICK_FRAME;
+  // Timeline: fade in → cursor appears → cursor travels to Content Planner → hovers → clicks → tab switches
+  const CURSOR_APPEAR = 10;
+  const CURSOR_ARRIVE = 28;   // cursor lands on Content Planner
+  const HOVER_FRAME = CURSOR_ARRIVE; // hover highlight starts when cursor arrives
+  const CLICK_FRAME = 36;     // click happens after cursor rests for ~8 frames
+  const activeIdx = frame < CLICK_FRAME ? 1 : 0; // 1 = Content History, 0 = Content Planner
+  const hoverPlanner = frame >= HOVER_FRAME && frame < CLICK_FRAME;
 
   // Fade in
   const fadeIn = interpolate(frame, [0, 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Content crossfade
+  // Content crossfade — only AFTER click
   const historyOpacity = interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 10], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const plannerOpacity = interpolate(frame, [CLICK_FRAME + 5, CLICK_FRAME + 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Cursor
-  const cursorProg = interpolate(frame, [8, 22], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const cursorX = interpolate(cursorProg, [0, 1], [440, 118]);
-  const cursorY = interpolate(cursorProg, [0, 1], [480, 132]);
-  const cursorOp = interpolate(frame, [8, 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Cursor movement: starts from content area, travels to "Content Planner" sidebar item
+  // Content Planner item center: app starts at (24,24), sidebar padding 18+14, first item at y≈24+18+20=62, x≈24+14+12+50=100
+  const cursorStartX = 580; // somewhere in the article content area
+  const cursorStartY = 320;
+  const cursorEndX = 108;   // center of "Content Planner" text in sidebar
+  const cursorEndY = 66;    // vertical center of first sidebar item
 
-  // Click pulse
-  const clickScale = frame >= CLICK_FRAME && frame < CLICK_FRAME + 4
-    ? interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 4], [0.92, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+  const cursorProg = interpolate(frame, [CURSOR_APPEAR, CURSOR_ARRIVE], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const cursorX = interpolate(cursorProg, [0, 1], [cursorStartX, cursorEndX]);
+  const cursorY = interpolate(cursorProg, [0, 1], [cursorStartY, cursorEndY]);
+  const cursorOp = interpolate(frame, [CURSOR_APPEAR, CURSOR_APPEAR + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // Click pulse — small bounce on the sidebar item when clicked
+  const clickScale = frame >= CLICK_FRAME && frame < CLICK_FRAME + 5
+    ? interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 2, CLICK_FRAME + 5], [1, 0.93, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
     : 1;
 
   // 3D perspective tilt — kicks in AFTER planner view appears, zooms into first calendar block
@@ -280,7 +290,7 @@ export const ContentHistoryScene: React.FC = () => {
       </div>
 
       {/* Mouse cursor */}
-      {frame >= 8 && (
+      {frame >= CURSOR_APPEAR && (
         <svg
           style={{ position: "absolute", left: cursorX, top: cursorY, width: 20, height: 26, opacity: cursorOp, pointerEvents: "none", zIndex: 100 }}
           viewBox="0 0 20 26" fill="none"
