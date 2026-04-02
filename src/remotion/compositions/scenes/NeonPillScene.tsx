@@ -4,19 +4,18 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
  * Neon pill shape drawing on black background, no text inside.
  * Ref frames 070-078 (9 ref frames = ~14 output frames)
  *
- * Pill: HUGE — ~72% frame width, ~55% frame height.
+ * Pill: ~58% width, ~29% height — same as OutrankScene.
  * Neon line draws clockwise starting from bottom-left.
  * By end: ~40-50% outline drawn.
- * Line: 1-2px core, soft glow behind.
+ * Line: 2px core, soft glow behind.
  * Gradient: orange (head) → magenta → cyan (tail).
- * Unlit portions invisible. Purple glow behind lit segment.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 920;   // ~72% of frame width
-const PILL_H = 400;   // ~55% of frame height
-const PILL_R = PILL_H / 2; // full rounding
+const PILL_W = 740;   // ~58% width — matches OutrankScene
+const PILL_H = 210;   // ~29% height — matches OutrankScene
+const PILL_R = PILL_H / 2;
 const CX = W / 2;
 const CY = H / 2;
 const PILL_X = CX - PILL_W / 2;
@@ -67,7 +66,7 @@ export const NeonPillScene: React.FC = () => {
   const glowAngle = 180 + glowProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
   const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.4);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.5);
 
   return (
     <div
@@ -83,9 +82,9 @@ export const NeonPillScene: React.FC = () => {
         style={{
           position: "absolute",
           left: glowCenterX - 280,
-          top: glowCenterY - 200,
+          top: glowCenterY - 180,
           width: 560,
-          height: 400,
+          height: 360,
           background:
             "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 80%)",
           filter: "blur(50px)",

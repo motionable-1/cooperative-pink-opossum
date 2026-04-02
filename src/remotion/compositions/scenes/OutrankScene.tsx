@@ -7,28 +7,23 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * "OUTRANK" in white bold text inside a LARGE neon pill on black bg.
+ * "OUTRANK" in white bold text inside a neon pill on black bg.
  * Ref frames 079-108 (30 ref frames = ~45 output frames)
  *
- * Pill: HUGE — ~72% frame width, ~55% frame height.
+ * Pill: ~58% width, ~30% height. Text fills 75-80% of pill height.
  * Interior very dark, slightly lighter than pure black bg.
- * Unlit edges faintly visible.
  *
  * Neon border: 2px core, ~55% lit segment rotating CLOCKWISE.
- * Colors along lit segment: cyan (tail) → magenta (middle/curve) → orange (head).
- * The brightest part is magenta on the left curve.
- *
- * Diffuse purple glow follows the lit segment (strongest near bright spot).
+ * Colors: cyan (tail) → magenta (middle) → orange (head).
+ * Diffuse purple glow follows the lit segment.
  *
  * Text "OUTRANK" types quickly — all 7 letters visible by frame ~8.
- * Latest letter starts gray (#6B7280) then turns white.
- * Text stays full white throughout rest of scene.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 920;   // ~72% of frame width — matches reference
-const PILL_H = 400;   // ~55% of frame height — matches reference
+const PILL_W = 740;   // ~58% width
+const PILL_H = 210;   // ~29% height
 const PILL_R = PILL_H / 2;
 const CX = W / 2;
 const CY = H / 2;
@@ -86,7 +81,7 @@ export const OutrankScene: React.FC = () => {
   const glowAngle = 225 + rotationProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
   const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.4);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.5);
 
   // Text reveal: FAST — all 7 letters by frame ~8
   const lettersVisible = Math.min(
@@ -98,6 +93,9 @@ export const OutrankScene: React.FC = () => {
       })
     )
   );
+
+  // Font size: fill ~78% of pill height
+  const fontSize = Math.round(PILL_H * 0.78);
 
   return (
     <div
@@ -112,13 +110,13 @@ export const OutrankScene: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 300,
-          top: glowCenterY - 200,
-          width: 600,
-          height: 400,
+          left: glowCenterX - 280,
+          top: glowCenterY - 180,
+          width: 560,
+          height: 360,
           background:
             "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 75%)",
-          filter: "blur(55px)",
+          filter: "blur(50px)",
         }}
       />
 
@@ -169,7 +167,7 @@ export const OutrankScene: React.FC = () => {
         />
       </svg>
 
-      {/* Faint pill interior — very dark, slightly lighter than bg */}
+      {/* Faint pill interior */}
       <div
         style={{
           position: "absolute",
@@ -182,7 +180,7 @@ export const OutrankScene: React.FC = () => {
         }}
       />
 
-      {/* "OUTRANK" text centered in pill */}
+      {/* "OUTRANK" text centered in pill — fills ~78% of pill height */}
       <div
         style={{
           position: "absolute",
@@ -196,9 +194,10 @@ export const OutrankScene: React.FC = () => {
           style={{
             fontFamily,
             fontWeight: 800,
-            fontSize: 72,
-            letterSpacing: "0.14em",
+            fontSize,
+            letterSpacing: "0.16em",
             display: "flex",
+            lineHeight: 1,
           }}
         >
           {LETTERS.split("").map((letter, i) => {
