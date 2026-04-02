@@ -7,17 +7,15 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * ApproveItScene — "Approve it" appears, then "or add your personal touch." fades in
- * line-by-line, then a design-tool selection box with handles + center guide appears.
+ * ApproveItScene — Matches reference frames captured at 300ms intervals:
  *
- * Timeline (30fps, reference frames at 300ms = 9 output frames):
- *   0-9:   "Approve it" types in word-by-word (Approve solid, "it" fading in)
- *   9-18:  "Approve it" fully solid, hold
- *  18-27:  "or add your / personal / touch." fades in top-to-bottom + cursor appears
- *  27-36:  text lines solidify top→bottom, cursor rests
- *  36-45:  selection bounding box with handles appears around secondary text
- *  45-54:  center guide dashed line appears, box outline darkens
- *  54-72:  hold / subtle cursor drift
+ * Ref 04 (0ms   → f0-8):   "Approve it" — "Approve" solid, "it" fading in with blur
+ * Ref 05 (300ms → f9-17):  "Approve it" fully solid, hold
+ * Ref 06 (600ms → f18-26): "Approve it" still visible + secondary text ALL appears at ~10-15% opacity. Cursor appears near "touch."
+ * Ref 07 (900ms → f27-35): "Approve it" GONE. Secondary lines solidify top→bottom (line1=100%, line2=60%, line3=25%)
+ * Ref 08 (1200ms→ f36-44): All text solid black. Light GRAY selection box + handles + rotation handle appear. Cursor at bottom-right of text.
+ * Ref 09 (1500ms→ f45-53): Box border darkens to BLACK. Vertical dashed center guideline (light gray) appears full height.
+ * Ref 10 (1800ms→ f54-72): Guideline GONE. Cursor drifts OUTSIDE box to lower-right. Hold.
  */
 
 const SECONDARY_LINES = ["or add your", "personal", "touch."];
@@ -25,58 +23,84 @@ const SECONDARY_LINES = ["or add your", "personal", "touch."];
 export const ApproveItScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // ── Phase 1: "Approve it" entrance ─────────────────────────────
+  // ── Phase 1: "Approve it" entrance (f0-8) ─────────────────────
   const approveOp = interpolate(frame, [0, 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const itOp = interpolate(frame, [3, 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const itBlur = interpolate(frame, [3, 9], [8, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
 
-  // ── Phase 2: Secondary text line-by-line fade ──────────────────
-  // Each line fades in with stagger: line 0 at frame 18, line 1 at 22, line 2 at 26
+  // "Approve it" fades OUT as secondary text takes over (f24-30)
+  const approveGroupOp = interpolate(frame, [24, 30], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.cubic) });
+
+  // ── Phase 2: Secondary text appears ALL AT ONCE at very low opacity (f18), then lines solidify top→bottom ──
+  // f18: all lines appear at ~12% opacity simultaneously
+  // f27-35: line 1 → 100%, line 2 → 60%, line 3 → 25% (top-down cascade)
+  // f35+: all lines reach 100%
+  const secondaryGlobalAppear = interpolate(frame, [18, 22], [0, 0.12], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
   const lineOpacities = SECONDARY_LINES.map((_, i) => {
-    const start = 18 + i * 4;
-    return interpolate(frame, [start, start + 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+    // Phase A: all appear at ~12% together (f18-22)
+    const ghostOp = secondaryGlobalAppear;
+    // Phase B: each line solidifies with stagger (line0 at f27, line1 at f29, line2 at f31)
+    const solidifyStart = 27 + i * 2;
+    const solidOp = interpolate(frame, [solidifyStart, solidifyStart + 8], [0.12, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+    // Use whichever is higher
+    return frame < 27 ? ghostOp : solidOp;
   });
 
+  // Slight upward shift as each line solidifies
   const lineYShifts = SECONDARY_LINES.map((_, i) => {
-    const start = 18 + i * 4;
-    return interpolate(frame, [start, start + 9], [12, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+    const solidifyStart = 27 + i * 2;
+    return interpolate(frame, [solidifyStart, solidifyStart + 8], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   });
 
   // ── Phase 3: Cursor ────────────────────────────────────────────
-  const cursorAppear = 20;
-  const cursorOp = interpolate(frame, [cursorAppear, cursorAppear + 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  // Cursor drifts from right side toward the text block bottom-right
-  const cursorX = interpolate(frame, [cursorAppear, 54], [520, 490], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
-  const cursorY = interpolate(frame, [cursorAppear, 54], [420, 440], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
+  // Appears at f18 (same time as ghost text), positioned near "touch." bottom-right
+  const CURSOR_APPEAR = 18;
+  const cursorOp = interpolate(frame, [CURSOR_APPEAR, CURSOR_APPEAR + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // ── Phase 4: Selection bounding box ────────────────────────────
-  const boxAppearStart = 36;
-  const boxOp = interpolate(frame, [boxAppearStart, boxAppearStart + 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  // Box outline darkens over time
-  const boxStrokeColor = frame < 45 ? "#CCCCCC" : "#222222";
+  // Cursor starts near "touch." text, stays there during box phase, then drifts outside box in final phase
+  const DRIFT_START = 54;
+  const cursorX = interpolate(frame, [CURSOR_APPEAR, DRIFT_START, 68], [700, 700, 780], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
+  const cursorY = interpolate(frame, [CURSOR_APPEAR, DRIFT_START, 68], [460, 465, 520], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
 
-  // ── Phase 5: Center guide line ─────────────────────────────────
-  const guideStart = 45;
-  const guideOp = interpolate(frame, [guideStart, guideStart + 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  // ── Phase 4: Selection bounding box (f36) ──────────────────────
+  const BOX_APPEAR = 36;
+  const boxOp = interpolate(frame, [BOX_APPEAR, BOX_APPEAR + 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+
+  // Box border: light gray first (f36-44), then transitions to black (f45+)
+  const borderDarken = interpolate(frame, [44, 48], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const borderGray = Math.round(interpolate(borderDarken, [0, 1], [190, 34]));
+  const boxStrokeColor = `rgb(${borderGray},${borderGray},${borderGray})`;
+
+  // ── Phase 5: Center guide dashed line (f45-53 only, disappears at f54) ──
+  const GUIDE_START = 45;
+  const GUIDE_END = 54;
+  const guideOp = frame < GUIDE_START ? 0
+    : frame < GUIDE_START + 5 ? interpolate(frame, [GUIDE_START, GUIDE_START + 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+    : frame < GUIDE_END ? 1
+    : interpolate(frame, [GUIDE_END, GUIDE_END + 4], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // ── Bounding box dimensions (around secondary text block) ──────
-  const BOX_W = 340;
-  const BOX_H = 160;
+  // Text block is centered. 3 lines at ~44px font, ~1.15 line height
+  // "or add your" ≈ 310px wide, "personal" ≈ 240px, "touch." ≈ 160px
+  // Box should tightly frame all 3 lines
+  const BOX_W = 360;
+  const BOX_H = 170;
   const BOX_X = (1280 - BOX_W) / 2;
-  const BOX_Y = 330;
+  const BOX_Y = 290;
   const HANDLE_SIZE = 8;
-  const ROTATION_HANDLE_LEN = 24;
+  const ROTATION_HANDLE_LEN = 22;
 
-  // Handle positions (8 handles: 4 corners + 4 midpoints)
+  // 8 resize handles: 4 corners + 4 midpoints
   const handles = [
-    { x: BOX_X, y: BOX_Y }, // top-left
-    { x: BOX_X + BOX_W / 2, y: BOX_Y }, // top-center
-    { x: BOX_X + BOX_W, y: BOX_Y }, // top-right
-    { x: BOX_X + BOX_W, y: BOX_Y + BOX_H / 2 }, // mid-right
-    { x: BOX_X + BOX_W, y: BOX_Y + BOX_H }, // bottom-right
-    { x: BOX_X + BOX_W / 2, y: BOX_Y + BOX_H }, // bottom-center
-    { x: BOX_X, y: BOX_Y + BOX_H }, // bottom-left
-    { x: BOX_X, y: BOX_Y + BOX_H / 2 }, // mid-left
+    { x: BOX_X, y: BOX_Y },
+    { x: BOX_X + BOX_W / 2, y: BOX_Y },
+    { x: BOX_X + BOX_W, y: BOX_Y },
+    { x: BOX_X + BOX_W, y: BOX_Y + BOX_H / 2 },
+    { x: BOX_X + BOX_W, y: BOX_Y + BOX_H },
+    { x: BOX_X + BOX_W / 2, y: BOX_Y + BOX_H },
+    { x: BOX_X, y: BOX_Y + BOX_H },
+    { x: BOX_X, y: BOX_Y + BOX_H / 2 },
   ];
 
   return (
@@ -85,29 +109,34 @@ export const ApproveItScene: React.FC = () => {
         position: "absolute",
         inset: 0,
         backgroundColor: "#FFFFFF",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         fontFamily,
       }}
     >
-      {/* ── "Approve it" ── */}
-      <div style={{ display: "flex", gap: 14, marginBottom: 20 }}>
+      {/* ── "Approve it" — fades out when secondary text solidifies ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, bottom: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: approveGroupOp,
+        }}
+      >
         <span
           style={{
             fontSize: 52,
-            fontWeight: 800,
+            fontWeight: 700,
             color: "#000000",
             opacity: approveOp,
           }}
         >
-          Approve
+          Approve{" "}
         </span>
         <span
           style={{
             fontSize: 52,
-            fontWeight: 800,
+            fontWeight: 700,
             color: "#000000",
             opacity: itOp,
             filter: `blur(${itBlur}px)`,
@@ -117,18 +146,27 @@ export const ApproveItScene: React.FC = () => {
         </span>
       </div>
 
-      {/* ── "or add your personal touch." ── */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+      {/* ── "or add your / personal / touch." — centered in frame ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, bottom: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {SECONDARY_LINES.map((line, i) => (
           <span
             key={i}
             style={{
-              fontSize: 44,
-              fontWeight: 800,
+              fontSize: 48,
+              fontWeight: 700,
               color: "#000000",
               opacity: lineOpacities[i],
               transform: `translateY(${lineYShifts[i]}px)`,
-              lineHeight: 1.15,
+              lineHeight: 1.2,
             }}
           >
             {line}
@@ -137,7 +175,7 @@ export const ApproveItScene: React.FC = () => {
       </div>
 
       {/* ── Selection bounding box ── */}
-      {frame >= boxAppearStart && (
+      {frame >= BOX_APPEAR && (
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: boxOp }}>
           {/* Box outline */}
           <div
@@ -148,11 +186,10 @@ export const ApproveItScene: React.FC = () => {
               width: BOX_W,
               height: BOX_H,
               border: `1.5px solid ${boxStrokeColor}`,
-              borderRadius: 0,
             }}
           />
 
-          {/* Rotation handle — line + circle from top-center */}
+          {/* Rotation handle — vertical line + circle from top-center */}
           <div
             style={{
               position: "absolute",
@@ -195,27 +232,22 @@ export const ApproveItScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── Center guide dashed line ── */}
-      {frame >= guideStart && (
+      {/* ── Center guide dashed line — appears briefly then disappears ── */}
+      {guideOp > 0 && (
         <svg
           style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: guideOp }}
           width="1280"
           height="720"
         >
           <line
-            x1="640"
-            y1="0"
-            x2="640"
-            y2="720"
-            stroke="#AAAAAA"
-            strokeWidth="1"
-            strokeDasharray="6,4"
+            x1="640" y1="0" x2="640" y2="720"
+            stroke="#AAAAAA" strokeWidth="1" strokeDasharray="6,4"
           />
         </svg>
       )}
 
       {/* ── Mouse cursor ── */}
-      {frame >= cursorAppear && (
+      {frame >= CURSOR_APPEAR && (
         <svg
           style={{
             position: "absolute",
