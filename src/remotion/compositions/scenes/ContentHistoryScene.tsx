@@ -7,27 +7,17 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * ContentHistoryScene — Dashboard UI with sidebar navigation.
+ * ContentHistoryScene — Dashboard with WHITE sidebar.
  *
- * Start frame: "Content History" is active in sidebar, main area shows article list.
- * Cursor hovers over "Content Planner" in sidebar, clicks it.
- * Sidebar switches to "Content Planner" active, main area crossfades to calendar view.
+ * Start: "Content History" active, article list in main area.
+ * Cursor moves to "Content Planner", clicks.
+ * Sidebar switches active state, main area crossfades to calendar.
  *
- * Layout:
- * - Purple outer background
- * - White rounded app container
- * - Dark sidebar (left ~200px) with nav items + icons
- * - Main content area (right)
- *
- * Sidebar items: Content Planner, Content History, Settings, Integrations
- * Bottom: Support button
+ * Key: sidebar bg is WHITE, active item has dark charcoal pill.
+ * Top bar: "Outrank" left, sun icon + avatar right.
  */
 
-// ── Sidebar items ────────────────────────────────────────────────────────────
-
-const SIDEBAR_W = 200;
-const SIDEBAR_BG = "#1a1a2e";
-const SIDEBAR_ITEM_H = 42;
+const SIDEBAR_W = 210;
 const SIDEBAR_ITEMS = [
   { label: "Content Planner", icon: "calendar" },
   { label: "Content History", icon: "doc" },
@@ -35,26 +25,22 @@ const SIDEBAR_ITEMS = [
   { label: "Integrations", icon: "plug" },
 ];
 
-// ── Article data for Content History ────────────────────────────────────────
-
 const ARTICLES = [
-  {
-    title: "Decoding Influencer Tweets: Strategies for Impact and Measurement",
-    color: "#4F7CFF",
-  },
-  {
-    title: "Analyzing Twitter Analytics on Other Accounts: A Comprehensive Guide",
-    color: "#34D399",
-  },
-  {
-    title: "Best Time to Tweet: A Data-Driven Guide to Maximizing Your Reach",
-    color: "#F59E0B",
-  },
+  { title: "Decoding Influencer Tweets: Strategies for Impact and Measurement", thumb: "#4F7CFF" },
+  { title: "Analyzing Twitter Analytics on Other Accounts: A Comprehensive Guide", thumb: "#34D399" },
+  { title: "Best Time to Tweet: A Data-Driven Guide to Maximizing Your Reach", thumb: "#60A5FA" },
 ];
 
-// ── Calendar data for Content Planner ────────────────────────────────────────
-
-const CALENDAR_ROWS = [
+const CAL_ROWS = [
+  [
+    { day: 4, title: "trending tweets", vol: 2100, diff: 9, hasBtn: true },
+    { day: 5, title: "trends on twitter", vol: 50, diff: 1 },
+    { day: 6, title: "twitter bookmarks", vol: 1600, diff: 7 },
+    { day: 7, title: "hashtags on instagram", vol: 280, diff: 8 },
+    { day: 0 },
+    { day: 0 },
+    { day: 0 },
+  ],
   [
     { day: 11, title: "worldwide trends on twitter", vol: 880, diff: 10 },
     { day: 12, title: "twitter trends worldwide", vol: 600, diff: 13 },
@@ -80,199 +66,81 @@ const CALENDAR_ROWS = [
     { day: 28, title: "twitter growth strategies", vol: 280, diff: 8 },
     { day: 29, title: "how to write engaging tweets", vol: 210, diff: 3 },
     { day: 30, title: "how to grow on twitter organically", vol: 140, diff: 2 },
-    { day: 0, title: "", vol: 0, diff: 0 },
+    { day: 0 },
   ],
 ];
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-// ── Icon SVGs (simple inline) ────────────────────────────────────────────────
+// ── Icon components ──────────────────────────────────────────────────────────
 
 const SidebarIcon: React.FC<{ type: string; color: string }> = ({ type, color }) => {
-  const s = { width: 16, height: 16, fill: "none", stroke: color, strokeWidth: 1.5 };
-  if (type === "calendar")
-    return (
-      <svg viewBox="0 0 16 16" {...s}>
-        <rect x="2" y="3" width="12" height="11" rx="1.5" />
-        <path d="M2 6.5h12" />
-        <path d="M5 1.5v3M11 1.5v3" />
-        <path d="M5.5 9l2 2 3-4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  if (type === "doc")
-    return (
-      <svg viewBox="0 0 16 16" {...s}>
-        <rect x="3" y="2" width="10" height="12" rx="1.5" />
-        <path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" strokeLinecap="round" />
-      </svg>
-    );
-  if (type === "gear")
-    return (
-      <svg viewBox="0 0 16 16" {...s}>
-        <circle cx="8" cy="8" r="2.5" />
-        <path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M3.8 12.2l1-1M11.2 4.8l1-1" strokeLinecap="round" />
-      </svg>
-    );
-  return (
-    <svg viewBox="0 0 16 16" {...s}>
-      <rect x="1" y="4" width="6" height="8" rx="1" />
-      <rect x="9" y="4" width="6" height="8" rx="1" />
-      <path d="M7 7h2M7 9h2" strokeLinecap="round" />
-    </svg>
-  );
+  const s: React.SVGProps<SVGSVGElement> = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "none", style: { flexShrink: 0 } };
+  const ps = { stroke: color, strokeWidth: 1.4, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  if (type === "calendar") return (<svg {...s}><rect x="2" y="3" width="12" height="11" rx="1.5" {...ps} fill="none" /><path d="M2 6.5h12" {...ps} /><path d="M5 1.5v3M11 1.5v3" {...ps} /></svg>);
+  if (type === "doc") return (<svg {...s}><rect x="3" y="2" width="10" height="12" rx="1.5" {...ps} fill="none" /><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" {...ps} /></svg>);
+  if (type === "gear") return (<svg {...s}><circle cx="8" cy="8" r="2.5" {...ps} fill="none" /><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M3.8 12.2l1-1M11.2 4.8l1-1" {...ps} /></svg>);
+  return (<svg {...s}><rect x="1.5" y="4" width="5.5" height="8" rx="1" {...ps} fill="none" /><rect x="9" y="4" width="5.5" height="8" rx="1" {...ps} fill="none" /></svg>);
 };
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main component ──────────────────────────────────────────────────────────
 
 export const ContentHistoryScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  // Timeline:
-  // 0-8: Fade in, Content History active
-  // 8-20: Cursor moves to "Content Planner"
-  // 20-25: Hover state visible on Content Planner
-  // 25-30: Click — active state switches
-  // 30-45: Main content crossfades from article list → calendar
-  // 45-end: Calendar view holds with subtle zoom
-
   const CLICK_FRAME = 28;
-
-  // Which sidebar item is active? 1=Content History (start), 0=Content Planner (after click)
   const activeIdx = frame < CLICK_FRAME ? 1 : 0;
-
-  // Hover state on Content Planner before click
   const hoverPlanner = frame >= 16 && frame < CLICK_FRAME;
 
   // Fade in
-  const fadeIn = interpolate(frame, [0, 8], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const fadeIn = interpolate(frame, [0, 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Main content crossfade
-  const historyOpacity = interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 10], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const plannerOpacity = interpolate(frame, [CLICK_FRAME + 5, CLICK_FRAME + 15], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Content crossfade
+  const historyOpacity = interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 10], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const plannerOpacity = interpolate(frame, [CLICK_FRAME + 5, CLICK_FRAME + 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Cursor position — moves from bottom-center to "Content Planner" sidebar item
-  const cursorProgress = interpolate(frame, [8, 22], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-  const cursorX = interpolate(cursorProgress, [0, 1], [400, 120]);
-  const cursorY = interpolate(cursorProgress, [0, 1], [500, 158]);
-  const cursorOpacity = interpolate(frame, [8, 12], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Cursor
+  const cursorProg = interpolate(frame, [8, 22], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const cursorX = interpolate(cursorProg, [0, 1], [440, 118]);
+  const cursorY = interpolate(cursorProg, [0, 1], [480, 132]);
+  const cursorOp = interpolate(frame, [8, 12], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   // Click pulse
-  const clickPulse =
-    frame >= CLICK_FRAME && frame < CLICK_FRAME + 4
-      ? interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 4], [0.85, 1], {
-          extrapolateLeft: "clamp",
-          extrapolateRight: "clamp",
-        })
-      : 1;
+  const clickScale = frame >= CLICK_FRAME && frame < CLICK_FRAME + 4
+    ? interpolate(frame, [CLICK_FRAME, CLICK_FRAME + 4], [0.92, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+    : 1;
 
-  // 3D perspective tilt — matches the style used across the video
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.25], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.cubic),
-  });
-
-  const rotateX = interpolate(frame, [0, durationInFrames], [2, 12], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
-
-  const rotateY = interpolate(frame, [0, durationInFrames], [-2, -14], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
-
-  const rotateZ = interpolate(frame, [0, durationInFrames], [0, -2], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
-
-  const originX = interpolate(frame, [0, durationInFrames], [50, 40], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
-
-  const originY = interpolate(frame, [0, durationInFrames], [50, 45], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
+  // 3D perspective tilt
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.2], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
+  const rotX = interpolate(frame, [0, durationInFrames], [2, 10], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const rotY = interpolate(frame, [0, durationInFrames], [-2, -12], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const rotZ = interpolate(frame, [0, durationInFrames], [0, -2], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const origX = interpolate(frame, [0, durationInFrames], [50, 42], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
+  const origY = interpolate(frame, [0, durationInFrames], [50, 45], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.inOut(Easing.quad) });
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        backgroundColor: "#7C3AED",
-        overflow: "hidden",
-        opacity: fadeIn,
-      }}
-    >
-      {/* App container — white rounded card with 3D perspective */}
+    <div style={{ position: "absolute", inset: 0, backgroundColor: "#A358F9", overflow: "hidden", opacity: fadeIn }}>
+      {/* 3D perspective wrapper */}
+      <div style={{ position: "absolute", top: 24, left: 24, right: 24, bottom: 24, perspective: 1200 }}>
+      {/* App container with 3D tilt */}
       <div
         style={{
-          position: "absolute",
-          top: 28,
-          left: 28,
-          right: 28,
-          bottom: 28,
-          backgroundColor: "#FFFFFF",
-          borderRadius: 16,
-          overflow: "hidden",
+          width: "100%", height: "100%",
+          backgroundColor: "#FFFFFF", borderRadius: 14, overflow: "hidden",
           display: "flex",
-          perspective: 1200,
-          transformOrigin: `${originX}% ${originY}%`,
-          transform: `scale(${zoom}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+          transformOrigin: `${origX}% ${origY}%`,
+          transform: `scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`,
           transformStyle: "preserve-3d" as const,
         }}
       >
-        {/* ── Sidebar ── */}
+        {/* ── WHITE Sidebar ── */}
         <div
           style={{
-            width: SIDEBAR_W,
-            backgroundColor: SIDEBAR_BG,
-            display: "flex",
-            flexDirection: "column",
-            padding: "20px 12px",
-            flexShrink: 0,
+            width: SIDEBAR_W, backgroundColor: "#FFFFFF", borderRight: "1px solid #F0F0F0",
+            display: "flex", flexDirection: "column", padding: "18px 14px", flexShrink: 0,
           }}
         >
-          {/* Logo placeholder */}
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              fontFamily,
-              marginBottom: 28,
-              paddingLeft: 10,
-            }}
-          >
-            Outrank
-          </div>
-
-          {/* Nav items */}
           {SIDEBAR_ITEMS.map((item, i) => {
             const isActive = i === activeIdx;
             const isHover = i === 0 && hoverPlanner && !isActive;
@@ -280,236 +148,123 @@ export const ContentHistoryScene: React.FC = () => {
               <div
                 key={item.label}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  height: SIDEBAR_ITEM_H,
-                  paddingLeft: 12,
-                  paddingRight: 12,
-                  borderRadius: 8,
-                  backgroundColor: isActive
-                    ? "rgba(255,255,255,0.15)"
-                    : isHover
-                      ? "rgba(255,255,255,0.08)"
-                      : "transparent",
-                  marginBottom: 4,
-                  transform: i === 0 && frame >= CLICK_FRAME && frame < CLICK_FRAME + 4 ? `scale(${clickPulse})` : "none",
+                  display: "flex", alignItems: "center", gap: 10,
+                  height: 40, paddingLeft: 12, paddingRight: 12, borderRadius: 8, marginBottom: 3,
+                  backgroundColor: isActive ? "#212B36" : isHover ? "#F1F3F5" : "transparent",
+                  transform: i === 0 && frame >= CLICK_FRAME && frame < CLICK_FRAME + 4 ? `scale(${clickScale})` : "none",
                 }}
               >
-                <SidebarIcon type={item.icon} color={isActive ? "#FFFFFF" : "#9CA3AF"} />
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? "#FFFFFF" : "#9CA3AF",
-                    fontFamily,
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <SidebarIcon type={item.icon} color={isActive ? "#FFFFFF" : "#4B5563"} />
+                <span style={{
+                  fontSize: 13, fontWeight: isActive ? 600 : 400, fontFamily,
+                  color: isActive ? "#FFFFFF" : "#4B5563", whiteSpace: "nowrap",
+                }}>
                   {item.label}
                 </span>
               </div>
             );
           })}
-
-          {/* Spacer */}
-          <div style={{ flex: 1 }} />
-
-          {/* Support button */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              height: 36,
-              borderRadius: 8,
-              backgroundColor: "rgba(255,255,255,0.12)",
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#FFFFFF",
-              fontFamily,
-            }}
-          >
-            Support
-          </div>
         </div>
 
-        {/* ── Main content area ── */}
+        {/* ── Main content ── */}
         <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-          {/* Header bar */}
-          <div
-            style={{
-              height: 52,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 24px",
-              borderBottom: "1px solid #F0F0F0",
-            }}
-          >
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#111", fontFamily }}>
-              Outrank
-            </span>
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                backgroundColor: "#E5E7EB",
-              }}
-            />
+          {/* Top header bar */}
+          <div style={{
+            height: 50, display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "0 22px", borderBottom: "1px solid #F0F0F0",
+          }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: "#111827", fontFamily }}>Outrank</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* Sun icon */}
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="4" stroke="#9CA3AF" strokeWidth="1.4" />
+                <path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.4 3.4l1.4 1.4M13.2 13.2l1.4 1.4M3.4 14.6l1.4-1.4M13.2 4.8l1.4-1.4" stroke="#9CA3AF" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              {/* Avatar */}
+              <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "#E5E7EB" }} />
+            </div>
           </div>
 
-          {/* Content History view */}
-          <div
-            style={{
-              position: "absolute",
-              top: 52,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              opacity: historyOpacity,
-              padding: "24px 28px",
-            }}
-          >
-            <div style={{ fontSize: 22, fontWeight: 700, color: "#111", fontFamily, marginBottom: 20 }}>
+          {/* ── Content History view ── */}
+          <div style={{
+            position: "absolute", top: 50, left: 0, right: 0, bottom: 0,
+            opacity: historyOpacity, padding: "20px 24px",
+          }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#111827", fontFamily, marginBottom: 18 }}>
               Content History
             </div>
 
             {/* Table header */}
-            <div
-              style={{
-                display: "flex",
-                gap: 16,
-                paddingBottom: 12,
-                borderBottom: "1px solid #F0F0F0",
-                marginBottom: 8,
-              }}
-            >
-              <span style={{ width: 60, fontSize: 11, color: "#9CA3AF", fontFamily, fontWeight: 500 }}>Image</span>
-              <span style={{ flex: 1, fontSize: 11, color: "#9CA3AF", fontFamily, fontWeight: 500 }}>Title ↓</span>
-              <span style={{ width: 60, fontSize: 11, color: "#9CA3AF", fontFamily, fontWeight: 500 }}>Keywords</span>
+            <div style={{ display: "flex", gap: 14, paddingBottom: 10, borderBottom: "1px solid #F0F0F0", marginBottom: 4 }}>
+              <span style={{ width: 52, fontSize: 12, color: "#6B7280", fontFamily, fontWeight: 500 }}>Image</span>
+              <span style={{ flex: 1, fontSize: 12, color: "#6B7280", fontFamily, fontWeight: 500 }}>Title ↓</span>
+              <span style={{ width: 70, fontSize: 12, color: "#6B7280", fontFamily, fontWeight: 500 }}>Keywords</span>
             </div>
 
-            {/* Articles */}
-            {ARTICLES.map((article, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                  padding: "14px 0",
-                  borderBottom: "1px solid #F8F8F8",
-                }}
-              >
-                {/* Thumbnail */}
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 6,
-                    backgroundColor: article.color,
-                    flexShrink: 0,
-                    opacity: 0.8,
-                  }}
-                />
-                <span style={{ flex: 1, fontSize: 13, color: "#374151", fontFamily, fontWeight: 400 }}>
-                  {article.title}
+            {/* Article rows */}
+            {ARTICLES.map((a, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 14, padding: "12px 0",
+                borderBottom: "1px solid #F8F8F8",
+              }}>
+                <div style={{ width: 44, height: 44, borderRadius: 6, backgroundColor: a.thumb, flexShrink: 0, opacity: 0.85 }} />
+                <span style={{ flex: 1, fontSize: 13, color: "#1F2937", fontFamily, fontWeight: 400, lineHeight: 1.4 }}>
+                  {a.title}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Content Planner view — calendar */}
-          <div
-            style={{
-              position: "absolute",
-              top: 52,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              opacity: plannerOpacity,
-              padding: "16px 16px",
-              
-            }}
-          >
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#111", fontFamily, marginBottom: 14 }}>
+          {/* ── Content Planner view (calendar) ── */}
+          <div style={{
+            position: "absolute", top: 50, left: 0, right: 0, bottom: 0,
+            opacity: plannerOpacity, padding: "14px 14px", overflow: "hidden",
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", fontFamily, marginBottom: 10 }}>
               Content Planner
             </div>
 
-            {/* Day of week headers */}
-            <div style={{ display: "flex", marginBottom: 4 }}>
+            {/* DOW headers */}
+            <div style={{ display: "flex", borderBottom: "1px solid #F0F0F0", paddingBottom: 6, marginBottom: 2 }}>
               {DOW.map((d) => (
-                <div
-                  key={d}
-                  style={{
-                    flex: 1,
-                    textAlign: "center",
-                    fontSize: 10,
-                    fontWeight: 600,
-                    color: "#9CA3AF",
-                    fontFamily,
-                    paddingBottom: 6,
-                    borderBottom: "1px solid #F0F0F0",
-                  }}
-                >
+                <div key={d} style={{ flex: 1, textAlign: "center", fontSize: 10, fontWeight: 600, color: "#9CA3AF", fontFamily }}>
                   {d}
                 </div>
               ))}
             </div>
 
-            {/* Calendar rows */}
-            {CALENDAR_ROWS.map((row, r) => (
+            {/* Calendar grid */}
+            {CAL_ROWS.map((row, r) => (
               <div key={r} style={{ display: "flex" }}>
                 {row.map((cell, c) => (
-                  <div
-                    key={c}
-                    style={{
-                      flex: 1,
-                      height: 130,
-                      borderRight: c < 6 ? "1px solid #F5F5F5" : "none",
-                      borderBottom: "1px solid #F0F0F0",
-                      padding: "4px 5px",
-                      position: "relative",
-                      backgroundColor: "#FFFFFF",
-                    }}
-                  >
+                  <div key={c} style={{
+                    flex: 1, height: 118, borderRight: c < 6 ? "1px solid #F5F5F5" : "none",
+                    borderBottom: "1px solid #F0F0F0", padding: "4px 4px", position: "relative",
+                  }}>
                     {cell.day > 0 && (
                       <>
-                        <span style={{ fontSize: 10, fontWeight: 600, color: "#999", fontFamily }}>
-                          {cell.day}
-                        </span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                          <span style={{ fontSize: 9, fontWeight: 600, color: "#AAAAAA", fontFamily }}>{cell.day}</span>
+                          <span style={{ fontSize: 7, color: "#CCCCCC", fontFamily }}>{DOW[c]}</span>
+                        </div>
                         {cell.title && (
-                          <div
-                            style={{
-                              marginTop: 4,
-                              backgroundColor: "#F3F4F6",
-                              borderRadius: 4,
-                              padding: "4px 5px",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: 8.5,
-                                fontWeight: 500,
-                                color: "#374151",
-                                fontFamily,
-                                lineHeight: 1.25,
-                                display: "block",
-                              }}
-                            >
-                              {cell.title.length > 35 ? cell.title.slice(0, 35) + "..." : cell.title}
+                          <div style={{ backgroundColor: "#F3F4F6", borderRadius: 4, padding: "3px 4px" }}>
+                            <span style={{ fontSize: 7.5, fontWeight: 500, color: "#374151", fontFamily, lineHeight: 1.25, display: "block" }}>
+                              {cell.title.length > 32 ? cell.title.slice(0, 32) + "..." : cell.title}
                             </span>
-                            <div style={{ marginTop: 3, display: "flex", gap: 6 }}>
-                              <span style={{ fontSize: 7, color: "#9CA3AF", fontFamily }}>
-                                Vol: {cell.vol.toLocaleString()}
-                              </span>
-                              <span style={{ fontSize: 7, color: "#9CA3AF", fontFamily }}>
-                                Diff: {cell.diff}
-                              </span>
+                            <div style={{ marginTop: 2, display: "flex", gap: 5 }}>
+                              <span style={{ fontSize: 6.5, color: "#9CA3AF", fontFamily }}>Volume: {(cell.vol ?? 0).toLocaleString()}</span>
+                              <span style={{ fontSize: 6.5, color: "#9CA3AF", fontFamily }}>Difficulty: {cell.diff}</span>
                             </div>
+                            {cell.hasBtn && (
+                              <div style={{
+                                marginTop: 3, backgroundColor: "#212B36", color: "#FFFFFF",
+                                fontSize: 6, fontWeight: 600, fontFamily, padding: "2px 6px",
+                                borderRadius: 3, display: "inline-block",
+                              }}>
+                                Visit Article
+                              </div>
+                            )}
                           </div>
                         )}
                       </>
@@ -521,29 +276,15 @@ export const ContentHistoryScene: React.FC = () => {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Mouse cursor */}
       {frame >= 8 && (
         <svg
-          style={{
-            position: "absolute",
-            left: cursorX,
-            top: cursorY,
-            width: 22,
-            height: 28,
-            opacity: cursorOpacity,
-            pointerEvents: "none",
-            zIndex: 100,
-          }}
-          viewBox="0 0 22 28"
-          fill="none"
+          style={{ position: "absolute", left: cursorX, top: cursorY, width: 20, height: 26, opacity: cursorOp, pointerEvents: "none", zIndex: 100 }}
+          viewBox="0 0 20 26" fill="none"
         >
-          <path
-            d="M3 2L3 20L7.5 16L11 24L14 23L10.5 15L17 15L3 2Z"
-            fill="#111111"
-            stroke="#FFFFFF"
-            strokeWidth="1.2"
-          />
+          <path d="M2 2L2 18L5.5 14.5L9 22L12 21L8.5 13.5L14 13.5L2 2Z" fill="#111" stroke="#FFF" strokeWidth="1" />
         </svg>
       )}
     </div>
