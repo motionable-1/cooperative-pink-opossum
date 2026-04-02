@@ -90,7 +90,7 @@ export const FindKeywordsScene: React.FC = () => {
               key={i}
               style={{
                 opacity: isTyping ? 0.6 : 1,
-                transition: "opacity 0.05s",
+                whiteSpace: "pre",
               }}
             >
               {char}
