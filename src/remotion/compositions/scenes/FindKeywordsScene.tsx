@@ -162,6 +162,7 @@ export const FindKeywordsScene: React.FC = () => {
                   display: "inline-block",
                   transform: `translateY(${keywordLift}px) scale(${keywordScale})`,
                   fontWeight: 800,
+                  margin: "0 6px",
                 }}
               >
                 {/* Glow behind KEYWORDS */}
