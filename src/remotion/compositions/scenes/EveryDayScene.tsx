@@ -24,8 +24,8 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-const CARD_W = 440;
-const CARD_H = 230;
+const CARD_W = 520;
+const CARD_H = 280;
 
 // Simple Google Ads icon as SVG
 const GoogleAdsIcon = () => (
@@ -93,57 +93,14 @@ export const EveryDayScene: React.FC = () => {
   const dsBelow = frame < 94 ? 110 : 0;
 
   // ═══════════════════════════════════════════════════════════════
-  // CARDS PHASE: Diagonal flow from top-right to bottom-left
-  // Cards are bigger, tilted ~-15deg, sliding diagonally across screen
+  // CARDS PHASE: Cinematic faux-3D flowing cards
+  // Simulated perspective using skewY + asymmetric scale so cards
+  // look like we're watching them glide past from the side.
+  // Tighter stagger = multiple cards visible & overlapping at once.
   // ═══════════════════════════════════════════════════════════════
-  const CARDS_START = 122;
-  const TILT = -15; // all cards tilted this angle
-
-  // Diagonal flow positions: top-right → center → bottom-left
-  // Start position (off-screen top-right)
-  const startX = 1280 + CARD_W;
-  const startY = -CARD_H - 100;
-  // End position (off-screen bottom-left)
-  const endX = -CARD_W - 200;
-  const endY = 720 + CARD_H + 100;
-
-  // Stagger: each card enters 10 frames after the previous
-  const CARD_STAGGER = 10;
-  // Each card takes ~20 frames to cross the visible area
-  const CARD_TRAVEL = 28;
-
-  // Card rendering helper
-  const renderCard = (tool: typeof TOOLS[0], style: React.CSSProperties) => (
-    <div
-      key={tool.name}
-      style={{
-        position: "absolute",
-        width: CARD_W,
-        height: CARD_H,
-        backgroundColor: tool.bg,
-        borderRadius: 24,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 14,
-        boxShadow: "0 12px 40px rgba(0,0,0,0.22)",
-        ...style,
-      }}
-    >
-      {tool.hasGoogleIcon && <GoogleAdsIcon />}
-      {tool.hasGAIcon && <GAIcon />}
-      {tool.accentChar ? (
-        <span style={{ fontSize: 44, fontWeight: 800, fontFamily }}>
-          <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
-          <span style={{ color: tool.restColor }}>{tool.restText}</span>
-        </span>
-      ) : (
-        <span style={{ fontSize: tool.name.length > 10 ? 28 : 36, fontWeight: 700, color: tool.textColor, fontFamily }}>
-          {tool.text}
-        </span>
-      )}
-    </div>
-  );
+  const CARDS_START = 124;
+  const CARD_STAGGER = 14;  // tighter so cards overlap on screen
+  const CARD_TRAVEL = 65;   // slower, more cinematic travel
 
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: PURPLE, fontFamily, overflow: "hidden" }}>
@@ -208,39 +165,81 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── DIAGONAL CARD FLOW: top-right → bottom-left, tilted ── */}
+      {/* ── CINEMATIC 3D CARD FLOW: right → left, tilted perspective ── */}
       {TOOLS.map((tool, i) => {
         const cardStart = CARDS_START + i * CARD_STAGGER;
         const cardEnd = cardStart + CARD_TRAVEL;
 
-        // Progress through diagonal path: 0 = top-right off-screen, 1 = bottom-left off-screen
+        // Progress: 0 = off-screen right, 0.5 = center, 1 = off-screen left
         const prog = interpolate(frame, [cardStart, cardEnd], [0, 1], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
-          easing: Easing.inOut(Easing.cubic),
         });
 
         if (prog <= 0) return null;
 
-        const x = interpolate(prog, [0, 1], [startX, endX]);
-        const y = interpolate(prog, [0, 1], [startY, endY]);
-
-        // Fade in as card enters view, fade out as it exits
-        const cardOp = interpolate(prog, [0, 0.1, 0.85, 1], [0, 1, 1, 0], {
+        // Horizontal flow: smooth glide right → center → left
+        const x = interpolate(prog, [0, 0.5, 1], [1450, (1280 - CARD_W) / 2, -CARD_W - 400], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
-        // Subtle scale: slightly bigger in middle of travel
-        const cardScale = interpolate(prog, [0, 0.5, 1], [0.9, 1.05, 0.9], {
+        // Gentle vertical arc: slight rise to center, descend on exit
+        const y = interpolate(prog, [0, 0.35, 0.65, 1], [380, (720 - CARD_H) / 2 - 30, (720 - CARD_H) / 2 - 30, 260], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
-        return renderCard(tool, {
-          left: x,
-          top: y,
-          opacity: cardOp,
-          transform: `rotate(${TILT}deg) scale(${cardScale})`,
-          zIndex: 10 + i,
+        // 3D rotateY: strong perspective tilt — angled on entry, face-on at center, angled on exit
+        const rotY = interpolate(prog, [0, 0.4, 0.6, 1], [55, -3, -3, -50], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
+
+        // Z-axis tilt for that cinematic sideways lean
+        const rotZ = interpolate(prog, [0, 0.5, 1], [-8, -2, 4], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        // Opacity: fade in, full at center, fade out
+        const cardOp = interpolate(prog, [0, 0.12, 0.85, 1], [0, 1, 1, 0], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        // Scale: smaller at edges, full at center
+        const cardScale = interpolate(prog, [0, 0.5, 1], [0.82, 1.04, 0.82], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        // Depth-of-field: blurred at edges, crisp at center
+        const cardBlur = interpolate(prog, [0, 0.25, 0.75, 1], [6, 0, 0, 6], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        // z-index: highest when closest to center
+        const zi = 100 - Math.abs(Math.round((prog - 0.5) * 100));
+
+        return (
+          <div
+            key={tool.name}
+            style={{
+              position: "absolute",
+              left: x,
+              top: y,
+              width: CARD_W,
+              height: CARD_H,
+              perspective: 900,
+              zIndex: zi,
+            }}
+          >
+            {renderCard(tool, {
+              position: "relative",
+              width: CARD_W,
+              height: CARD_H,
+              opacity: cardOp,
+              transform: `rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${cardScale})`,
+              filter: cardBlur > 0.3 ? `blur(${cardBlur}px)` : "none",
+              left: 0,
+              top: 0,
+            })}
+          </div>
+        );
       })}
     </div>
   );
