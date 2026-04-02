@@ -148,16 +148,23 @@ export const EveryDayScene: React.FC = () => {
           display: "flex", alignItems: "center", justifyContent: "center", gap: 18,
           opacity: uhFadeOut,
         }}>
-          <span style={{
-            fontSize: 70, fontWeight: 700,
-            fontFamily: monoFont,
-            opacity: uncoversOp,
-            color: "transparent",
-            WebkitTextStroke: "2px #FFFFFF",
-            letterSpacing: 2,
-          }}>
-            Uncovers
-          </span>
+          <svg width="420" height="90" viewBox="0 0 420 90" style={{ opacity: uncoversOp, overflow: "visible" }}>
+            <text
+              x="210"
+              y="72"
+              textAnchor="middle"
+              fontFamily={monoFont}
+              fontSize="70"
+              fontWeight="700"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="2"
+              strokeDasharray="6 5"
+              letterSpacing="2"
+            >
+              Uncovers
+            </text>
+          </svg>
           <span style={{
             fontSize: 70, fontWeight: 700, color: "#FFFFFF",
             opacity: hiddenOp, filter: `blur(${hiddenBlur}px)`,
