@@ -21,6 +21,7 @@ import { FindKeywordsScene } from "./scenes/FindKeywordsScene";
 import { SEOGraphScene } from "./scenes/SEOGraphScene";
 import { ContentPlanScene } from "./scenes/ContentPlanScene";
 import { CalendarScene } from "./scenes/CalendarScene";
+import { ContentHistoryScene } from "./scenes/ContentHistoryScene";
 
 /*
  * Full animation sequence:
@@ -72,6 +73,7 @@ const SCENE_21_DURATION = 52;  // "find the relevant KEYWORDS for you," typewrit
 const SCENE_22_DURATION = 91;  // Purple circle → SEO graph + "From no visit to high SEO traffic."
 const SCENE_23_DURATION = 44;  // "Get a 30-day content plan." typewriter, "plan." in purple
 const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
+const SCENE_25_DURATION = 90;  // Dashboard UI: Content History → Content Planner sidebar switch
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -96,6 +98,7 @@ const SCENE_21_START = SCENE_20_START + SCENE_20_DURATION;
 const SCENE_22_START = SCENE_21_START + SCENE_21_DURATION;
 const SCENE_23_START = SCENE_22_START + SCENE_22_DURATION;
 const SCENE_24_START = SCENE_23_START + SCENE_23_DURATION;
+const SCENE_25_START = SCENE_24_START + SCENE_24_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -218,6 +221,11 @@ export const Main: React.FC = () => {
       {/* Scene 24: 30-day content calendar zoom-in + pan right */}
       <Sequence from={SCENE_24_START} durationInFrames={SCENE_24_DURATION}>
         <CalendarScene />
+      </Sequence>
+
+      {/* Scene 25: Dashboard UI — Content History → Content Planner sidebar switch */}
+      <Sequence from={SCENE_25_START} durationInFrames={SCENE_25_DURATION}>
+        <ContentHistoryScene />
       </Sequence>
     </AbsoluteFill>
   );
