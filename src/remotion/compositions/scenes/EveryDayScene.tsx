@@ -150,7 +150,7 @@ export const EveryDayScene: React.FC = () => {
         }}>
           <div style={{
             opacity: uncoversOp,
-            backgroundColor: "rgba(255,255,255,0.15)",
+            backgroundColor: "#FFFFFF",
             borderRadius: 12,
             padding: "8px 22px",
             display: "flex",
@@ -166,7 +166,7 @@ export const EveryDayScene: React.FC = () => {
                 fontSize="68"
                 fontWeight="700"
                 fill="none"
-                stroke="#FFFFFF"
+                stroke="#1a1a1a"
                 strokeWidth="1.8"
                 strokeDasharray="3 2.5"
                 letterSpacing="1"
