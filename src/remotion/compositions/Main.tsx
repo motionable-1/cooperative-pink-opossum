@@ -22,6 +22,7 @@ import { SEOGraphScene } from "./scenes/SEOGraphScene";
 import { ContentPlanScene } from "./scenes/ContentPlanScene";
 import { CalendarScene } from "./scenes/CalendarScene";
 import { ContentHistoryScene } from "./scenes/ContentHistoryScene";
+import { ApproveItScene } from "./scenes/ApproveItScene";
 
 /*
  * Full animation sequence:
@@ -74,6 +75,7 @@ const SCENE_22_DURATION = 91;  // Purple circle → SEO graph + "From no visit t
 const SCENE_23_DURATION = 44;  // "Get a 30-day content plan." typewriter, "plan." in purple
 const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
 const SCENE_25_DURATION = 120;  // Dashboard UI: Content History → Content Planner → 3D zoom into calendar block
+const SCENE_26_DURATION = 75;   // "Approve it" + "or add your personal touch." + selection box + center guide
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -99,6 +101,7 @@ const SCENE_22_START = SCENE_21_START + SCENE_21_DURATION;
 const SCENE_23_START = SCENE_22_START + SCENE_22_DURATION;
 const SCENE_24_START = SCENE_23_START + SCENE_23_DURATION;
 const SCENE_25_START = SCENE_24_START + SCENE_24_DURATION;
+const SCENE_26_START = SCENE_25_START + SCENE_25_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -226,6 +229,11 @@ export const Main: React.FC = () => {
       {/* Scene 25: Dashboard UI — Content History → Content Planner sidebar switch */}
       <Sequence from={SCENE_25_START} durationInFrames={SCENE_25_DURATION}>
         <ContentHistoryScene />
+      </Sequence>
+
+      {/* Scene 26: "Approve it" + "or add your personal touch." + selection box */}
+      <Sequence from={SCENE_26_START} durationInFrames={SCENE_26_DURATION}>
+        <ApproveItScene />
       </Sequence>
     </AbsoluteFill>
   );
