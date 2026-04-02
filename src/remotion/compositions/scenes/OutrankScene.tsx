@@ -7,31 +7,28 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * "OUTRANK" in white bold text inside a neon pill on black bg.
+ * "OUTRANK" in white bold text inside a LARGE neon pill on black bg.
  * Ref frames 079-108 (30 ref frames = ~45 output frames)
  *
- * Pill: ~58% frame width, ~18% frame height (thin horizontal).
- * Interior very dark gray (#0A0A0A), slightly lighter than pure black bg.
- * Unlit edges faintly visible on right side.
+ * Pill: HUGE — ~72% frame width, ~55% frame height.
+ * Interior very dark, slightly lighter than pure black bg.
+ * Unlit edges faintly visible.
  *
- * Neon border: 1-2px core, ~55% lit segment rotating CLOCKWISE.
- * Colors along lit segment: cyan (tail) → magenta (middle/curve) → cyan (head tip).
+ * Neon border: 2px core, ~55% lit segment rotating CLOCKWISE.
+ * Colors along lit segment: cyan (tail) → magenta (middle/curve) → orange (head).
  * The brightest part is magenta on the left curve.
  *
- * Diffuse purple glow follows the lit segment (strongest on left side).
+ * Diffuse purple glow follows the lit segment (strongest near bright spot).
  *
  * Text "OUTRANK" types quickly — all 7 letters visible by frame ~8.
  * Latest letter starts gray (#6B7280) then turns white.
  * Text stays full white throughout rest of scene.
- *
- * ref 086 (frame ~10 in scene): lit segment on left curve + partial top/bottom,
- *   all letters visible, "K" still gray.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 740;
-const PILL_H = 130;
+const PILL_W = 920;   // ~72% of frame width — matches reference
+const PILL_H = 400;   // ~55% of frame height — matches reference
 const PILL_R = PILL_H / 2;
 const CX = W / 2;
 const CY = H / 2;
@@ -89,7 +86,7 @@ export const OutrankScene: React.FC = () => {
   const glowAngle = 225 + rotationProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
   const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.6);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.4);
 
   // Text reveal: FAST — all 7 letters by frame ~8
   const lettersVisible = Math.min(
@@ -115,13 +112,13 @@ export const OutrankScene: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 220,
-          top: glowCenterY - 140,
-          width: 440,
-          height: 280,
+          left: glowCenterX - 300,
+          top: glowCenterY - 200,
+          width: 600,
+          height: 400,
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.45) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 75%)",
-          filter: "blur(45px)",
+            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 75%)",
+          filter: "blur(55px)",
         }}
       />
 
@@ -139,7 +136,7 @@ export const OutrankScene: React.FC = () => {
             <stop offset="100%" stopColor="#06B6D4" />
           </linearGradient>
           <filter id="outrankGlow">
-            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feGaussianBlur stdDeviation="8" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -152,12 +149,12 @@ export const OutrankScene: React.FC = () => {
           d={getPillPath()}
           fill="none"
           stroke="url(#outrankNeon)"
-          strokeWidth={8}
+          strokeWidth={10}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
           filter="url(#outrankGlow)"
-          opacity={0.4}
+          opacity={0.45}
         />
 
         {/* Core thin neon line */}
@@ -165,14 +162,14 @@ export const OutrankScene: React.FC = () => {
           d={getPillPath()}
           fill="none"
           stroke="url(#outrankNeon)"
-          strokeWidth={1.5}
+          strokeWidth={2}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
         />
       </svg>
 
-      {/* Faint pill interior — very dark gray, slightly lighter than bg */}
+      {/* Faint pill interior — very dark, slightly lighter than bg */}
       <div
         style={{
           position: "absolute",
@@ -199,8 +196,8 @@ export const OutrankScene: React.FC = () => {
           style={{
             fontFamily,
             fontWeight: 800,
-            fontSize: 48,
-            letterSpacing: "0.12em",
+            fontSize: 72,
+            letterSpacing: "0.14em",
             display: "flex",
           }}
         >

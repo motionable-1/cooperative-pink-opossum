@@ -4,19 +4,19 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
  * Neon pill shape drawing on black background, no text inside.
  * Ref frames 070-078 (9 ref frames = ~14 output frames)
  *
- * Pill: ~55-60% frame width, ~15-20% height (thin horizontal pill).
+ * Pill: HUGE — ~72% frame width, ~55% frame height.
  * Neon line draws clockwise starting from bottom-left.
  * By end: ~40-50% outline drawn.
- * Line: 1-2px core, soft 8px glow.
+ * Line: 1-2px core, soft glow behind.
  * Gradient: orange (head) → magenta → cyan (tail).
  * Unlit portions invisible. Purple glow behind lit segment.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 740;    // ~58% of frame width
-const PILL_H = 130;    // ~18% of frame height
-const PILL_R = PILL_H / 2; // 65 — full rounding
+const PILL_W = 920;   // ~72% of frame width
+const PILL_H = 400;   // ~55% of frame height
+const PILL_R = PILL_H / 2; // full rounding
 const CX = W / 2;
 const CY = H / 2;
 const PILL_X = CX - PILL_W / 2;
@@ -67,7 +67,7 @@ export const NeonPillScene: React.FC = () => {
   const glowAngle = 180 + glowProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
   const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.6);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.4);
 
   return (
     <div
@@ -78,16 +78,17 @@ export const NeonPillScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
+      {/* Diffuse purple glow behind lit segment */}
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 200,
-          top: glowCenterY - 120,
-          width: 400,
-          height: 240,
+          left: glowCenterX - 280,
+          top: glowCenterY - 200,
+          width: 560,
+          height: 400,
           background:
             "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 80%)",
-          filter: "blur(40px)",
+          filter: "blur(50px)",
           opacity: glowOpacity,
         }}
       />
@@ -104,7 +105,7 @@ export const NeonPillScene: React.FC = () => {
             <stop offset="100%" stopColor="#06B6D4" />
           </linearGradient>
           <filter id="neonPillGlow">
-            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feGaussianBlur stdDeviation="8" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -112,22 +113,24 @@ export const NeonPillScene: React.FC = () => {
           </filter>
         </defs>
 
+        {/* Soft glow layer */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={8}
+          strokeWidth={10}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
           filter="url(#neonPillGlow)"
           opacity={0.4}
         />
 
+        {/* Core thin neon line */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={1.5}
+          strokeWidth={2}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
         />
