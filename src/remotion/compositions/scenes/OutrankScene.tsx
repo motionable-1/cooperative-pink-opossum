@@ -8,22 +8,25 @@ const { fontFamily } = loadFont("normal", {
 
 /**
  * "OUTRANK" in white bold text inside a neon pill on black bg.
- * Ref frames 079-108 (30 ref frames = ~45 output frames)
+ * Ref frames 079-108
  *
- * Pill: ~58% width, ~30% height. Text fills 75-80% of pill height.
- * Interior very dark, slightly lighter than pure black bg.
+ * Pill: ~58% width, ~29% height. Text fills ~45-50% of pill height.
+ * Generous padding above/below text (~25% each side).
+ * Black opaque fill inside pill.
  *
- * Neon border: 2px core, ~55% lit segment rotating CLOCKWISE.
- * Colors: cyan (tail) → magenta (middle) → orange (head).
- * Diffuse purple glow follows the lit segment.
+ * Neon border: thin 1.5px white-hot core + thick soft magenta/cyan glow.
+ * Primary color: vibrant magenta/hot pink.
+ * Tips: bright cyan.
+ * ~55% lit segment rotating CLOCKWISE.
+ * Massive soft diffuse glow behind lit portion.
  *
  * Text "OUTRANK" types quickly — all 7 letters visible by frame ~8.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 740;   // ~58% width
-const PILL_H = 210;   // ~29% height
+const PILL_W = 740;
+const PILL_H = 210;
 const PILL_R = PILL_H / 2;
 const CX = W / 2;
 const CY = H / 2;
@@ -57,11 +60,9 @@ export const OutrankScene: React.FC = () => {
   const curveLen = 2 * Math.PI * PILL_R;
   const perimeter = straightLen + curveLen;
 
-  // Lit segment: ~55% of perimeter
   const litLength = perimeter * 0.55;
   const gapLength = perimeter - litLength;
 
-  // Rotating neon clockwise, ~1.2 full loops over scene
   const startOffset = -perimeter * 0.15;
   const endOffset = startOffset - perimeter * 1.2;
   const dashOffset = interpolate(
@@ -71,7 +72,6 @@ export const OutrankScene: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
-  // Glow follows lit segment center
   const rotationProgress = interpolate(
     frame,
     [0, durationInFrames],
@@ -80,10 +80,9 @@ export const OutrankScene: React.FC = () => {
   );
   const glowAngle = 225 + rotationProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
-  const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.5);
+  const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.32);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.55);
 
-  // Text reveal: FAST — all 7 letters by frame ~8
   const lettersVisible = Math.min(
     LETTERS.length,
     Math.floor(
@@ -94,8 +93,8 @@ export const OutrankScene: React.FC = () => {
     )
   );
 
-  // Font size: fill ~78% of pill height
-  const fontSize = Math.round(PILL_H * 0.78);
+  // Text: ~47% of pill height
+  const fontSize = Math.round(PILL_H * 0.47);
 
   return (
     <div
@@ -106,17 +105,17 @@ export const OutrankScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Diffuse purple glow following lit segment */}
+      {/* Large diffuse magenta/purple glow following lit segment */}
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 280,
-          top: glowCenterY - 180,
-          width: 560,
-          height: 360,
+          left: glowCenterX - 320,
+          top: glowCenterY - 220,
+          width: 640,
+          height: 440,
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 75%)",
-          filter: "blur(50px)",
+            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(236, 72, 153, 0.55) 0%, rgba(168, 85, 247, 0.25) 35%, rgba(139, 92, 246, 0.08) 60%, transparent 80%)",
+          filter: "blur(60px)",
         }}
       />
 
@@ -126,61 +125,99 @@ export const OutrankScene: React.FC = () => {
         style={{ position: "absolute", width: "100%", height: "100%" }}
       >
         <defs>
-          <linearGradient id="outrankNeon" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#F97316" />
-            <stop offset="20%" stopColor="#EC4899" />
-            <stop offset="45%" stopColor="#A855F7" />
-            <stop offset="70%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#06B6D4" />
+          {/* Rich magenta-dominant gradient with cyan tips */}
+          <linearGradient id="outrankNeon" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06d6a0" />
+            <stop offset="15%" stopColor="#22d3ee" />
+            <stop offset="35%" stopColor="#c026d3" />
+            <stop offset="55%" stopColor="#ec4899" />
+            <stop offset="75%" stopColor="#c026d3" />
+            <stop offset="90%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#06d6a0" />
           </linearGradient>
-          <filter id="outrankGlow">
-            <feGaussianBlur stdDeviation="8" result="blur" />
+
+          {/* Outer heavy glow */}
+          <filter id="outrankGlowHeavy">
+            <feGaussianBlur stdDeviation="18" result="blur1" />
             <feMerge>
-              <feMergeNode in="blur" />
+              <feMergeNode in="blur1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Medium glow */}
+          <filter id="outrankGlowMed">
+            <feGaussianBlur stdDeviation="6" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur2" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Inner core glow — hot white */}
+          <filter id="outrankGlowCore">
+            <feGaussianBlur stdDeviation="2" result="blur3" />
+            <feMerge>
+              <feMergeNode in="blur3" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
 
-        {/* Soft glow layer */}
+        {/* Layer 1: Heavy outer glow — thick, soft, vibrant */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#outrankNeon)"
-          strokeWidth={10}
+          strokeWidth={16}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
-          filter="url(#outrankGlow)"
-          opacity={0.45}
+          filter="url(#outrankGlowHeavy)"
+          opacity={0.5}
         />
 
-        {/* Core thin neon line */}
+        {/* Layer 2: Medium glow */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#outrankNeon)"
-          strokeWidth={2}
+          strokeWidth={6}
           strokeDasharray={`${litLength} ${gapLength}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
+          filter="url(#outrankGlowMed)"
+          opacity={0.7}
+        />
+
+        {/* Layer 3: Thin hot-white core */}
+        <path
+          d={getPillPath()}
+          fill="none"
+          stroke="#fff"
+          strokeWidth={1.5}
+          strokeDasharray={`${litLength} ${gapLength}`}
+          strokeDashoffset={dashOffset}
+          strokeLinecap="round"
+          filter="url(#outrankGlowCore)"
+          opacity={0.9}
         />
       </svg>
 
-      {/* Faint pill interior */}
+      {/* Opaque black pill interior */}
       <div
         style={{
           position: "absolute",
-          left: PILL_X,
-          top: PILL_Y,
-          width: PILL_W,
-          height: PILL_H,
+          left: PILL_X + 2,
+          top: PILL_Y + 2,
+          width: PILL_W - 4,
+          height: PILL_H - 4,
           borderRadius: PILL_R,
-          backgroundColor: "rgba(255, 255, 255, 0.02)",
+          backgroundColor: "#050505",
         }}
       />
 
-      {/* "OUTRANK" text centered in pill — fills ~78% of pill height */}
+      {/* "OUTRANK" text centered in pill */}
       <div
         style={{
           position: "absolute",
@@ -195,7 +232,7 @@ export const OutrankScene: React.FC = () => {
             fontFamily,
             fontWeight: 800,
             fontSize,
-            letterSpacing: "0.16em",
+            letterSpacing: "0.18em",
             display: "flex",
             lineHeight: 1,
           }}

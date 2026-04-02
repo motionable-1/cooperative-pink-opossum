@@ -2,19 +2,14 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 
 /**
  * Neon pill shape drawing on black background, no text inside.
- * Ref frames 070-078 (9 ref frames = ~14 output frames)
- *
- * Pill: ~58% width, ~29% height — same as OutrankScene.
- * Neon line draws clockwise starting from bottom-left.
- * By end: ~40-50% outline drawn.
- * Line: 2px core, soft glow behind.
- * Gradient: orange (head) → magenta → cyan (tail).
+ * Same pill dimensions and neon style as OutrankScene.
+ * Neon line draws clockwise from bottom-left, ~45% drawn by end.
  */
 
 const W = 1280;
 const H = 720;
-const PILL_W = 740;   // ~58% width — matches OutrankScene
-const PILL_H = 210;   // ~29% height — matches OutrankScene
+const PILL_W = 740;
+const PILL_H = 210;
 const PILL_R = PILL_H / 2;
 const CX = W / 2;
 const CY = H / 2;
@@ -46,7 +41,6 @@ export const NeonPillScene: React.FC = () => {
   const curveLen = 2 * Math.PI * PILL_R;
   const perimeter = straightLen + curveLen;
 
-  // Draw progress: 0 → ~0.45 of perimeter
   const drawProgress = interpolate(frame, [0, durationInFrames], [0, 0.45], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -61,12 +55,11 @@ export const NeonPillScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // Glow tracks midpoint of drawn segment
   const glowProgress = drawProgress / 2;
   const glowAngle = 180 + glowProgress * 360;
   const glowRad = (glowAngle * Math.PI) / 180;
-  const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.3);
-  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.5);
+  const glowCenterX = CX + Math.cos(glowRad) * (PILL_W * 0.32);
+  const glowCenterY = CY + Math.sin(glowRad) * (PILL_H * 0.55);
 
   return (
     <div
@@ -77,17 +70,17 @@ export const NeonPillScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Diffuse purple glow behind lit segment */}
+      {/* Large diffuse magenta glow */}
       <div
         style={{
           position: "absolute",
-          left: glowCenterX - 280,
-          top: glowCenterY - 180,
-          width: 560,
-          height: 360,
+          left: glowCenterX - 320,
+          top: glowCenterY - 220,
+          width: 640,
+          height: 440,
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(180, 60, 230, 0.5) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 80%)",
-          filter: "blur(50px)",
+            "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(236, 72, 153, 0.55) 0%, rgba(168, 85, 247, 0.25) 35%, rgba(139, 92, 246, 0.08) 60%, transparent 80%)",
+          filter: "blur(60px)",
           opacity: glowOpacity,
         }}
       />
@@ -97,41 +90,72 @@ export const NeonPillScene: React.FC = () => {
         style={{ position: "absolute", width: "100%", height: "100%" }}
       >
         <defs>
-          <linearGradient id="neonPillGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#F97316" />
-            <stop offset="30%" stopColor="#EC4899" />
-            <stop offset="60%" stopColor="#A855F7" />
-            <stop offset="100%" stopColor="#06B6D4" />
+          <linearGradient id="neonPillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06d6a0" />
+            <stop offset="15%" stopColor="#22d3ee" />
+            <stop offset="35%" stopColor="#c026d3" />
+            <stop offset="55%" stopColor="#ec4899" />
+            <stop offset="75%" stopColor="#c026d3" />
+            <stop offset="90%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#06d6a0" />
           </linearGradient>
-          <filter id="neonPillGlow">
-            <feGaussianBlur stdDeviation="8" result="blur" />
+          <filter id="neonPillGlowHeavy">
+            <feGaussianBlur stdDeviation="18" result="blur1" />
             <feMerge>
-              <feMergeNode in="blur" />
+              <feMergeNode in="blur1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="neonPillGlowMed">
+            <feGaussianBlur stdDeviation="6" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur2" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="neonPillGlowCore">
+            <feGaussianBlur stdDeviation="2" result="blur3" />
+            <feMerge>
+              <feMergeNode in="blur3" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
 
-        {/* Soft glow layer */}
+        {/* Heavy outer glow */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={10}
+          strokeWidth={16}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
-          filter="url(#neonPillGlow)"
-          opacity={0.4}
+          filter="url(#neonPillGlowHeavy)"
+          opacity={0.5}
         />
 
-        {/* Core thin neon line */}
+        {/* Medium glow */}
         <path
           d={getPillPath()}
           fill="none"
           stroke="url(#neonPillGrad)"
-          strokeWidth={2}
+          strokeWidth={6}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeLinecap="round"
+          filter="url(#neonPillGlowMed)"
+          opacity={0.7}
+        />
+
+        {/* Thin hot-white core */}
+        <path
+          d={getPillPath()}
+          fill="none"
+          stroke="#fff"
+          strokeWidth={1.5}
+          strokeDasharray={`${dashLen} ${dashGap}`}
+          strokeLinecap="round"
+          filter="url(#neonPillGlowCore)"
+          opacity={0.9}
         />
       </svg>
     </div>
