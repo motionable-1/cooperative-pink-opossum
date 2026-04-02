@@ -80,13 +80,8 @@ export const FindKeywordsScene: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.quad) }
   );
 
-  // Scale pop
-  const scalePop = spring({
-    frame: Math.max(0, frame - highlightDelay),
-    fps,
-    config: { damping: 10, stiffness: 200, mass: 0.6 },
-  });
-  const keywordScale = 1 + scalePop * 0.06;
+  // No scale — keep size consistent so it doesn't overlap neighbors
+  const keywordScale = 1;
 
   // Glow pulse behind KEYWORDS
   const glowOpacity = keywordFullyTyped
@@ -169,10 +164,10 @@ export const FindKeywordsScene: React.FC = () => {
                 <span
                   style={{
                     position: "absolute",
-                    inset: "-12px -16px",
-                    borderRadius: 12,
-                    background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(147, 51, 234, 0.4) 0%, transparent 70%)",
-                    filter: "blur(14px)",
+                    inset: "-6px -2px",
+                    borderRadius: 8,
+                    background: "radial-gradient(ellipse 100% 100% at 50% 60%, rgba(147, 51, 234, 0.35) 0%, transparent 70%)",
+                    filter: "blur(10px)",
                     opacity: glowOpacity,
                     pointerEvents: "none",
                   }}
