@@ -143,8 +143,11 @@ export const EveryDayScene: React.FC = () => {
           opacity: uhFadeOut,
         }}>
           <span style={{
-            fontSize: 70, fontWeight: 700, color: "#FFFFFF",
+            fontSize: 70, fontWeight: 700, color: PURPLE,
             opacity: uncoversOp,
+            backgroundColor: "#FFFFFF",
+            padding: "4px 16px",
+            borderRadius: 8,
           }}>
             uncovers
           </span>
