@@ -189,7 +189,7 @@ export const EveryDayScene: React.FC = () => {
           display: "flex", alignItems: "center", justifyContent: "center",
           opacity: edOp, transform: `scale(${edScale})`, filter: `blur(${edBlur}px)`,
         }}>
-          <span style={{ fontSize: 58, fontWeight: 700, color: "#FFFFFF" }}>Every day</span>
+          <span style={{ fontSize: 70, fontWeight: 700, color: "#FFFFFF" }}>Every day</span>
         </div>
       )}
 
@@ -202,7 +202,7 @@ export const EveryDayScene: React.FC = () => {
           filter: `blur(${osMotionBlur}px)`,
           transform: `translateX(${osXShift}px)`,
         }}>
-          <span style={{ fontSize: 46, fontWeight: 700, color: "#FFFFFF" }}>Outrank scours the web,</span>
+          <span style={{ fontSize: 55, fontWeight: 700, color: "#FFFFFF" }}>Outrank scours the web,</span>
         </div>
       )}
 
@@ -214,13 +214,13 @@ export const EveryDayScene: React.FC = () => {
           opacity: uhFadeOut,
         }}>
           <span style={{
-            fontSize: 58, fontWeight: 700, color: "#FFFFFF",
+            fontSize: 70, fontWeight: 700, color: "#FFFFFF",
             opacity: uncoversOp,
           }}>
             uncovers
           </span>
           <span style={{
-            fontSize: 58, fontWeight: 700, color: "#FFFFFF",
+            fontSize: 70, fontWeight: 700, color: "#FFFFFF",
             opacity: hiddenOp, filter: `blur(${hiddenBlur}px)`,
           }}>
             hidden
@@ -233,11 +233,12 @@ export const EveryDayScene: React.FC = () => {
         <div style={{
           position: "absolute", inset: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
+          paddingTop: frame < 84 ? 100 : 0,
           opacity: dsOp,
           filter: `blur(${dsBlur}px)`,
           transform: `translate(${dsExitX}px, ${dsYShift + dsExitY}px)`,
         }}>
-          <span style={{ fontSize: 58, fontWeight: 700, color: "#FFFFFF" }}>data sources.</span>
+          <span style={{ fontSize: 70, fontWeight: 700, color: "#FFFFFF" }}>data sources.</span>
         </div>
       )}
 
