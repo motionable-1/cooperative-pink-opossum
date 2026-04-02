@@ -11,7 +11,7 @@ const { fontFamily } = loadFont("normal", {
  *
  * Text phases with subtle breathing room between each:
  *   "Every day" → "Outrank scours the web," → "uncovers hidden" → "data sources."
- * Then cards flow diagonally from top-right to bottom-left, tilted, larger.
+ * Then large tilted cards flow diagonally from top-right corner to bottom-left corner.
  */
 
 const PURPLE = "#9D62F0";
@@ -24,12 +24,13 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-const CARD_W = 520;
-const CARD_H = 280;
+// Cards 30%+ bigger than before (was 380×200)
+const CARD_W = 580;
+const CARD_H = 320;
 
 // Simple Google Ads icon as SVG
 const GoogleAdsIcon = () => (
-  <svg width="36" height="36" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="44" height="44" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="18" y="4" width="8" height="24" rx="4" fill="#4285F4" transform="rotate(15 22 16)" />
     <rect x="6" y="4" width="8" height="24" rx="4" fill="#FBBC04" transform="rotate(15 10 16)" />
     <circle cx="10" cy="26" r="4" fill="#34A853" />
@@ -38,7 +39,7 @@ const GoogleAdsIcon = () => (
 
 // Simple Google Analytics icon as SVG
 const GAIcon = () => (
-  <svg width="36" height="36" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="44" height="44" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="22" y="4" width="6" height="24" rx="3" fill="#F9AB00" />
     <rect x="13" y="10" width="6" height="18" rx="3" fill="#E37400" />
     <circle cx="7" cy="25" r="3.5" fill="#E37400" />
@@ -49,7 +50,7 @@ export const EveryDayScene: React.FC = () => {
   const frame = useCurrentFrame();
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE 1: "Every day"  (f0–22)  — added ~4f breathing room
+  // TEXT PHASE 1: "Every day"  (f0–22)
   // ═══════════════════════════════════════════════════════════════
   const edFadeIn = interpolate(frame, [0, 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const edFadeOut = interpolate(frame, [16, 22], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
@@ -60,7 +61,7 @@ export const EveryDayScene: React.FC = () => {
   const edScale = frame >= 16 ? interpolate(frame, [16, 22], [1, 0.92], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE 2: "Outrank scours the web,"  (f22–50)  — +4f gap before, +4f hold
+  // TEXT PHASE 2: "Outrank scours the web,"  (f22–50)
   // ═══════════════════════════════════════════════════════════════
   const osFadeIn = interpolate(frame, [20, 26], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const osBlurIn = interpolate(frame, [20, 26], [8, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -70,8 +71,7 @@ export const EveryDayScene: React.FC = () => {
   const osXShift = frame >= 42 ? interpolate(frame, [42, 50], [0, -90], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE 3: "uncovers hidden"  (f50–92)  — +6f gap, wider hold
-  // "hidden" appears first, then "uncovers" fades in
+  // TEXT PHASE 3: "uncovers hidden"  (f50–92)
   // ═══════════════════════════════════════════════════════════════
   const hiddenOp = interpolate(frame, [50, 55], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const hiddenBlur = interpolate(frame, [50, 55], [6, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -79,8 +79,7 @@ export const EveryDayScene: React.FC = () => {
   const uhFadeOut = interpolate(frame, [86, 94], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) });
 
   // ═══════════════════════════════════════════════════════════════
-  // TEXT PHASE 4: "data sources."  (f80–128)  — overlaps with uh exit, then alone
-  // Positioned BELOW center when "uncovers hidden" is still visible, then moves to center
+  // TEXT PHASE 4: "data sources."  (f80–128)
   // ═══════════════════════════════════════════════════════════════
   const dsFadeIn = interpolate(frame, [80, 88], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const dsVerticalShift = interpolate(frame, [80, 88], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
@@ -89,18 +88,25 @@ export const EveryDayScene: React.FC = () => {
   const dsBlur = frame >= 120 ? interpolate(frame, [120, 128], [0, 14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
   const dsExitX = frame >= 120 ? interpolate(frame, [120, 130], [0, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
   const dsExitY = frame >= 120 ? interpolate(frame, [120, 130], [0, -80], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
-  // When "uncovers hidden" is still visible (before f94), push "data sources." down
   const dsBelow = frame < 94 ? 110 : 0;
 
   // ═══════════════════════════════════════════════════════════════
-  // CARDS PHASE: Cinematic faux-3D flowing cards
-  // Simulated perspective using skewY + asymmetric scale so cards
-  // look like we're watching them glide past from the side.
-  // Tighter stagger = multiple cards visible & overlapping at once.
+  // CARDS PHASE: Large tilted cards flowing diagonally
+  // top-right corner → bottom-left corner
+  // Cards are rotated ~-20deg (along the diagonal) and flow slowly.
+  // Multiple cards visible simultaneously for cinematic overlap.
   // ═══════════════════════════════════════════════════════════════
   const CARDS_START = 124;
-  const CARD_STAGGER = 14;  // tighter so cards overlap on screen
-  const CARD_TRAVEL = 65;   // slower, more cinematic travel
+  const CARD_STAGGER = 16;
+  const CARD_TRAVEL = 70; // slow cinematic glide
+
+  // Diagonal path: top-right off-screen → bottom-left off-screen
+  // Start: beyond top-right corner
+  const diagStartX = 1280 + CARD_W * 0.3;
+  const diagStartY = -CARD_H - 100;
+  // End: beyond bottom-left corner
+  const diagEndX = -CARD_W - 100;
+  const diagEndY = 720 + CARD_H * 0.3;
 
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: PURPLE, fontFamily, overflow: "hidden" }}>
@@ -129,7 +135,7 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── "uncovers hidden" — "hidden" appears first, then "uncovers" fades in ── */}
+      {/* ── "uncovers hidden" ── */}
       {(hiddenOp > 0.01 && uhFadeOut > 0.01) && (
         <div style={{
           position: "absolute", inset: 0,
@@ -151,7 +157,7 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── "data sources." — sits below center when "uncovers hidden" visible, then centers ── */}
+      {/* ── "data sources." ── */}
       {dsOp > 0.01 && (
         <div style={{
           position: "absolute", inset: 0,
@@ -165,55 +171,46 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── CINEMATIC 3D CARD FLOW: right → left, tilted perspective ── */}
+      {/* ── DIAGONAL CARD FLOW: top-right → bottom-left, tilted ── */}
       {TOOLS.map((tool, i) => {
         const cardStart = CARDS_START + i * CARD_STAGGER;
         const cardEnd = cardStart + CARD_TRAVEL;
 
-        // Progress: 0 = off-screen right, 0.5 = center, 1 = off-screen left
         const prog = interpolate(frame, [cardStart, cardEnd], [0, 1], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
         if (prog <= 0) return null;
 
-        // Horizontal flow: smooth glide right → center → left
-        const x = interpolate(prog, [0, 0.5, 1], [1450, (1280 - CARD_W) / 2, -CARD_W - 400], {
+        // Diagonal position: top-right → bottom-left
+        const x = interpolate(prog, [0, 1], [diagStartX, diagEndX]);
+        const y = interpolate(prog, [0, 1], [diagStartY, diagEndY]);
+
+        // Tilt: ~-20deg along the diagonal direction, slight variation per card
+        const tilt = -20 + i * 1.5;
+
+        // Opacity: fade in, hold, fade out
+        const cardOp = interpolate(prog, [0, 0.08, 0.88, 1], [0, 1, 1, 0], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
-        // Gentle vertical arc: slight rise to center, descend on exit
-        const y = interpolate(prog, [0, 0.35, 0.65, 1], [380, (720 - CARD_H) / 2 - 30, (720 - CARD_H) / 2 - 30, 260], {
+        // Scale: grows slightly as it approaches center, shrinks on exit
+        const cardScale = interpolate(prog, [0, 0.45, 0.55, 1], [0.88, 1.06, 1.06, 0.88], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
-        // 3D rotateY: strong perspective tilt — angled on entry, face-on at center, angled on exit
-        const rotY = interpolate(prog, [0, 0.4, 0.6, 1], [55, -3, -3, -50], {
+        // Depth of field: blurred at edges, crisp in center
+        const cardBlur = interpolate(prog, [0, 0.2, 0.8, 1], [5, 0, 0, 5], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
-        // Z-axis tilt for that cinematic sideways lean
-        const rotZ = interpolate(prog, [0, 0.5, 1], [-8, -2, 4], {
+        // Shadow shifts as card moves — deeper shadow when closer to center
+        const shadowSize = interpolate(prog, [0, 0.5, 1], [12, 30, 12], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
-
-        // Opacity: fade in, full at center, fade out
-        const cardOp = interpolate(prog, [0, 0.12, 0.85, 1], [0, 1, 1, 0], {
+        const shadowOp = interpolate(prog, [0, 0.5, 1], [0.12, 0.35, 0.12], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
-
-        // Scale: smaller at edges, full at center
-        const cardScale = interpolate(prog, [0, 0.5, 1], [0.82, 1.04, 0.82], {
-          extrapolateLeft: "clamp", extrapolateRight: "clamp",
-        });
-
-        // Depth-of-field: blurred at edges, crisp at center
-        const cardBlur = interpolate(prog, [0, 0.25, 0.75, 1], [6, 0, 0, 6], {
-          extrapolateLeft: "clamp", extrapolateRight: "clamp",
-        });
-
-        // z-index: highest when closest to center
-        const zi = 100 - Math.abs(Math.round((prog - 0.5) * 100));
 
         return (
           <div
@@ -224,20 +221,31 @@ export const EveryDayScene: React.FC = () => {
               top: y,
               width: CARD_W,
               height: CARD_H,
-              perspective: 900,
-              zIndex: zi,
+              backgroundColor: tool.bg,
+              borderRadius: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 16,
+              opacity: cardOp,
+              transform: `rotate(${tilt}deg) scale(${cardScale})`,
+              filter: cardBlur > 0.3 ? `blur(${cardBlur}px)` : "none",
+              boxShadow: `0 ${shadowSize}px ${shadowSize * 2}px rgba(0,0,0,${shadowOp})`,
+              zIndex: 10 + i,
             }}
           >
-            {renderCard(tool, {
-              position: "relative",
-              width: CARD_W,
-              height: CARD_H,
-              opacity: cardOp,
-              transform: `rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${cardScale})`,
-              filter: cardBlur > 0.3 ? `blur(${cardBlur}px)` : "none",
-              left: 0,
-              top: 0,
-            })}
+            {tool.hasGoogleIcon && <GoogleAdsIcon />}
+            {tool.hasGAIcon && <GAIcon />}
+            {tool.accentChar ? (
+              <span style={{ fontSize: 56, fontWeight: 800, fontFamily }}>
+                <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
+                <span style={{ color: tool.restColor }}>{tool.restText}</span>
+              </span>
+            ) : (
+              <span style={{ fontSize: tool.name.length > 10 ? 34 : 46, fontWeight: 700, color: tool.textColor, fontFamily }}>
+                {tool.text}
+              </span>
+            )}
           </div>
         );
       })}

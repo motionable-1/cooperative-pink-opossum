@@ -77,7 +77,7 @@ const SCENE_23_DURATION = 44;  // "Get a 30-day content plan." typewriter, "plan
 const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
 const SCENE_25_DURATION = 120;  // Dashboard UI: Content History → Content Planner → 3D zoom into calendar block
 const SCENE_26_DURATION = 75;   // "Approve it" + "or add your personal touch." + selection box + center guide
-const SCENE_27_DURATION = 235;  // "Every day" → text morphs → cinematic 3D card flow
+const SCENE_27_DURATION = 245;  // "Every day" → text morphs → diagonal card flow
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
