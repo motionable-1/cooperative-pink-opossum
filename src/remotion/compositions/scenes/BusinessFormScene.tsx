@@ -40,23 +40,47 @@ export const BusinessFormScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // === Continuous slow zoom — camera travels from full form view down to Business Name + Description ===
-  // Reference end frame shows Business Name "SuperX" and Description fields clearly visible
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.85], {
+  // === 3D perspective zoom — starts with subtle isometric tilt, ends dramatically tilted ===
+  // Start: subtle mockup tilt (slight rotateX/Y)
+  // End: dramatic angle — form recedes to top-right, viewed from below-left
+
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 2.1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
 
-  // Zoom origin Y: form is centered at 50%. Start at center, drift down to Description area.
-  const originY = interpolate(frame, [0, durationInFrames], [50, 62], {
+  // 3D rotations — progressively increase
+  const rotateX = interpolate(frame, [0, durationInFrames], [3, 18], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Zoom origin X: centered on the form
-  const originX = 50;
+  const rotateY = interpolate(frame, [0, durationInFrames], [-4, -22], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const rotateZ = interpolate(frame, [0, durationInFrames], [-1, -4], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  // Origin drifts down-left as we zoom into Business Name + Description
+  const originY = interpolate(frame, [0, durationInFrames], [48, 66], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
+
+  const originX = interpolate(frame, [0, durationInFrames], [50, 42], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.quad),
+  });
 
   // === URL typing (frames 20-38) ===
   const urlCharCount = Math.floor(
@@ -103,8 +127,10 @@ export const BusinessFormScene: React.FC = () => {
         style={{
           position: "absolute",
           inset: 0,
+          perspective: 1200,
           transformOrigin: `${originX}% ${originY}%`,
-          transform: `scale(${zoom})`,
+          transform: `scale(${zoom}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
+          transformStyle: "preserve-3d" as const,
         }}
       >
         {/* Form container */}
