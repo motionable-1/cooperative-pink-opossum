@@ -49,8 +49,8 @@ export const FindKeywordsScene: React.FC = () => {
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
-  const cursorX = interpolate(cursorProgress, [0, 1], [520, 700]);
-  const cursorY = interpolate(cursorProgress, [0, 1], [640, 440]);
+  const cursorX = interpolate(cursorProgress, [0, 1], [540, 720]);
+  const cursorY = interpolate(cursorProgress, [0, 1], [600, 380]);
   const cursorOpacity = interpolate(frame, [22, 26], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -67,12 +67,14 @@ export const FindKeywordsScene: React.FC = () => {
         fontFamily,
       }}
     >
-      {/* Text — lower-left */}
+      {/* Text — centered */}
       <div
         style={{
           position: "absolute",
-          left: 115,
-          top: 430,
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           fontWeight: 700,
           fontSize: 54,
           color: "#111111",
