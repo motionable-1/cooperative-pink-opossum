@@ -19,10 +19,10 @@ export const HandsFreeScene: React.FC = () => {
    * Bottom = base (appears instantly), middle & top fall from above.
    */
 
-  const RECT_H = 76;
-  const FONT_SIZE = 52;
-  const PX_NARROW = 44;   // horizontal padding for top & bottom
-  const PX_WIDE = 80;     // horizontal padding for middle (wider)
+  const RECT_H = 95;
+  const FONT_SIZE = 65;
+  const PX_NARROW = 55;   // horizontal padding for top & bottom
+  const PX_WIDE = 100;    // horizontal padding for middle (wider)
 
   // Stack of 3 rects, flush, centered vertically
   const totalH = RECT_H * 3;
