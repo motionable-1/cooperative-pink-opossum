@@ -36,7 +36,6 @@ import { PublishedScene } from "./scenes/PublishedScene";
 import { HandsFreeScene } from "./scenes/HandsFreeScene";
 import { PlannerDashScene } from "./scenes/PlannerDashScene";
 import { CalendarZoomScene } from "./scenes/CalendarZoomScene";
-import { RadialBurstScene } from "./scenes/RadialBurstScene";
 import { YoutubeThumbnailsScene } from "./scenes/YoutubeThumbnailsScene";
 import { BlogIntegrationsTextScene } from "./scenes/BlogIntegrationsTextScene";
 import { IntegrationIconsScene } from "./scenes/IntegrationIconsScene";
@@ -108,7 +107,7 @@ const SCENE_36_DURATION = 45;   // "PUBLISHED" zoom-in with echoes → purple on
 const SCENE_37_DURATION = 45;   // "hands-free." stacked pills on black
 const SCENE_38_DURATION = 40;   // Outrank Content Planner dashboard slide-up
 const SCENE_39_DURATION = 29;   // Calendar cards 3D zoom + hold
-const SCENE_40_DURATION = 30;   // Purple radial burst finale
+const SCENE_40_DURATION = 0;    // REMOVED: Purple radial burst
 const SCENE_41_DURATION = 50;   // YouTube thumbnails social proof
 const SCENE_42_DURATION = 35;   // "Auto-published on your BLOG with easy integrations." text
 const SCENE_43_DURATION = 55;   // Integration icons floating around text
@@ -356,11 +355,6 @@ export const Main: React.FC = () => {
       {/* Scene 39: Calendar cards 3D zoom */}
       <Sequence from={SCENE_39_START} durationInFrames={SCENE_39_DURATION}>
         <CalendarZoomScene />
-      </Sequence>
-
-      {/* Scene 40: Purple radial burst finale */}
-      <Sequence from={SCENE_40_START} durationInFrames={SCENE_40_DURATION}>
-        <RadialBurstScene />
       </Sequence>
 
       {/* Scene 41: YouTube thumbnails social proof */}
