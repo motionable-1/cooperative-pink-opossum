@@ -1,38 +1,38 @@
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import { useCurrentFrame, interpolate, Easing, Img } from "remotion";
 
-const PURPLE = "#A855F7";
-const NUM_RAYS = 24;
+const BURST_IMG =
+  "https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/outrank-promo/1775219016130_wut2vthofqs_radial_burst_manga.png";
 
 export const RadialBurstScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Center glow expands
-  const glowScale = interpolate(frame, [0, 20], [0, 4], {
+  // Burst scales up rapidly from 0 → full
+  const scaleUp = interpolate(frame, [0, 10], [0.3, 1.15], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(1.4)),
+  });
+
+  // Settle to 1.05 after overshoot
+  const settle = interpolate(frame, [10, 18], [1.15, 1.05], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
-  const glowOp = interpolate(frame, [0, 6, 20], [0, 1, 0.7], {
+
+  const scale = frame < 10 ? scaleUp : settle;
+
+  // Fade in
+  const opacity = interpolate(frame, [0, 3], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Rays shoot outward
-  const rayLength = interpolate(frame, [0, 15], [0, 1200], {
+  // Subtle slow rotation for living energy
+  const rotation = interpolate(frame, [0, 30], [0, 1.2], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-  const rayOp = interpolate(frame, [0, 5, 18, 25], [0, 1, 1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // White flash at the end
-  const whiteFlash = interpolate(frame, [15, 25], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.in(Easing.quad),
+    easing: Easing.out(Easing.quad),
   });
 
   return (
@@ -44,61 +44,18 @@ export const RadialBurstScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Center glow */}
-      <div
+      <Img
+        src={BURST_IMG}
         style={{
           position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: 200,
-          height: 200,
-          borderRadius: "50%",
-          transform: `translate(-50%, -50%) scale(${glowScale})`,
-          background: `radial-gradient(circle, rgba(255,255,255,1) 0%, ${PURPLE} 40%, transparent 70%)`,
-          opacity: glowOp,
-        }}
-      />
-
-      {/* Radial rays */}
-      <svg
-        width="1280"
-        height="720"
-        viewBox="0 0 1280 720"
-        style={{ position: "absolute", inset: 0, opacity: rayOp }}
-      >
-        {Array.from({ length: NUM_RAYS }).map((_, i) => {
-          const angle = (i / NUM_RAYS) * Math.PI * 2;
-          const thickness = 3 + Math.random() * 6;
-          const length = rayLength * (0.6 + Math.random() * 0.4);
-          const cx = 640;
-          const cy = 360;
-          const endX = cx + Math.cos(angle) * length;
-          const endY = cy + Math.sin(angle) * length;
-
-          return (
-            <line
-              key={i}
-              x1={cx}
-              y1={cy}
-              x2={endX}
-              y2={endY}
-              stroke={PURPLE}
-              strokeWidth={thickness}
-              strokeLinecap="round"
-              opacity={0.5 + Math.random() * 0.5}
-            />
-          );
-        })}
-      </svg>
-
-      {/* White flash overlay */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "#FFFFFF",
-          opacity: whiteFlash,
-          zIndex: 100,
+          width: "120%",
+          height: "120%",
+          left: "-10%",
+          top: "-10%",
+          objectFit: "cover",
+          opacity,
+          transform: `scale(${scale}) rotate(${rotation}deg)`,
+          transformOrigin: "center center",
         }}
       />
     </div>
