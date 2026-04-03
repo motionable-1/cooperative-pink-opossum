@@ -1,4 +1,4 @@
-import { useCurrentFrame, interpolate, Easing, spring } from "remotion";
+import { useCurrentFrame, interpolate, spring } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 const { fontFamily } = loadFont("normal", {
@@ -7,125 +7,71 @@ const { fontFamily } = loadFont("normal", {
 });
 
 const PURPLE = "#AE62EE";
-const BG_GREY = "#F2F2F4";
 
 export const PublishedScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // ═══════════════════════════════════════════════════════════════
-  // PHASE 1 (0-40): Massive "PUBLISHED" zooms in from right
-  //   - Text is HUGE (fills screen), only partial letters visible at start
-  //   - Outline echo trails follow behind (hollow stroke-only copies)
-  //   - Text oscillates/bounces before settling centered
-  //   - Glitch offset lines remain briefly
-  //
-  // PHASE 2 (40-58): Snaps to white text on solid purple bg
-  //
-  // PHASE 3 (58-80): Inverts to purple text on white bg
-  // ═══════════════════════════════════════════════════════════════
+  /*
+   * PHASE 1 (0–25): "PUBLISHED" zooms in from massive scale with 2 outline echoes
+   * PHASE 2 (25–45): Snaps to purple text on white — clean hold
+   */
 
-  const PHASE2_START = 40;
-  const PHASE3_START = 58;
+  const SNAP = 25;
+  const FONT_SIZE = 130;
 
-  // ─── PHASE 1: Massive zoom-in with outline trails ───
-  const phase1Active = frame < PHASE2_START;
-  const phase1Op = phase1Active
+  const phase1 = frame < SNAP;
+
+  // ── PHASE 1: Zoom-in with echo trails ──
+  const zoomSpring = spring({
+    frame,
+    fps: 30,
+    config: { damping: 14, stiffness: 80, mass: 0.8 },
+  });
+
+  const textScale = interpolate(zoomSpring, [0, 1], [3.5, 1]);
+  const mainX = interpolate(zoomSpring, [0, 1], [600, 0]);
+  const phase1Op = phase1
     ? 1
-    : interpolate(frame, [PHASE2_START, PHASE2_START + 3], [1, 0], {
+    : interpolate(frame, [SNAP, SNAP + 2], [1, 0], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
       });
 
-  // Text slides in from far right — spring with overshoot for bounce
-  const slideSpring = spring({
-    frame,
-    fps: 30,
-    config: { damping: 10, stiffness: 60, mass: 1.2 },
-  });
-
-  // X position: starts way off to the right, bounces past center, settles
-  const mainX = interpolate(slideSpring, [0, 1], [1400, 0]);
-
-  // Scale: starts massive (only partial letters visible), shrinks to fit
-  const textScale = interpolate(slideSpring, [0, 1], [4.5, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Number of outline echo trails
-  const NUM_ECHOES = 4;
-
-  // Glitch offset that appears as text settles (horizontal stroke duplication)
-  const glitchAmount = phase1Active
-    ? interpolate(frame, [18, 28, 35, 40], [0, 6, 3, 0], {
+  // ── PHASE 2: Purple on white ──
+  const phase2Op = frame >= SNAP
+    ? interpolate(frame, [SNAP, SNAP + 2], [0, 1], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
       })
     : 0;
-
-  // ─── PHASE 2: White on Purple ───
-  const phase2Active = frame >= PHASE2_START && frame < PHASE3_START;
-  const phase2Op = phase2Active
-    ? interpolate(frame, [PHASE2_START, PHASE2_START + 3], [0, 1], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0;
-
-  // Subtle vertical trail on phase 2 (frames 37 ref — drip effect)
-  const drip = phase2Active
-    ? interpolate(frame, [PHASE2_START + 4, PHASE2_START + 12], [8, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-        easing: Easing.out(Easing.quad),
-      })
-    : 0;
-
-  // ─── PHASE 3: Purple on White ───
-  const phase3Op = frame >= PHASE3_START
-    ? interpolate(frame, [PHASE3_START, PHASE3_START + 3], [0, 1], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0;
-
-  const FONT_SIZE = 130;
 
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", fontFamily }}>
-      {/* ═══ PHASE 1: Massive zoom with outline echoes ═══ */}
+      {/* PHASE 1 */}
       {phase1Op > 0.01 && (
         <div
           style={{
             position: "absolute",
             inset: 0,
-            backgroundColor: BG_GREY,
+            backgroundColor: "#F2F2F4",
             opacity: phase1Op,
           }}
         >
-          {/* Outline echo trails — hollow stroke-only copies that lag behind */}
-          {Array.from({ length: NUM_ECHOES }).map((_, echoIdx) => {
-            const delay = (echoIdx + 1) * 3;
-            const echoSpring = spring({
+          {/* 2 outline echo trails */}
+          {[1, 2].map((echoIdx) => {
+            const delay = echoIdx * 3;
+            const echoSpr = spring({
               frame: Math.max(0, frame - delay),
               fps: 30,
-              config: { damping: 10, stiffness: 60, mass: 1.2 },
+              config: { damping: 14, stiffness: 80, mass: 0.8 },
             });
-            const echoX = interpolate(echoSpring, [0, 1], [1400, 0]);
-            const echoScale = interpolate(echoSpring, [0, 1], [4.5, 1], {
+            const eX = interpolate(echoSpr, [0, 1], [600, 0]);
+            const eS = interpolate(echoSpr, [0, 1], [3.5, 1]);
+            const eOp = interpolate(frame, [delay, delay + 5, 20, 25], [0, 0.6, 0.3, 0], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             });
-            // Echoes fade as they catch up to main text
-            const echoOp = interpolate(
-              frame,
-              [delay, delay + 8, 30, 38],
-              [0, 0.7, 0.4, 0],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            );
-
-            if (echoOp <= 0.01) return null;
-
+            if (eOp < 0.01) return null;
             return (
               <div
                 key={echoIdx}
@@ -135,7 +81,7 @@ export const PublishedScene: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: echoOp,
+                  opacity: eOp,
                 }}
               >
                 <span
@@ -146,7 +92,7 @@ export const PublishedScene: React.FC = () => {
                     whiteSpace: "nowrap",
                     WebkitTextStroke: `2px ${PURPLE}`,
                     WebkitTextFillColor: "transparent",
-                    transform: `translateX(${echoX}px) scale(${echoScale})`,
+                    transform: `translateX(${eX}px) scale(${eS})`,
                     transformOrigin: "center center",
                   }}
                 >
@@ -166,45 +112,6 @@ export const PublishedScene: React.FC = () => {
               justifyContent: "center",
             }}
           >
-            {/* Glitch offset copy — horizontal stroke duplicate */}
-            {glitchAmount > 0.5 && (
-              <span
-                style={{
-                  position: "absolute",
-                  fontSize: FONT_SIZE,
-                  fontWeight: 900,
-                  letterSpacing: 8,
-                  whiteSpace: "nowrap",
-                  WebkitTextStroke: `1.5px ${PURPLE}`,
-                  WebkitTextFillColor: "transparent",
-                  transform: `translateX(${mainX + glitchAmount}px) scale(${textScale})`,
-                  transformOrigin: "center center",
-                  opacity: 0.6,
-                }}
-              >
-                PUBLISHED
-              </span>
-            )}
-            {glitchAmount > 0.5 && (
-              <span
-                style={{
-                  position: "absolute",
-                  fontSize: FONT_SIZE,
-                  fontWeight: 900,
-                  letterSpacing: 8,
-                  whiteSpace: "nowrap",
-                  WebkitTextStroke: `1.5px ${PURPLE}`,
-                  WebkitTextFillColor: "transparent",
-                  transform: `translateX(${mainX - glitchAmount}px) scale(${textScale})`,
-                  transformOrigin: "center center",
-                  opacity: 0.6,
-                }}
-              >
-                PUBLISHED
-              </span>
-            )}
-
-            {/* Solid main text */}
             <span
               style={{
                 fontSize: FONT_SIZE,
@@ -222,51 +129,8 @@ export const PublishedScene: React.FC = () => {
         </div>
       )}
 
-      {/* ═══ PHASE 2: White on Purple ═══ */}
+      {/* PHASE 2: Purple on white — clean hold */}
       {phase2Op > 0.01 && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: PURPLE,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: phase2Op,
-          }}
-        >
-          {/* Subtle vertical trail/drip */}
-          {drip > 0.5 && (
-            <span
-              style={{
-                position: "absolute",
-                fontSize: FONT_SIZE,
-                fontWeight: 900,
-                color: "rgba(255,255,255,0.15)",
-                letterSpacing: 8,
-                whiteSpace: "nowrap",
-                transform: `translateY(${drip}px)`,
-              }}
-            >
-              PUBLISHED
-            </span>
-          )}
-          <span
-            style={{
-              fontSize: FONT_SIZE,
-              fontWeight: 900,
-              color: "#FFFFFF",
-              letterSpacing: 8,
-              whiteSpace: "nowrap",
-            }}
-          >
-            PUBLISHED
-          </span>
-        </div>
-      )}
-
-      {/* ═══ PHASE 3: Purple on White ═══ */}
-      {phase3Op > 0.01 && (
         <div
           style={{
             position: "absolute",
@@ -275,7 +139,7 @@ export const PublishedScene: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            opacity: phase3Op,
+            opacity: phase2Op,
           }}
         >
           <span
