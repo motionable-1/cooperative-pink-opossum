@@ -37,6 +37,11 @@ import { HandsFreeScene } from "./scenes/HandsFreeScene";
 import { PlannerDashScene } from "./scenes/PlannerDashScene";
 import { CalendarZoomScene } from "./scenes/CalendarZoomScene";
 import { RadialBurstScene } from "./scenes/RadialBurstScene";
+import { YoutubeThumbnailsScene } from "./scenes/YoutubeThumbnailsScene";
+import { BlogIntegrationsTextScene } from "./scenes/BlogIntegrationsTextScene";
+import { IntegrationIconsScene } from "./scenes/IntegrationIconsScene";
+import { IconsScatterScene } from "./scenes/IconsScatterScene";
+import { StartRankingScene } from "./scenes/StartRankingScene";
 
 /*
  * Full animation sequence:
@@ -104,6 +109,11 @@ const SCENE_37_DURATION = 45;   // "hands-free." stacked pills on black
 const SCENE_38_DURATION = 40;   // Outrank Content Planner dashboard slide-up
 const SCENE_39_DURATION = 29;   // Calendar cards 3D zoom + hold
 const SCENE_40_DURATION = 30;   // Purple radial burst finale
+const SCENE_41_DURATION = 50;   // YouTube thumbnails social proof
+const SCENE_42_DURATION = 35;   // "Auto-published on your BLOG with easy integrations." text
+const SCENE_43_DURATION = 55;   // Integration icons floating around text
+const SCENE_44_DURATION = 28;   // Icons scatter + crosshair transition
+const SCENE_45_DURATION = 60;   // "Start ranking today." CTA with arrow
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -144,6 +154,11 @@ const SCENE_37_START = SCENE_36_START + SCENE_36_DURATION;
 const SCENE_38_START = SCENE_37_START + SCENE_37_DURATION;
 const SCENE_39_START = SCENE_38_START + SCENE_38_DURATION;
 const SCENE_40_START = SCENE_39_START + SCENE_39_DURATION;
+const SCENE_41_START = SCENE_40_START + SCENE_40_DURATION;
+const SCENE_42_START = SCENE_41_START + SCENE_41_DURATION;
+const SCENE_43_START = SCENE_42_START + SCENE_42_DURATION;
+const SCENE_44_START = SCENE_43_START + SCENE_43_DURATION;
+const SCENE_45_START = SCENE_44_START + SCENE_44_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -346,6 +361,31 @@ export const Main: React.FC = () => {
       {/* Scene 40: Purple radial burst finale */}
       <Sequence from={SCENE_40_START} durationInFrames={SCENE_40_DURATION}>
         <RadialBurstScene />
+      </Sequence>
+
+      {/* Scene 41: YouTube thumbnails social proof */}
+      <Sequence from={SCENE_41_START} durationInFrames={SCENE_41_DURATION}>
+        <YoutubeThumbnailsScene />
+      </Sequence>
+
+      {/* Scene 42: "Auto-published on your BLOG with easy integrations." text */}
+      <Sequence from={SCENE_42_START} durationInFrames={SCENE_42_DURATION}>
+        <BlogIntegrationsTextScene />
+      </Sequence>
+
+      {/* Scene 43: Integration icons floating around text */}
+      <Sequence from={SCENE_43_START} durationInFrames={SCENE_43_DURATION}>
+        <IntegrationIconsScene />
+      </Sequence>
+
+      {/* Scene 44: Icons scatter + crosshair transition */}
+      <Sequence from={SCENE_44_START} durationInFrames={SCENE_44_DURATION}>
+        <IconsScatterScene />
+      </Sequence>
+
+      {/* Scene 45: "Start ranking today." CTA with arrow */}
+      <Sequence from={SCENE_45_START} durationInFrames={SCENE_45_DURATION}>
+        <StartRankingScene />
       </Sequence>
     </AbsoluteFill>
   );

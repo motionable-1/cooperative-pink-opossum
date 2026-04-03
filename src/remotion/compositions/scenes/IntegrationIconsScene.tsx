@@ -1,0 +1,210 @@
+import React from "react";
+import { useCurrentFrame, interpolate, Easing, Img } from "remotion";
+
+const PURPLE = "#7C3AED";
+
+/* Integration tiles: white squircle cards with brand logos */
+const INTEGRATIONS = [
+  {
+    name: "feather",
+    label: "feather",
+    // Use a feather/quill icon
+    iconUrl:
+      "https://api.iconify.design/lucide/feather.svg?color=%23000000&width=28",
+    x: -280,
+    y: -160,
+    rot: -8,
+    delay: 0,
+  },
+  {
+    name: "notion",
+    label: "Notion",
+    iconUrl:
+      "https://api.iconify.design/simple-icons/notion.svg?color=%23000000&width=32",
+    x: 240,
+    y: -170,
+    rot: 6,
+    delay: 3,
+  },
+  {
+    name: "wordpress",
+    label: "WORDPRESS",
+    iconUrl:
+      "https://api.iconify.design/mdi/wordpress.svg?color=%23000000&width=30",
+    x: 310,
+    y: 20,
+    rot: 4,
+    delay: 6,
+  },
+  {
+    name: "webflow",
+    label: "Webflow",
+    iconUrl:
+      "https://api.iconify.design/simple-icons/webflow.svg?color=%23146EF5&width=24",
+    x: -260,
+    y: 140,
+    rot: -5,
+    delay: 9,
+  },
+  {
+    name: "webhook",
+    label: "Webhook",
+    iconUrl:
+      "https://api.iconify.design/material-symbols/webhook.svg?color=%23E53E3E&width=28",
+    x: 220,
+    y: 160,
+    rot: 3,
+    delay: 12,
+  },
+];
+
+const TILE_W = 130;
+const TILE_H = 55;
+
+export const IntegrationIconsScene: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  // Text is already visible (carried from previous scene)
+  // Integration icons fly in one by one with spring-like easing
+
+  // Subtle purple glow behind text
+  const glowOp = interpolate(frame, [0, 30], [0, 0.15], {
+    extrapolateRight: "clamp",
+  });
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        backgroundColor: "#000000",
+        overflow: "hidden",
+      }}
+    >
+      {/* Purple glow behind text */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: 500,
+          height: 300,
+          transform: "translate(-50%, -50%)",
+          background: `radial-gradient(ellipse, ${PURPLE}${Math.round(glowOp * 255)
+            .toString(16)
+            .padStart(2, "0")} 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Center text (static - same as previous scene but fully visible) */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          textAlign: "center",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+            fontSize: 62,
+            fontWeight: 700,
+            color: "#FFFFFF",
+            lineHeight: 1.15,
+          }}
+        >
+          Auto-published
+        </div>
+        <div
+          style={{
+            fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+            fontSize: 62,
+            fontWeight: 700,
+            lineHeight: 1.15,
+          }}
+        >
+          <span style={{ color: "#FFFFFF" }}>on your </span>
+          <span style={{ color: PURPLE }}>BLOG</span>
+          <span style={{ color: "#FFFFFF" }}> with</span>
+        </div>
+        <div
+          style={{
+            fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+            fontSize: 62,
+            fontWeight: 700,
+            lineHeight: 1.15,
+          }}
+        >
+          <span style={{ color: "#FFFFFF" }}>easy </span>
+          <span style={{ color: PURPLE }}>integrations.</span>
+        </div>
+      </div>
+
+      {/* Integration icon tiles */}
+      {INTEGRATIONS.map((item) => {
+        const progress = interpolate(
+          frame,
+          [item.delay, item.delay + 10],
+          [0, 1],
+          {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+            easing: Easing.out(Easing.back(1.4)),
+          }
+        );
+        const tileScale = interpolate(progress, [0, 1], [0.3, 1]);
+        const tileOp = interpolate(progress, [0, 0.3], [0, 1], {
+          extrapolateRight: "clamp",
+        });
+
+        // Subtle float
+        const floatY =
+          Math.sin((frame + item.delay * 10) * 0.08) * 4;
+        const floatX =
+          Math.cos((frame + item.delay * 7) * 0.06) * 3;
+
+        return (
+          <div
+            key={item.name}
+            style={{
+              position: "absolute",
+              top: `calc(50% + ${item.y + floatY}px)`,
+              left: `calc(50% + ${item.x + floatX}px)`,
+              width: TILE_W,
+              height: TILE_H,
+              borderRadius: 14,
+              backgroundColor: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              transform: `rotate(${item.rot}deg) scale(${tileScale})`,
+              opacity: tileOp,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+              zIndex: 2,
+            }}
+          >
+            <Img
+              src={item.iconUrl}
+              style={{ width: 24, height: 24 }}
+            />
+            <span
+              style={{
+                fontFamily:
+                  "Inter, system-ui, -apple-system, sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#000000",
+              }}
+            >
+              {item.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
