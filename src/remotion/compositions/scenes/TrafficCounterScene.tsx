@@ -19,7 +19,7 @@ const formatNumber = (n: number): string => {
 };
 
 const ARC_CX = 640;
-const ARC_CY = 460;
+const ARC_CY = 380;
 
 const arcPath = (r: number, startDeg: number, endDeg: number) => {
   const startRad = ((startDeg - 90) * Math.PI) / 180;
@@ -42,13 +42,13 @@ const pointOnArc = (r: number, deg: number) => {
 
 /* Arc ring configs: radius, thickness, sweep delay, sweep range, color opacity */
 const ARC_RINGS = [
-  { r: 200, w: 2, delay: 0, sweep: 260, op: 0.15 },
-  { r: 240, w: 3, delay: 3, sweep: 240, op: 0.2 },
-  { r: 280, w: 5, delay: 5, sweep: 280, op: 0.35 },
-  { r: 320, w: 8, delay: 2, sweep: 260, op: 0.5 },
-  { r: 360, w: 12, delay: 0, sweep: 290, op: 0.85 },
-  { r: 400, w: 4, delay: 6, sweep: 220, op: 0.25 },
-  { r: 440, w: 2, delay: 8, sweep: 200, op: 0.12 },
+  { r: 140, w: 2, delay: 0, sweep: 260, op: 0.15 },
+  { r: 170, w: 3, delay: 3, sweep: 240, op: 0.2 },
+  { r: 200, w: 5, delay: 5, sweep: 280, op: 0.35 },
+  { r: 230, w: 8, delay: 2, sweep: 260, op: 0.5 },
+  { r: 260, w: 12, delay: 0, sweep: 290, op: 0.85 },
+  { r: 290, w: 4, delay: 6, sweep: 220, op: 0.25 },
+  { r: 320, w: 2, delay: 8, sweep: 200, op: 0.12 },
 ];
 
 export const TrafficCounterScene: React.FC = () => {
@@ -193,7 +193,7 @@ export const TrafficCounterScene: React.FC = () => {
         })}
 
         {/* Orbiting glow dots on key arcs */}
-        {[280, 320, 360].map((r, di) => {
+        {[200, 230, 260].map((r, di) => {
           const dotAngle = interpolate(
             frame,
             [di * 3, di * 3 + 65],
@@ -235,7 +235,7 @@ export const TrafficCounterScene: React.FC = () => {
         <circle
           cx={ARC_CX}
           cy={ARC_CY}
-          r={160}
+          r={110}
           fill="none"
           stroke={PURPLE}
           strokeWidth={1}
@@ -252,7 +252,7 @@ export const TrafficCounterScene: React.FC = () => {
         <circle
           cx={ARC_CX}
           cy={ARC_CY}
-          r={480}
+          r={350}
           fill="none"
           stroke={PURPLE}
           strokeWidth={1}
@@ -272,7 +272,7 @@ export const TrafficCounterScene: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          top: ARC_CY - 120,
+          top: ARC_CY - 60,
           left: "50%",
           transform: `translate(-50%, -50%) scale(${numScale})`,
           opacity: numOp,
