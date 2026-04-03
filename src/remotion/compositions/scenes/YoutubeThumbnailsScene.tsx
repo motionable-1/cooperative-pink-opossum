@@ -7,7 +7,7 @@ import { useCurrentFrame, interpolate, Easing, Img } from "remotion";
  * All baked into one image for clean rendering (no transparency issues).
  */
 const THUMB_COMPOSITE =
-  "https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/outrank-promo/1775227527161_s2zd45kzyn_yt_thumbnail_v3.png";
+  "https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/outrank-promo/1775227723208_xni3ewgxcj_yt_thumbnail_v4.png";
 
 export const YoutubeThumbnailsScene: React.FC = () => {
   const frame = useCurrentFrame();
