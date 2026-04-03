@@ -8,11 +8,10 @@ const INTEGRATIONS = [
   {
     name: "feather",
     label: "feather",
-    // Use a feather/quill icon
     iconUrl:
       "https://api.iconify.design/lucide/feather.svg?color=%23000000&width=28",
-    x: -280,
-    y: -160,
+    x: -340,
+    y: -195,
     rot: -8,
     delay: 0,
   },
@@ -21,8 +20,8 @@ const INTEGRATIONS = [
     label: "Notion",
     iconUrl:
       "https://api.iconify.design/simple-icons/notion.svg?color=%23000000&width=32",
-    x: 240,
-    y: -170,
+    x: 300,
+    y: -200,
     rot: 6,
     delay: 3,
   },
@@ -31,7 +30,7 @@ const INTEGRATIONS = [
     label: "WORDPRESS",
     iconUrl:
       "https://api.iconify.design/mdi/wordpress.svg?color=%23000000&width=30",
-    x: 310,
+    x: 380,
     y: 20,
     rot: 4,
     delay: 6,
@@ -41,8 +40,8 @@ const INTEGRATIONS = [
     label: "Webflow",
     iconUrl:
       "https://api.iconify.design/simple-icons/webflow.svg?color=%23146EF5&width=24",
-    x: -260,
-    y: 140,
+    x: -330,
+    y: 180,
     rot: -5,
     delay: 9,
   },
@@ -51,8 +50,8 @@ const INTEGRATIONS = [
     label: "Webhook",
     iconUrl:
       "https://api.iconify.design/material-symbols/webhook.svg?color=%23E53E3E&width=28",
-    x: 220,
-    y: 160,
+    x: 280,
+    y: 195,
     rot: 3,
     delay: 12,
   },

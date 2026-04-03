@@ -10,8 +10,8 @@ const INTEGRATIONS = [
     label: "feather",
     iconUrl:
       "https://api.iconify.design/lucide/feather.svg?color=%23000000&width=28",
-    startX: -280,
-    startY: -160,
+    startX: -340,
+    startY: -195,
     exitX: -800,
     exitY: -400,
     rot: -8,
@@ -22,8 +22,8 @@ const INTEGRATIONS = [
     label: "Notion",
     iconUrl:
       "https://api.iconify.design/simple-icons/notion.svg?color=%23000000&width=32",
-    startX: 240,
-    startY: -170,
+    startX: 300,
+    startY: -200,
     exitX: 160,
     exitY: -60,
     rot: 6,
@@ -34,7 +34,7 @@ const INTEGRATIONS = [
     label: "WORDPRESS",
     iconUrl:
       "https://api.iconify.design/mdi/wordpress.svg?color=%23000000&width=30",
-    startX: 310,
+    startX: 380,
     startY: 20,
     exitX: 800,
     exitY: 200,
@@ -46,8 +46,8 @@ const INTEGRATIONS = [
     label: "Webflow",
     iconUrl:
       "https://api.iconify.design/simple-icons/webflow.svg?color=%23146EF5&width=24",
-    startX: -260,
-    startY: 140,
+    startX: -330,
+    startY: 180,
     exitX: -200,
     exitY: 90,
     rot: -5,
@@ -58,8 +58,8 @@ const INTEGRATIONS = [
     label: "Webhook",
     iconUrl:
       "https://api.iconify.design/material-symbols/webhook.svg?color=%23E53E3E&width=28",
-    startX: 220,
-    startY: 160,
+    startX: 280,
+    startY: 195,
     exitX: 700,
     exitY: 500,
     rot: 3,
