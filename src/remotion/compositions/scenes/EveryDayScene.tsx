@@ -54,17 +54,55 @@ const GAIcon = () => (
 );
 
 /**
- * Damped bounce function — mimics a real ball bouncing off a wall.
- * Returns value 0→1 where 0 = wall contact point, bouncing away and settling back to 0.
- * Uses exponential decay with sine oscillation.
+ * Real ball-bounce physics.
+ *
+ * Models a ball hitting a wall and bouncing back with gravity.
+ * Each bounce is a parabolic arc (like real gravity), and each
+ * successive bounce loses energy (coefficient of restitution).
+ *
+ * @param t - normalized time 0→1 across the full bounce sequence
+ * @param restitution - energy kept per bounce (0.45 = loses 55% each time)
+ * @returns displacement 0→peak→0→peak→0... settling to 0
  */
-const dampedBounce = (t: number, bounces: number = 3, decay: number = 4): number => {
-  if (t <= 0) return 0;
-  if (t >= 1) return 0;
-  // Exponential decay envelope × sine wave
-  const envelope = Math.exp(-decay * t);
-  const oscillation = Math.abs(Math.sin(t * Math.PI * bounces));
-  return envelope * oscillation;
+const ballBounce = (t: number): number => {
+  if (t <= 0 || t >= 1) return 0;
+
+  // Restitution = energy kept per bounce. 0.55 gives 3 clearly visible bounces.
+  const restitution = 0.55;
+
+  // Pre-compute bounce heights and durations
+  // Height of bounce n = restitution^n (first bounce = 1.0)
+  // Duration of bounce n = sqrt(height) = restitution^(n/2) (physics: time ∝ √height)
+  const bounceHeights: number[] = [];
+  const bounceDurations: number[] = [];
+  let totalDur = 0;
+
+  for (let i = 0; i < 4; i++) {
+    const h = Math.pow(restitution, i);
+    const d = Math.pow(restitution, i / 2);
+    bounceHeights.push(h);
+    bounceDurations.push(d);
+    totalDur += d;
+  }
+
+  // Normalize durations so they sum to 1.0
+  const normDurations = bounceDurations.map((d) => d / totalDur);
+
+  // Find which bounce arc we're in
+  let elapsed = 0;
+  for (let i = 0; i < normDurations.length; i++) {
+    const start = elapsed;
+    const end = elapsed + normDurations[i];
+    if (t >= start && t < end) {
+      // localT: 0→1 within this bounce arc
+      const localT = (t - start) / normDurations[i];
+      // Parabolic arc: 4h·t·(1-t) — peaks at h when localT=0.5
+      return 4 * bounceHeights[i] * localT * (1 - localT);
+    }
+    elapsed = end;
+  }
+
+  return 0;
 };
 
 export const EveryDayScene: React.FC = () => {
@@ -134,7 +172,7 @@ export const EveryDayScene: React.FC = () => {
   // ── Last card timing ──
   const lastCardStart = CARDS_START + 3 * CARD_STAGGER; // card index 3
   const HIT_FRAME = lastCardStart + 30;      // arrives at corner faster
-  const BOUNCE_DURATION = 24;                 // 24 frames = 0.8s of bounce physics
+  const BOUNCE_DURATION = 28;                 // 28 frames ≈ 0.93s of bounce physics
   const BOUNCE_END = HIT_FRAME + BOUNCE_DURATION;
   const HOLD_AFTER_BOUNCE = 6;                // brief hold before wipe
   const WIPE_START = BOUNCE_END + HOLD_AFTER_BOUNCE;
@@ -288,24 +326,29 @@ export const EveryDayScene: React.FC = () => {
             cardScale = 1;
             cardBlur = interpolate(flowProg, [0, 0.2], [3, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
           } else if (frame < BOUNCE_END) {
-            // ── BALL BOUNCE PHYSICS ──
-            // Damped oscillation: card bounces away from corner and settles back.
-            // The bounce goes diagonally away (up-right) and returns.
+            // ── REAL BALL BOUNCE PHYSICS ──
+            // Parabolic arcs with diminishing height, like a real ball.
             const bounceT = (frame - HIT_FRAME) / BOUNCE_DURATION;
-            const bounceAmount = dampedBounce(bounceT, 3, 2.8);
+            const bounceAmount = ballBounce(bounceT);
 
-            // Bounce displacement — moves diagonally up-right from corner
-            const bounceDistX = 140; // larger horizontal bounce for visibility
-            const bounceDistY = 110; // larger vertical bounce for visibility
+            // Bounce displacement — card rebounds diagonally up-right from corner
+            const bounceDistX = 160; // max horizontal rebound on first bounce
+            const bounceDistY = 130; // max vertical rebound on first bounce
 
             x = cornerX + bounceAmount * bounceDistX;
             y = cornerY - bounceAmount * bounceDistY;
 
-            // Rotation wobble during bounce — more visible
-            cardRotation = bounceAmount * 8;
+            // Rotation follows the bounce — tilts on rebound, levels at contact
+            cardRotation = bounceAmount * 10;
 
-            // Scale squash on impact, stretch on bounce
-            cardScale = 1 + bounceAmount * 0.06;
+            // Squash at contact (bounceAmount near 0), stretch at peak
+            if (bounceAmount < 0.1) {
+              // Near wall contact — squash horizontally, stretch vertically
+              cardScale = 0.92;
+            } else {
+              // In the air — slight stretch
+              cardScale = 1 + bounceAmount * 0.06;
+            }
 
             cardOp = 1;
             cardBlur = 0;
