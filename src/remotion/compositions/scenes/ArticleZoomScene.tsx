@@ -31,21 +31,21 @@ const ARTICLES = [
 export const ArticleZoomScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Rapidly zoom toward center with radial blur effect
-  const zoomProg = interpolate(frame, [0, 30], [1.04, 3.5], {
+  // Rapidly zoom toward center — zoom leads, blur follows
+  const zoomProg = interpolate(frame, [0, 30], [1.02, 3.5], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.in(Easing.quad),
+    easing: Easing.in(Easing.cubic),
   });
 
-  // Blur increases as we zoom
-  const blurAmount = interpolate(frame, [0, 20, 30], [0, 8, 30], {
+  // Blur only kicks in AFTER zoom is well underway (starts at frame 12)
+  const blurAmount = interpolate(frame, [12, 25, 30], [0, 6, 30], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Fade to white at the end
-  const whiteOp = interpolate(frame, [20, 30], [0, 1], {
+  // Fade to white at the very end
+  const whiteOp = interpolate(frame, [22, 30], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.in(Easing.quad),
