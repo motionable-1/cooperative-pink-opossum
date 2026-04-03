@@ -245,9 +245,10 @@ export const EveryDayScene: React.FC = () => {
           const BOUNCE_BACK = HIT_FRAME + 5;    // bounces back peak
           const SETTLE = BOUNCE_BACK + 8;        // settles into final pos
 
-          // Corner position (bottom-left, slightly inside frame)
-          const cornerX = -80;
-          const cornerY = 720 - CARD_H + 40;
+          // Corner position — card stays INSIDE the frame boundary
+          // Account for rotation: card is tilted ~-15deg so we need some margin
+          const cornerX = 10;                    // left edge of card just inside frame
+          const cornerY = 720 - CARD_H + 30;    // bottom edge of card just inside frame
 
           // Bounce-back position (slightly up-right from corner)
           const bounceX = cornerX + 70;
@@ -366,15 +367,24 @@ export const EveryDayScene: React.FC = () => {
         );
       })}
 
-      {/* ── WHITE FLASH TRANSITION: frame turns white after last card settles ── */}
-      {frame >= 230 && (
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundColor: "#FFFFFF",
-          opacity: interpolate(frame, [230, 240], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.cubic) }),
-          zIndex: 200,
-        }} />
-      )}
+      {/* ── RADIAL WIPE: white circle expands from bottom-left corner ── */}
+      {frame >= 225 && (() => {
+        // Circle expands from the bottom-left corner (0, 720)
+        // Max radius needed to cover full 1280×720 frame from corner = ~1468px
+        const maxRadius = 1500;
+        const radius = interpolate(frame, [225, 242], [0, maxRadius], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+          easing: Easing.inOut(Easing.cubic),
+        });
+        return (
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundColor: "#FFFFFF",
+            clipPath: `circle(${radius}px at 0px 720px)`,
+            zIndex: 200,
+          }} />
+        );
+      })()}
     </div>
   );
 };
