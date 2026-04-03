@@ -18,6 +18,8 @@ const { fontFamily: monoFont } = loadMono("normal", {
  * Text phases with subtle breathing room between each:
  *   "Every day" → "Outrank scours the web," → "uncovers hidden" → "data sources."
  * Then large tilted cards flow diagonally from top-right corner to bottom-left corner.
+ * Cards nearly touch each other (5-8px gap).
+ * Last card hits corner with natural ball-bounce physics, then expands like water.
  */
 
 const PURPLE = "#9D62F0";
@@ -30,7 +32,6 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-// Cards 30%+ bigger than before (was 380×200)
 const CARD_W = 580;
 const CARD_H = 320;
 
@@ -51,6 +52,20 @@ const GAIcon = () => (
     <circle cx="7" cy="25" r="3.5" fill="#E37400" />
   </svg>
 );
+
+/**
+ * Damped bounce function — mimics a real ball bouncing off a wall.
+ * Returns value 0→1 where 0 = wall contact point, bouncing away and settling back to 0.
+ * Uses exponential decay with sine oscillation.
+ */
+const dampedBounce = (t: number, bounces: number = 3, decay: number = 4): number => {
+  if (t <= 0) return 0;
+  if (t >= 1) return 0;
+  // Exponential decay envelope × sine wave
+  const envelope = Math.exp(-decay * t);
+  const oscillation = Math.abs(Math.sin(t * Math.PI * bounces));
+  return envelope * oscillation;
+};
 
 export const EveryDayScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -94,23 +109,37 @@ export const EveryDayScene: React.FC = () => {
   const dsBlur = frame >= 120 ? interpolate(frame, [120, 128], [0, 14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
   const dsExitX = frame >= 120 ? interpolate(frame, [120, 130], [0, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
   const dsExitY = frame >= 120 ? interpolate(frame, [120, 130], [0, -80], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) }) : 0;
-  // No overlap — "uncovers hidden" fully exits before "data sources." enters
 
   // ═══════════════════════════════════════════════════════════════
-  // CARDS PHASE: Large tilted cards flowing diagonally
-  // top-right corner → bottom-left corner
-  // Smooth constant speed — no acceleration stutters.
-  // Last card lands at 90° flush in bottom-left corner then expands.
+  // CARDS PHASE: Tilted cards flowing diagonally, nearly touching
+  //
+  // Cards are tilted at ~-18deg. Along the diagonal, consecutive
+  // cards should be ~6px apart (nearly touching).
+  // The diagonal path length from one card center to the next
+  // at 6px gap ≈ CARD_H (rotated) + 6px ≈ ~330px apart on the diagonal.
+  //
+  // Speed: faster flow — CARD_TRAVEL=50 frames per card.
+  // Stagger: tight — 10 frames between each card launch.
   // ═══════════════════════════════════════════════════════════════
   const CARDS_START = 124;
-  const CARD_STAGGER = 24;    // more spacing between cards so each is readable
-  const CARD_TRAVEL = 90;     // much slower glide — smooth and readable
+  const CARD_STAGGER = 10;    // tight stagger so cards nearly touch
+  const CARD_TRAVEL = 50;     // faster flow, more energetic
 
   // Diagonal path: top-right off-screen → bottom-left off-screen
   const diagStartX = 1280 + CARD_W * 0.2;
   const diagStartY = -CARD_H - 60;
   const diagEndX = -CARD_W - 60;
   const diagEndY = 720 + CARD_H * 0.2;
+
+  // ── Last card timing ──
+  const lastCardStart = CARDS_START + 3 * CARD_STAGGER; // card index 3
+  const HIT_FRAME = lastCardStart + 30;      // arrives at corner faster
+  const BOUNCE_DURATION = 24;                 // 24 frames = 0.8s of bounce physics
+  const BOUNCE_END = HIT_FRAME + BOUNCE_DURATION;
+  const HOLD_AFTER_BOUNCE = 6;                // brief hold before wipe
+  const WIPE_START = BOUNCE_END + HOLD_AFTER_BOUNCE;
+  const WIPE_DURATION = 14;                   // fast wipe
+  const WIPE_END = WIPE_START + WIPE_DURATION;
 
   return (
     <div style={{ position: "absolute", inset: 0, backgroundColor: PURPLE, fontFamily, overflow: "hidden" }}>
@@ -157,10 +186,8 @@ export const EveryDayScene: React.FC = () => {
             justifyContent: "center",
           }}>
             <svg width="370" height="80" viewBox="0 0 370 80" style={{ overflow: "visible", position: "relative", zIndex: 2 }}>
-              {/* White bg with text cutout using mask */}
               <defs>
                 <mask id="textMask">
-                  {/* White = visible, black = hidden */}
                   <rect x="-30" y="-15" width="430" height="110" fill="white" />
                   <text
                     x="185"
@@ -176,9 +203,7 @@ export const EveryDayScene: React.FC = () => {
                   </text>
                 </mask>
               </defs>
-              {/* White rectangle with text knocked out */}
               <rect x="-30" y="-15" width="430" height="110" rx="12" fill="white" mask="url(#textMask)" />
-              {/* Dotted outline on top */}
               <text
                 x="185"
                 y="64"
@@ -219,86 +244,73 @@ export const EveryDayScene: React.FC = () => {
         </div>
       )}
 
-      {/* ── DIAGONAL CARD FLOW: top-right → bottom-left, tilted ── */}
+      {/* ── DIAGONAL CARD FLOW ── */}
       {TOOLS.map((tool, i) => {
         const isLast = i === TOOLS.length - 1;
         const cardStart = CARDS_START + i * CARD_STAGGER;
         const cardEnd = cardStart + CARD_TRAVEL;
 
-        // Smooth constant-speed easing (ease-out only, no accel/decel stutter)
-        const prog = interpolate(frame, [cardStart, cardEnd], [0, 1], {
-          extrapolateLeft: "clamp", extrapolateRight: "clamp",
-          easing: Easing.out(Easing.quad),
-        });
-
-        if (prog <= 0 && !isLast) return null;
-        if (!isLast && prog <= 0) return null;
-
-        // Tilt: ~-18deg along the diagonal, slight variation per card
+        // Tilt: ~-18deg, slight variation per card
         const tilt = -18 + i * 1.5;
 
         let x: number, y: number, cardOp: number, cardScale: number, cardBlur: number;
         let cardRotation = tilt;
 
         if (isLast) {
-          // ── LAST CARD: flows down, lands FLUSH at 0° in bottom-left corner ──
-          // Then a separate white circle expands from the card to fill the frame.
-          const LAND_FRAME = cardStart + 50;     // lands in corner
-          const BOUNCE_PEAK = LAND_FRAME + 4;    // subtle bounce back
-          const SETTLE_FRAME = BOUNCE_PEAK + 6;  // settles flush
+          // ══════════════════════════════════════════════════════════
+          // LAST CARD: Google Analytics — flies to corner, BALL BOUNCE
+          // Natural damped oscillation like a ball hitting a wall.
+          // Card stays inside frame at all times.
+          // ══════════════════════════════════════════════════════════
 
-          // Corner position — card left edge = 0, bottom edge = 720
+          // Corner position — card sits flush in bottom-left
           const cornerX = 0;
           const cornerY = 720 - CARD_H;
 
-          // Bounce position (slight shift up-right)
-          const bounceX = 40;
-          const bounceY = cornerY - 35;
-
           if (frame < cardStart) {
+            // Not yet visible
             x = diagStartX;
             y = diagStartY;
             cardOp = 0;
             cardScale = 0.92;
             cardBlur = 3;
-          } else if (frame < LAND_FRAME) {
-            // Smooth flow toward corner, rotation straightens to 0°
-            const flowProg = interpolate(frame, [cardStart, LAND_FRAME], [0, 1], {
+          } else if (frame < HIT_FRAME) {
+            // Flying toward corner — accelerating (ease-in for impact feel)
+            const flowProg = interpolate(frame, [cardStart, HIT_FRAME], [0, 1], {
               extrapolateLeft: "clamp", extrapolateRight: "clamp",
-              easing: Easing.out(Easing.cubic),
+              easing: Easing.in(Easing.quad),
             });
             x = interpolate(flowProg, [0, 1], [diagStartX, cornerX]);
             y = interpolate(flowProg, [0, 1], [diagStartY, cornerY]);
-            cardRotation = interpolate(flowProg, [0, 1], [tilt, 0]);
-            cardOp = interpolate(flowProg, [0, 0.08], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+            // Rotation straightens as it approaches corner
+            cardRotation = interpolate(flowProg, [0, 0.7, 1], [tilt, tilt * 0.3, 0]);
+            cardOp = interpolate(flowProg, [0, 0.06], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             cardScale = 1;
             cardBlur = interpolate(flowProg, [0, 0.2], [3, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-          } else if (frame < BOUNCE_PEAK) {
-            // Subtle bounce away from corner
-            const bp = interpolate(frame, [LAND_FRAME, BOUNCE_PEAK], [0, 1], {
-              extrapolateLeft: "clamp", extrapolateRight: "clamp",
-              easing: Easing.out(Easing.cubic),
-            });
-            x = interpolate(bp, [0, 1], [cornerX, bounceX]);
-            y = interpolate(bp, [0, 1], [cornerY, bounceY]);
-            cardRotation = interpolate(bp, [0, 1], [0, 3]);
+          } else if (frame < BOUNCE_END) {
+            // ── BALL BOUNCE PHYSICS ──
+            // Damped oscillation: card bounces away from corner and settles back.
+            // The bounce goes diagonally away (up-right) and returns.
+            const bounceT = (frame - HIT_FRAME) / BOUNCE_DURATION;
+            const bounceAmount = dampedBounce(bounceT, 3, 2.8);
+
+            // Bounce displacement — moves diagonally up-right from corner
+            const bounceDistX = 140; // larger horizontal bounce for visibility
+            const bounceDistY = 110; // larger vertical bounce for visibility
+
+            x = cornerX + bounceAmount * bounceDistX;
+            y = cornerY - bounceAmount * bounceDistY;
+
+            // Rotation wobble during bounce — more visible
+            cardRotation = bounceAmount * 8;
+
+            // Scale squash on impact, stretch on bounce
+            cardScale = 1 + bounceAmount * 0.06;
+
             cardOp = 1;
-            cardScale = interpolate(bp, [0, 1], [1, 0.97], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            cardBlur = 0;
-          } else if (frame < SETTLE_FRAME) {
-            // Settle back flush into corner
-            const sp = interpolate(frame, [BOUNCE_PEAK, SETTLE_FRAME], [0, 1], {
-              extrapolateLeft: "clamp", extrapolateRight: "clamp",
-              easing: Easing.out(Easing.quad),
-            });
-            x = interpolate(sp, [0, 1], [bounceX, cornerX]);
-            y = interpolate(sp, [0, 1], [bounceY, cornerY]);
-            cardRotation = interpolate(sp, [0, 1], [3, 0]);
-            cardOp = 1;
-            cardScale = interpolate(sp, [0, 1], [0.97, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
             cardBlur = 0;
           } else {
-            // Hold flush in corner
+            // Settled flush in corner
             x = cornerX;
             y = cornerY;
             cardRotation = 0;
@@ -338,20 +350,22 @@ export const EveryDayScene: React.FC = () => {
           );
         }
 
-        // ── Normal cards: smooth constant-speed diagonal flow ──
+        // ── Normal cards: fast diagonal flow ──
+        const prog = interpolate(frame, [cardStart, cardEnd], [0, 1], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+
+        if (prog <= 0) return null;
+
         x = interpolate(prog, [0, 1], [diagStartX, diagEndX]);
         y = interpolate(prog, [0, 1], [diagStartY, diagEndY]);
 
-        // Simple fade in/out at edges, no scale stutter
-        cardOp = interpolate(prog, [0, 0.06, 0.85, 1], [0, 1, 1, 0], {
+        // Simple fade in/out at edges
+        cardOp = interpolate(prog, [0, 0.06, 0.88, 1], [0, 1, 1, 0], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
-        // Gentle scale — no dramatic zoom in/out that causes stutter
-        cardScale = interpolate(prog, [0, 0.15, 0.85, 1], [0.96, 1, 1, 0.96], {
-          extrapolateLeft: "clamp", extrapolateRight: "clamp",
-        });
-        // Light blur only at very edges
-        cardBlur = interpolate(prog, [0, 0.12, 0.88, 1], [2, 0, 0, 2], {
+        cardScale = 1;
+        cardBlur = interpolate(prog, [0, 0.1, 0.9, 1], [2, 0, 0, 2], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
         });
 
@@ -379,7 +393,7 @@ export const EveryDayScene: React.FC = () => {
               filter: cardBlur > 0.3 ? `blur(${cardBlur}px)` : "none",
               boxShadow: `0 ${shadowSize}px ${shadowSize * 2}px rgba(0,0,0,0.2)`,
               zIndex: 10 + i,
-              backfaceVisibility: "hidden",
+              backfaceVisibility: "hidden" as const,
             }}
           >
             {tool.hasGoogleIcon && <GoogleAdsIcon />}
@@ -398,28 +412,40 @@ export const EveryDayScene: React.FC = () => {
         );
       })}
 
-      {/* ── WHITE RADIAL WIPE: circle expands from card center in bottom-left corner ── */}
-      {(() => {
-        // Last card timing: starts at CARDS_START + 3*CARD_STAGGER = 124+72 = 196
-        // SETTLE_FRAME = 196+50+4+6 = 256, hold 8 = 264, wipe from 264
-        const WIPE_START = 264;
-        const WIPE_END = 280;
-        if (frame < WIPE_START) return null;
-        // Circle origin: center of the card when flush in bottom-left corner
-        const originX = CARD_W / 2;              // 290
-        const originY = 720 - CARD_H / 2;        // 560
-        // Max radius to cover full frame from that origin point
-        // Distance to far corner (1280, 0) = sqrt((1280-290)^2 + (0-560)^2) ≈ 1139
-        const maxRadius = 1200;
-        const radius = interpolate(frame, [WIPE_START, WIPE_END], [0, maxRadius], {
+      {/* ── WHITE WIPE: card borders expand like water flooding outward ── */}
+      {frame >= WIPE_START && (() => {
+        // The card sits flush at bottom-left: left=0, top=400, width=580, height=320
+        // The white rectangle starts exactly as the card and expands outward
+        // using CSS inset values that shrink from the card edges to 0 (full frame)
+        const wipeProg = interpolate(frame, [WIPE_START, WIPE_END], [0, 1], {
           extrapolateLeft: "clamp", extrapolateRight: "clamp",
           easing: Easing.out(Easing.cubic),
         });
+
+        // Card position: top=400, right=700, bottom=0, left=0
+        // (inset: top right bottom left)
+        // At prog=0: inset matches card exactly
+        // At prog=1: inset = 0 0 0 0 (full frame)
+        const cardTop = 720 - CARD_H;   // 400
+        const cardRight = 1280 - CARD_W; // 700
+
+        const top = interpolate(wipeProg, [0, 1], [cardTop, 0]);
+        const right = interpolate(wipeProg, [0, 1], [cardRight, 0]);
+        // bottom and left are already 0 (card is flush in corner)
+
+        // Border radius shrinks from card's 28px to 0
+        const br = interpolate(wipeProg, [0, 1], [28, 0]);
+
         return (
           <div style={{
-            position: "absolute", inset: 0,
+            position: "absolute",
+            top,
+            right,
+            bottom: 0,
+            left: 0,
             backgroundColor: "#FFFFFF",
-            clipPath: `circle(${radius}px at ${originX}px ${originY}px)`,
+            borderTopRightRadius: br,
+            borderTopLeftRadius: interpolate(wipeProg, [0, 1], [28, 0]),
             zIndex: 200,
           }} />
         );
