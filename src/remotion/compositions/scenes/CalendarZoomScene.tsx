@@ -122,34 +122,34 @@ export const CalendarZoomScene: React.FC = () => {
    */
 
   // Scale: zoom from full view → extreme close-up on card 12 in 1 sec
-  const zoomScale = interpolate(frame, [0, 28], [0.78, 3.6], {
+  const zoomScale = interpolate(frame, [0, 20], [0.78, 1.8], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
   // Pan Y: start where PlannerDash ended (top=60)
-  const panY = interpolate(frame, [0, 28], [60, 80], {
+  const panY = interpolate(frame, [0, 20], [60, 75], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
   // Pan X: nudge so card 12 column stays centered
-  const panX = interpolate(frame, [0, 28], [0, 60], {
+  const panX = interpolate(frame, [0, 20], [0, 40], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // 3D tilt builds smoothly — starts at 0 to match PlannerDash end state
-  const tiltX = interpolate(frame, [0, 28], [0, 18], {
+  // 3D tilt builds smoothly
+  const tiltX = interpolate(frame, [0, 20], [0, 12], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
 
-  const tiltY = interpolate(frame, [0, 28], [0, -8], {
+  const tiltY = interpolate(frame, [0, 20], [0, -5], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -262,7 +262,7 @@ export const CalendarZoomScene: React.FC = () => {
           position: "absolute",
           inset: 0,
           backgroundColor: "#FFFFFF",
-          opacity: interpolate(frame, [22, 28], [0, 1], {
+          opacity: interpolate(frame, [16, 22], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),

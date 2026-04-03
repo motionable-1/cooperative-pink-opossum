@@ -116,11 +116,11 @@ const DayCard: React.FC<{
 export const PlannerDashScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Slide up from bottom
+  // Fast slide up from bottom
   const slideUp = spring({
     frame,
     fps: 30,
-    config: { damping: 18, stiffness: 80, mass: 0.7 },
+    config: { damping: 14, stiffness: 200, mass: 0.5 },
   });
   const dashY = interpolate(slideUp, [0, 1], [500, 60]);
   const dashOp = interpolate(slideUp, [0, 0.3], [0, 1], {
@@ -128,8 +128,8 @@ export const PlannerDashScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // Slow zoom in toward the calendar area
-  const zoomIn = interpolate(frame, [0, 120], [0.68, 0.78], {
+  // Quick zoom in toward the calendar area
+  const zoomIn = interpolate(frame, [0, 22], [0.68, 0.78], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -237,7 +237,7 @@ export const PlannerDashScene: React.FC = () => {
                 {/* Row 1 offset: day 12 is Tuesday, so add 1 blank for Monday */}
                 {ri === 0 && <div style={{ width: CARD_W, flexShrink: 0 }} />}
                 {row.map((day, ci) => {
-                  const cardDelay = ri * 4 + ci * 2 + 10;
+                  const cardDelay = ri * 1 + ci * 0.5 + 2;
                   const cardSpring = spring({
                     frame: Math.max(0, frame - cardDelay),
                     fps: 30,
