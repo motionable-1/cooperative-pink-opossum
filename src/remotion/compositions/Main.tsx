@@ -24,6 +24,11 @@ import { CalendarScene } from "./scenes/CalendarScene";
 import { ContentHistoryScene } from "./scenes/ContentHistoryScene";
 import { ApproveItScene } from "./scenes/ApproveItScene";
 import { EveryDayScene } from "./scenes/EveryDayScene";
+import { GeneratesScene } from "./scenes/GeneratesScene";
+import { WhiteFlashScene } from "./scenes/WhiteFlashScene";
+import { ImageGridScene } from "./scenes/ImageGridScene";
+import { BrandColorsScene } from "./scenes/BrandColorsScene";
+import { ArticleCardsScene } from "./scenes/ArticleCardsScene";
 
 /*
  * Full animation sequence:
@@ -78,6 +83,11 @@ const SCENE_24_DURATION = 75;  // 30-day content calendar zoom-in + pan right
 const SCENE_25_DURATION = 120;  // Dashboard UI: Content History → Content Planner → 3D zoom into calendar block
 const SCENE_26_DURATION = 75;   // "Approve it" + "or add your personal touch." + selection box + center guide
 const SCENE_27_DURATION = 212;  // "Every day" → text morphs → 3D card stack → front card slides to corner → white splash
+const SCENE_28_DURATION = 60;   // "Generates stunning images..." typewriter on purple + cursor
+const SCENE_29_DURATION = 12;   // White flash transition
+const SCENE_30_DURATION = 55;   // Image grid gallery (3x3) on white
+const SCENE_31_DURATION = 95;   // "With your brand colors, No useless stock images." on black
+const SCENE_32_DURATION = 120;  // Floating article cards on purple gradient
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -105,6 +115,11 @@ const SCENE_24_START = SCENE_23_START + SCENE_23_DURATION;
 const SCENE_25_START = SCENE_24_START + SCENE_24_DURATION;
 const SCENE_26_START = SCENE_25_START + SCENE_25_DURATION;
 const SCENE_27_START = SCENE_26_START + SCENE_26_DURATION;
+const SCENE_28_START = SCENE_27_START + SCENE_27_DURATION;
+const SCENE_29_START = SCENE_28_START + SCENE_28_DURATION;
+const SCENE_30_START = SCENE_29_START + SCENE_29_DURATION;
+const SCENE_31_START = SCENE_30_START + SCENE_30_DURATION;
+const SCENE_32_START = SCENE_31_START + SCENE_31_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -242,6 +257,31 @@ export const Main: React.FC = () => {
       {/* Scene 27: "Every day" → text morphs → tool logo cards fan */}
       <Sequence from={SCENE_27_START} durationInFrames={SCENE_27_DURATION}>
         <EveryDayScene />
+      </Sequence>
+
+      {/* Scene 28: "Generates stunning images..." typewriter on purple */}
+      <Sequence from={SCENE_28_START} durationInFrames={SCENE_28_DURATION}>
+        <GeneratesScene />
+      </Sequence>
+
+      {/* Scene 29: White flash transition */}
+      <Sequence from={SCENE_29_START} durationInFrames={SCENE_29_DURATION}>
+        <WhiteFlashScene />
+      </Sequence>
+
+      {/* Scene 30: Image grid gallery (3x3) on white */}
+      <Sequence from={SCENE_30_START} durationInFrames={SCENE_30_DURATION}>
+        <ImageGridScene />
+      </Sequence>
+
+      {/* Scene 31: "With your brand colors, No useless stock images." on black */}
+      <Sequence from={SCENE_31_START} durationInFrames={SCENE_31_DURATION}>
+        <BrandColorsScene />
+      </Sequence>
+
+      {/* Scene 32: Floating article cards on purple gradient */}
+      <Sequence from={SCENE_32_START} durationInFrames={SCENE_32_DURATION}>
+        <ArticleCardsScene />
       </Sequence>
     </AbsoluteFill>
   );
