@@ -3,16 +3,29 @@ import { useCurrentFrame, interpolate, Easing, Img } from "remotion";
 
 const PURPLE = "#7C3AED";
 
-/* Integration tiles: white squircle cards with brand logos */
+const TILE_W = 169;
+const TILE_H = 72;
+
+/*
+ * Integration tiles arranged in a balanced halo around center text.
+ * x/y offsets are from the CENTER of the viewport.
+ * Each tile is centered on its (x, y) point via translate(-50%, -50%).
+ *
+ * Layout (roughly symmetric):
+ *   feather (top-left)          Notion (top-right)
+ *                  [ TEXT ]
+ *   Webflow (bottom-left)   WORDPRESS (mid-right)
+ *               Webhook (bottom-center-right)
+ */
 const INTEGRATIONS = [
   {
     name: "feather",
     label: "feather",
     iconUrl:
       "https://api.iconify.design/lucide/feather.svg?color=%23000000&width=28",
-    x: -340,
-    y: -195,
-    rot: -8,
+    x: -320,
+    y: -155,
+    rot: -6,
     delay: 0,
   },
   {
@@ -20,9 +33,9 @@ const INTEGRATIONS = [
     label: "Notion",
     iconUrl:
       "https://api.iconify.design/simple-icons/notion.svg?color=%23000000&width=32",
-    x: 300,
-    y: -200,
-    rot: 6,
+    x: 320,
+    y: -155,
+    rot: 5,
     delay: 3,
   },
   {
@@ -30,9 +43,9 @@ const INTEGRATIONS = [
     label: "WORDPRESS",
     iconUrl:
       "https://api.iconify.design/mdi/wordpress.svg?color=%23000000&width=30",
-    x: 380,
-    y: 20,
-    rot: 4,
+    x: -370,
+    y: 30,
+    rot: -4,
     delay: 6,
   },
   {
@@ -40,9 +53,9 @@ const INTEGRATIONS = [
     label: "Webflow",
     iconUrl:
       "https://api.iconify.design/simple-icons/webflow.svg?color=%23146EF5&width=24",
-    x: -330,
-    y: 180,
-    rot: -5,
+    x: 370,
+    y: 30,
+    rot: 4,
     delay: 9,
   },
   {
@@ -50,21 +63,15 @@ const INTEGRATIONS = [
     label: "Webhook",
     iconUrl:
       "https://api.iconify.design/material-symbols/webhook.svg?color=%23E53E3E&width=28",
-    x: 280,
-    y: 195,
-    rot: 3,
+    x: 0,
+    y: 185,
+    rot: 2,
     delay: 12,
   },
 ];
 
-const TILE_W = 169;
-const TILE_H = 72;
-
 export const IntegrationIconsScene: React.FC = () => {
   const frame = useCurrentFrame();
-
-  // Text is already visible (carried from previous scene)
-  // Integration icons fly in one by one with spring-like easing
 
   // Subtle purple glow behind text
   const glowOp = interpolate(frame, [0, 30], [0, 0.15], {
@@ -95,7 +102,7 @@ export const IntegrationIconsScene: React.FC = () => {
         }}
       />
 
-      {/* Center text (static - same as previous scene but fully visible) */}
+      {/* Center text */}
       <div
         style={{
           position: "absolute",
@@ -142,7 +149,7 @@ export const IntegrationIconsScene: React.FC = () => {
         </div>
       </div>
 
-      {/* Integration icon tiles */}
+      {/* Integration icon tiles — centered on their position */}
       {INTEGRATIONS.map((item) => {
         const progress = interpolate(
           frame,
@@ -180,7 +187,8 @@ export const IntegrationIconsScene: React.FC = () => {
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
-              transform: `rotate(${item.rot}deg) scale(${tileScale})`,
+              /* Center the tile on its anchor point, then rotate + scale */
+              transform: `translate(-50%, -50%) rotate(${item.rot}deg) scale(${tileScale})`,
               opacity: tileOp,
               boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
               zIndex: 2,
