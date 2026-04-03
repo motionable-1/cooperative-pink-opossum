@@ -104,55 +104,23 @@ export const CalendarZoomScene: React.FC = () => {
   const row3 = DAYS.slice(13, 19);
 
   /*
-   * Zoom progression (matching reference frames 45→49):
-   * Start: full dashboard view (scale ~0.78, where PlannerDash ended)
-   * End: very zoomed in on card 12 (scale ~2.8) with subtle 3D tilt
-   *
-   * The zoom FOCUSES on the first card (12 Tue) by panning left+up.
-   * The selected card is in the top-left area of the grid (after the Mon blank).
+   * Seamless continuation from PlannerDashScene's final state:
+   * PlannerDash ends: translateX(-50%) scale(0.78), top=60, NO perspective/tilt
+   * We continue from that exact state → zoom deeper toward card 12
    */
 
-  /*
-   * Card 12 position inside the 1300px-wide dashboard:
-   *   X: sidebar(180) + padding(24) + blankMon(155+8) = ~367px from dashboard left
-   *   Y: header+month(~90) + cards start = ~100px from dashboard top
-   * Dashboard is centered via translateX(-50%) at left:50% → dashboard left edge = 640 - 650 = -10px
-   * So card 12 center in viewport ≈ -10 + 367 + 77 = ~434px (left of center)
-   * We need to pan so card 12 ends up centered at ~640px viewport
-   */
-
-  // Scale: zoom from full view → extreme close-up on card 12 in 1 sec
-  const zoomScale = interpolate(frame, [0, 20], [0.78, 1.8], {
+  // Scale: continue from 0.78 → zoom to 1.8 (same transform style as PlannerDash)
+  const zoomScale = interpolate(frame, [0, 25], [0.78, 1.8], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Pan Y: start where PlannerDash ended (top=60)
-  const panY = interpolate(frame, [0, 20], [60, 75], {
+  // Top position: start at 60 (where PlannerDash ended), drift up slightly
+  const panY = interpolate(frame, [0, 25], [60, 20], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
-  });
-
-  // Pan X: nudge so card 12 column stays centered
-  const panX = interpolate(frame, [0, 20], [0, 40], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
-
-  // 3D tilt builds smoothly
-  const tiltX = interpolate(frame, [0, 20], [0, 12], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
-  });
-
-  const tiltY = interpolate(frame, [0, 20], [0, -5], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.quad),
   });
 
   return (
@@ -165,14 +133,14 @@ export const CalendarZoomScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Same dashboard card, zooming into card 12 with 3D tilt */}
+      {/* Same dashboard card — same transform style as PlannerDash (no perspective) */}
       <div
         style={{
           position: "absolute",
           left: "50%",
           top: panY,
-          transform: `perspective(600px) translateX(-50%) translateX(${panX}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${zoomScale})`,
-          transformOrigin: "370px 160px", // origin anchored on card 12 (Tue) position
+          transform: `translateX(-50%) scale(${zoomScale})`,
+          transformOrigin: "top center",
           width: 1300,
           backgroundColor: "#FFFFFF",
           borderRadius: 14,
@@ -244,7 +212,7 @@ export const CalendarZoomScene: React.FC = () => {
           {/* Month */}
           <div style={{ fontSize: 14, fontWeight: 700, color: "#333", marginBottom: 10 }}>November 2024</div>
 
-          {/* Calendar grid — 3 rows (identical layout to PlannerDashScene) */}
+          {/* Calendar grid — 3 rows */}
           {[row1, row2, row3].map((row, ri) => (
             <div key={ri} style={{ display: "flex", gap: CARD_GAP, marginBottom: ROW_GAP }}>
               {ri === 0 && <div style={{ width: CARD_W, flexShrink: 0 }} />}
@@ -256,13 +224,13 @@ export const CalendarZoomScene: React.FC = () => {
         </div>
       </div>
 
-      {/* White flash at end — crashes into radial burst */}
+      {/* White flash at end */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundColor: "#FFFFFF",
-          opacity: interpolate(frame, [25, 30], [0, 1], {
+          opacity: interpolate(frame, [25, 29], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),
