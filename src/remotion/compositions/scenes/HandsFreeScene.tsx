@@ -67,20 +67,20 @@ export const HandsFreeScene: React.FC = () => {
   });
 
   const rects = [
-    // Bottom: purple bg, white text, narrow
+    // Bottom: purple bg, white text, offset left
     {
       y: bottomY, op: baseOp, bg: PURPLE, color: "#FFFFFF",
-      px: PX_NARROW, xOff: 0, zIndex: 1,
+      px: PX_NARROW, xOff: -40, zIndex: 1,
     },
     // Middle: off-white bg, purple text, wider, offset right
     {
       y: midFinalY, op: midOp, bg: OFF_WHITE, color: PURPLE,
-      px: PX_WIDE, xOff: 55, zIndex: 2,
+      px: PX_WIDE, xOff: 60, zIndex: 2,
     },
-    // Top: purple bg, white text, narrow (aligned with bottom)
+    // Top: purple bg, white text, offset slight left
     {
       y: topFinalY, op: topOp, bg: PURPLE, color: "#FFFFFF",
-      px: PX_NARROW, xOff: 0, zIndex: 3,
+      px: PX_NARROW, xOff: -15, zIndex: 3,
     },
   ];
 
