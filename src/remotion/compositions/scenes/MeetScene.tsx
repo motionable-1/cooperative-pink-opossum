@@ -7,21 +7,16 @@ const { fontFamily } = loadFont("normal", {
 });
 
 /**
- * "meet!" in purple bouncy text on black background.
- * Ref frames 055-063 (9 ref frames = ~14 output frames)
- *
- * Each letter enters at a different angle/position with spring animation,
- * creating a "scattered" bouncy look. Letters are tilted at different angles.
- * Color: light purple/lavender (#A78BFA).
- * Font: bold Inter 800, ~120px
- *
- * The letters settle into a roughly centered arrangement but remain
- * at slightly different angles/heights — never perfectly straight.
+ * "meet!" bounces in purple, then morphs to white and straightens.
+ * Single continuous scene — no scene cut for the color change.
  */
 
 const LETTERS = ["m", "e", "e", "t", "!"];
-const LETTER_ROTATIONS = [-15, 12, 8, -10, -12]; // Final settled rotations
-const LETTER_Y_OFFSETS = [8, -14, -8, 10, 12]; // Final y offsets from center
+const LETTER_ROTATIONS = [-15, 12, 8, -10, -12];
+const LETTER_Y_OFFSETS = [8, -14, -8, 10, 12];
+
+const MORPH_START = 11; // frame when color starts shifting
+const MORPH_END = 16;   // frame when fully white + straight
 
 export const MeetScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -32,6 +27,18 @@ export const MeetScene: React.FC = () => {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+
+  // Color morph progress: 0 = purple, 1 = white
+  const morphProg = interpolate(frame, [MORPH_START, MORPH_END], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Interpolate RGB: purple #A78BFA → white #FFFFFF
+  const r = Math.round(167 + (255 - 167) * morphProg);
+  const g = Math.round(139 + (255 - 139) * morphProg);
+  const b = Math.round(250 + (255 - 250) * morphProg);
+  const textColor = `rgb(${r},${g},${b})`;
 
   return (
     <div
@@ -66,13 +73,17 @@ export const MeetScene: React.FC = () => {
               extrapolateRight: "clamp",
             });
 
-            // Start from exaggerated rotation, settle to final
-            const startRot = LETTER_ROTATIONS[i] * 4;
-            const rot = interpolate(prog, [0, 1], [startRot, LETTER_ROTATIONS[i]]);
+            // Rotation: scattered → straighten as morphProg increases
+            const settledRot = LETTER_ROTATIONS[i];
+            const startRot = settledRot * 4;
+            const bouncedRot = interpolate(prog, [0, 1], [startRot, settledRot]);
+            const finalRot = interpolate(morphProg, [0, 1], [bouncedRot, 0]);
 
-            // Start from offset Y, settle to final
-            const startY = LETTER_Y_OFFSETS[i] * 3;
-            const yOff = interpolate(prog, [0, 1], [startY, LETTER_Y_OFFSETS[i]]);
+            // Y offset: scattered → center as morphProg increases
+            const settledY = LETTER_Y_OFFSETS[i];
+            const startY = settledY * 3;
+            const bouncedY = interpolate(prog, [0, 1], [startY, settledY]);
+            const finalY = interpolate(morphProg, [0, 1], [bouncedY, 0]);
 
             const scl = interpolate(prog, [0, 1], [0.4, 1]);
 
@@ -83,9 +94,9 @@ export const MeetScene: React.FC = () => {
                   fontFamily,
                   fontWeight: 800,
                   fontSize: 120,
-                  color: "#A78BFA",
+                  color: textColor,
                   opacity,
-                  transform: `translateY(${yOff}px) rotate(${rot}deg) scale(${scl})`,
+                  transform: `translateY(${finalY}px) rotate(${finalRot}deg) scale(${scl})`,
                   display: "inline-block",
                 }}
               >
