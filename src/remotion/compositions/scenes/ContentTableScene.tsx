@@ -23,39 +23,30 @@ const TABLE_W = 920;
 export const ContentTableScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // 3D perspective tilt entrance
+  // 3D perspective tilt entrance — snappier spring
   const enterSpring = spring({
     frame,
     fps: 30,
-    config: { damping: 18, stiffness: 80, mass: 0.8 },
+    config: { damping: 14, stiffness: 120, mass: 0.6 },
   });
 
-  const perspTilt = interpolate(enterSpring, [0, 1], [25, 8], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const perspRotZ = interpolate(enterSpring, [0, 1], [-5, -2], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const tableScale = interpolate(enterSpring, [0, 1], [0.7, 0.82], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const perspTilt = interpolate(enterSpring, [0, 1], [25, 8]);
+  const perspRotZ = interpolate(enterSpring, [0, 1], [-5, -2]);
+  const tableScale = interpolate(enterSpring, [0, 1], [0.7, 0.82]);
   const tableOp = interpolate(enterSpring, [0, 0.4], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Scroll down over time
-  const scrollY = interpolate(frame, [30, 140], [0, -120], {
+  // Scroll down — compressed to 2.5s (75 frames)
+  const scrollY = interpolate(frame, [15, 70], [0, -120], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Slow zoom in
-  const zoomIn = interpolate(frame, [0, 140], [1, 1.15], {
+  // Slow zoom in — compressed
+  const zoomIn = interpolate(frame, [0, 70], [1, 1.15], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -118,15 +109,15 @@ export const ContentTableScene: React.FC = () => {
             <div style={{ width: 100 }}>Date</div>
           </div>
 
-          {/* Rows — clipped so scroll doesn't bleed into header */}
+          {/* Rows */}
           <div style={{ overflow: "hidden", maxHeight: ROW_H * 5 + 20 }}>
             <div style={{ transform: `translateY(${scrollY}px)` }}>
               {ROWS.map((row, idx) => {
-              const rowDelay = idx * 3;
+              const rowDelay = idx * 2; // faster stagger
               const rowSpring = spring({
-                frame: Math.max(0, frame - rowDelay - 8),
+                frame: Math.max(0, frame - rowDelay - 4),
                 fps: 30,
-                config: { damping: 14, stiffness: 160, mass: 0.4 },
+                config: { damping: 12, stiffness: 200, mass: 0.3 },
               });
               const rowOp = interpolate(rowSpring, [0, 0.4], [0, 1], {
                 extrapolateLeft: "clamp",
