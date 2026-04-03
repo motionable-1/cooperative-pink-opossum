@@ -129,7 +129,7 @@ export const PlannerDashScene: React.FC = () => {
   });
 
   // Quick zoom in toward the calendar area
-  const zoomIn = interpolate(frame, [0, 22], [0.68, 0.78], {
+  const zoomIn = interpolate(frame, [0, 38], [0.68, 0.78], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),

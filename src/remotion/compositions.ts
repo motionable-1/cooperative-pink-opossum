@@ -4,7 +4,7 @@ import { Main } from "./compositions/Main";
 export const composition = {
   id: "Main",
   component: Main,
-  durationInFrames: 2224,
+  durationInFrames: 2239,
   fps: 30,
   width: 1280,
   height: 720,

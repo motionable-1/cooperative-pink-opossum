@@ -101,8 +101,8 @@ const SCENE_34_DURATION = 150;  // Content History table on purple (3D tilt + sc
 const SCENE_35_DURATION = 70;   // "Come back tomorrow to see your article" word reveal
 const SCENE_36_DURATION = 80;   // "PUBLISHED" glitch/trail → white on purple → purple on white
 const SCENE_37_DURATION = 45;   // "hands-free." stacked pills on black
-const SCENE_38_DURATION = 23;   // Outrank Content Planner dashboard slide-up — quick
-const SCENE_39_DURATION = 31;   // Calendar cards 3D zoom — +300ms hold
+const SCENE_38_DURATION = 40;   // Outrank Content Planner dashboard slide-up
+const SCENE_39_DURATION = 29;   // Calendar cards 3D zoom + hold
 const SCENE_40_DURATION = 30;   // Purple radial burst finale
 
 const SCENE_2_START = SCENE_1_DURATION;
