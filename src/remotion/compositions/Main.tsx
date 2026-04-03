@@ -10,6 +10,7 @@ import { AreSearchingScene } from "./scenes/AreSearchingScene";
 import { SearchBarScene } from "./scenes/SearchBarScene";
 import { ExclamationScene } from "./scenes/ExclamationScene";
 import { MeetScene } from "./scenes/MeetScene";
+import { MeetWhiteScene } from "./scenes/MeetWhiteScene";
 import { NeonPillScene } from "./scenes/NeonPillScene";
 import { OutrankScene } from "./scenes/OutrankScene";
 import { ScaleYourScene } from "./scenes/ScaleYourScene";
@@ -82,8 +83,8 @@ const SCENE_8_DURATION = 13;   // "are searching for,"
 const SCENE_9_DURATION = 54;   // Search bar typing + zoom
 const SCENE_10_DURATION = 3;   // Transition to black
 const SCENE_11_DURATION = 18;  // Purple "!" rotating
-const SCENE_12_DURATION = 23;  // "meet!" bouncy purple → morphs white + straightens
-const SCENE_13_DURATION = 0;   // MERGED into Scene 12
+const SCENE_12_DURATION = 14;  // "meet!" bouncy purple
+const SCENE_13_DURATION = 9;   // "Meet !" white
 const SCENE_14_DURATION = 14;  // Neon pill drawing
 const SCENE_15_DURATION = 54;  // "OUTRANK" in neon pill (+300ms breathing room)
 const SCENE_16_DURATION = 5;   // Neon pill fade
@@ -235,7 +236,10 @@ export const Main: React.FC = () => {
         <MeetScene />
       </Sequence>
 
-      {/* Scene 13: MERGED into Scene 12 */}
+      {/* Scene 13: "Meet !" white centered */}
+      <Sequence from={SCENE_13_START} durationInFrames={SCENE_13_DURATION}>
+        <MeetWhiteScene />
+      </Sequence>
 
       {/* Scene 14: Neon pill outline drawing */}
       <Sequence from={SCENE_14_START} durationInFrames={SCENE_14_DURATION}>
