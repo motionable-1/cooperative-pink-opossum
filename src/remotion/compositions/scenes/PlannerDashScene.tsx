@@ -8,13 +8,32 @@ const { fontFamily } = loadFont("normal", {
 
 const PURPLE = "#A855F7";
 
-const DAYS = [
-  { day: 12, weekday: "Tue", keyword: "twitter trends worldwide", volume: "600", difficulty: "15", published: true },
-  { day: 13, weekday: "Wed", keyword: "how to view sensitive content on twitter", volume: "4,400", difficulty: "11", published: false },
-  { day: 14, weekday: "Thu", keyword: "how to get more twitter followers", volume: "2,800", difficulty: "22", published: false },
-  { day: 15, weekday: "Fri", keyword: "how long can videos be on twitter", volume: "1,200", difficulty: "8", published: false },
-  { day: 16, weekday: "Sat", keyword: "how to go viral on twitter", volume: "3,100", difficulty: "18", published: false },
-  { day: 17, weekday: "Sun", keyword: "how many twitter followers to get verified", volume: "900", difficulty: "14", published: false },
+// 3 rows of calendar data matching the reference
+const ROWS = [
+  [
+    { day: 12, weekday: "Tue", keyword: "twitter trends worldwide", volume: "600", difficulty: "15", published: true },
+    { day: 13, weekday: "Wed", keyword: "how to view sensitive content on twitter", volume: "4,400", difficulty: "11", published: false },
+    { day: 14, weekday: "Thu", keyword: "how to get more twitter followers", volume: "2,800", difficulty: "22", published: false },
+    { day: 15, weekday: "Fri", keyword: "how long can videos be on twitter", volume: "1,200", difficulty: "8", published: false },
+    { day: 16, weekday: "Sat", keyword: "how to go viral on twitter", volume: "3,100", difficulty: "18", published: false },
+    { day: 17, weekday: "Sun", keyword: "how many twitter followers to get verified", volume: "900", difficulty: "14", published: false },
+  ],
+  [
+    { day: 18, weekday: "Mon", keyword: "how to get more twitter likes", volume: "1,800", difficulty: "19", published: false },
+    { day: 19, weekday: "Tue", keyword: "best time to post on twitter", volume: "5,200", difficulty: "25", published: false },
+    { day: 20, weekday: "Wed", keyword: "twitter analytics guide", volume: "2,100", difficulty: "16", published: false },
+    { day: 21, weekday: "Thu", keyword: "how to use twitter spaces", volume: "3,400", difficulty: "12", published: false },
+    { day: 22, weekday: "Fri", keyword: "twitter thread strategy", volume: "1,600", difficulty: "20", published: false },
+    { day: 23, weekday: "Sat", keyword: "twitter engagement tips", volume: "2,900", difficulty: "17", published: false },
+  ],
+  [
+    { day: 24, weekday: "Sun", keyword: "twitter hashtag strategy", volume: "2,400", difficulty: "21", published: false },
+    { day: 25, weekday: "Mon", keyword: "twitter marketing tips", volume: "4,100", difficulty: "24", published: false },
+    { day: 26, weekday: "Tue", keyword: "how to monetize twitter", volume: "3,700", difficulty: "28", published: false },
+    { day: 27, weekday: "Wed", keyword: "twitter content calendar", volume: "1,100", difficulty: "13", published: false },
+    { day: 28, weekday: "Thu", keyword: "twitter growth hacks", volume: "2,600", difficulty: "19", published: false },
+    { day: 29, weekday: "Fri", keyword: "twitter brand strategy", volume: "1,900", difficulty: "23", published: false },
+  ],
 ];
 
 const SIDEBAR_ITEMS = ["Content Planner", "Content History", "Settings", "Integrations"];
@@ -80,12 +99,9 @@ export const PlannerDashScene: React.FC = () => {
             flexDirection: "column",
           }}
         >
-          {/* Brand */}
           <div style={{ padding: "0 20px 28px", fontSize: 18, fontWeight: 700, color: "#111" }}>
             Outrank
           </div>
-
-          {/* Nav items */}
           {SIDEBAR_ITEMS.map((item, i) => (
             <div
               key={i}
@@ -95,15 +111,11 @@ export const PlannerDashScene: React.FC = () => {
                 fontWeight: i === 0 ? 600 : 400,
                 color: i === 0 ? "#111" : "#888",
                 backgroundColor: i === 0 ? "#F0F0F0" : "transparent",
-                borderRadius: 0,
-                cursor: "pointer",
               }}
             >
               {item}
             </div>
           ))}
-
-          {/* Bottom spacer + support */}
           <div style={{ flex: 1 }} />
           <div style={{ padding: "10px 20px", fontSize: 12, color: "#AAA" }}>Support</div>
           <div style={{ padding: "6px 20px", fontSize: 11, color: "#BBB" }}>ahmedhatata.ah@gmail.com</div>
@@ -136,89 +148,88 @@ export const PlannerDashScene: React.FC = () => {
           {/* Month */}
           <div style={{ fontSize: 16, fontWeight: 600, color: "#333", marginBottom: 16 }}>November 2024</div>
 
-          {/* Calendar grid */}
-          <div style={{ display: "flex", gap: 12 }}>
-            {DAYS.map((day, i) => {
-              const cardDelay = i * 3 + 10;
-              const cardSpring = spring({
-                frame: Math.max(0, frame - cardDelay),
-                fps: 30,
-                config: { damping: 14, stiffness: 140, mass: 0.4 },
-              });
-              const cardOp = interpolate(cardSpring, [0, 0.3], [0, 1], {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-              });
-              const cardY = interpolate(cardSpring, [0, 1], [20, 0]);
+          {/* Calendar grid — 3 rows */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {ROWS.map((row, ri) => (
+              <div key={ri} style={{ display: "flex", gap: 12 }}>
+                {row.map((day, ci) => {
+                  const cardDelay = ri * 6 + ci * 3 + 10;
+                  const cardSpring = spring({
+                    frame: Math.max(0, frame - cardDelay),
+                    fps: 30,
+                    config: { damping: 14, stiffness: 140, mass: 0.4 },
+                  });
+                  const cardOp = interpolate(cardSpring, [0, 0.3], [0, 1], {
+                    extrapolateLeft: "clamp",
+                    extrapolateRight: "clamp",
+                  });
+                  const cardY = interpolate(cardSpring, [0, 1], [20, 0]);
 
-              const isActive = day.day === 12;
+                  const isActive = day.day === 12;
 
-              return (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    minWidth: 160,
-                    backgroundColor: isActive ? "#F8F0FF" : "#FAFAFA",
-                    borderRadius: 12,
-                    padding: 14,
-                    opacity: cardOp,
-                    transform: `translateY(${cardY}px)`,
-                    border: isActive ? `2px solid ${PURPLE}` : "1px solid #ECECEC",
-                  }}
-                >
-                  {/* Day header */}
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                    <span style={{ fontSize: 20, fontWeight: 700, color: "#111" }}>{day.day}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: isActive ? PURPLE : "#888" }}>{day.weekday}</span>
-                  </div>
-
-                  {/* Published badge */}
-                  {day.published && (
+                  return (
                     <div
+                      key={ci}
                       style={{
-                        display: "inline-block",
-                        padding: "3px 10px",
-                        backgroundColor: "#E8F5E9",
-                        color: "#2E7D32",
-                        fontSize: 10,
-                        fontWeight: 600,
-                        borderRadius: 6,
-                        marginBottom: 8,
+                        flex: 1,
+                        minWidth: 0,
+                        backgroundColor: isActive ? "#F8F0FF" : "#FAFAFA",
+                        borderRadius: 12,
+                        padding: 14,
+                        opacity: cardOp,
+                        transform: `translateY(${cardY}px)`,
+                        border: isActive ? `2px solid ${PURPLE}` : "1px solid #ECECEC",
                       }}
                     >
-                      Published
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <span style={{ fontSize: 18, fontWeight: 700, color: "#111" }}>{day.day}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: isActive ? PURPLE : "#888" }}>{day.weekday}</span>
+                      </div>
+
+                      {day.published && (
+                        <div
+                          style={{
+                            display: "inline-block",
+                            padding: "3px 10px",
+                            backgroundColor: "#E8F5E9",
+                            color: "#2E7D32",
+                            fontSize: 10,
+                            fontWeight: 600,
+                            borderRadius: 6,
+                            marginBottom: 6,
+                          }}
+                        >
+                          Published
+                        </div>
+                      )}
+
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "#222", lineHeight: 1.3, marginBottom: 8 }}>
+                        {day.keyword}
+                      </div>
+
+                      <div style={{ fontSize: 9, color: "#888", marginBottom: 2 }}>Volume: {day.volume}</div>
+                      <div style={{ fontSize: 9, color: "#888", marginBottom: 8 }}>Difficulty: {day.difficulty}</div>
+
+                      {day.published && (
+                        <div
+                          style={{
+                            padding: "5px 12px",
+                            backgroundColor: "#333",
+                            color: "#FFF",
+                            fontSize: 10,
+                            fontWeight: 600,
+                            borderRadius: 6,
+                            textAlign: "center",
+                          }}
+                        >
+                          Visit Article
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  {/* Keyword */}
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#222", lineHeight: 1.3, marginBottom: 10 }}>
-                    {day.keyword}
-                  </div>
-
-                  {/* Metrics */}
-                  <div style={{ fontSize: 10, color: "#888", marginBottom: 3 }}>Volume: {day.volume}</div>
-                  <div style={{ fontSize: 10, color: "#888", marginBottom: 10 }}>Difficulty: {day.difficulty}</div>
-
-                  {/* Visit Article button for published */}
-                  {day.published && (
-                    <div
-                      style={{
-                        padding: "6px 14px",
-                        backgroundColor: "#333",
-                        color: "#FFF",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        borderRadius: 6,
-                        textAlign: "center",
-                      }}
-                    >
-                      Visit Article
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
