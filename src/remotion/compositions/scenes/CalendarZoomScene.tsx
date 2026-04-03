@@ -121,38 +121,35 @@ export const CalendarZoomScene: React.FC = () => {
    * We need to pan so card 12 ends up centered at ~640px viewport
    */
 
-  // Scale: zoom from full view → extreme close-up on card 12
-  const zoomScale = interpolate(frame, [0, 85], [0.78, 4.5], {
+  // Scale: zoom from full view → extreme close-up on card 12 in 1 sec
+  const zoomScale = interpolate(frame, [0, 28], [0.78, 4.5], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Pan: we use transformOrigin to anchor the zoom on card 12's position
-  // At scale 2.8 the dashboard is huge, so we shift it so card 12 stays centered
-
-  // Pan Y: start where PlannerDash ended (top=60), push up so row 1 stays visible
-  const panY = interpolate(frame, [0, 85], [60, 80], {
+  // Pan Y: start where PlannerDash ended (top=60)
+  const panY = interpolate(frame, [0, 28], [60, 80], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // Pan X: nudge left so card 12 column stays in center
-  const panX = interpolate(frame, [0, 85], [0, 60], {
+  // Pan X: nudge so card 12 column stays centered
+  const panX = interpolate(frame, [0, 28], [0, 60], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
   });
 
-  // 3D tilt builds from start — dramatic perspective like reference
-  const tiltX = interpolate(frame, [0, 85], [2, 18], {
+  // 3D tilt builds from start — dramatic perspective
+  const tiltX = interpolate(frame, [0, 28], [2, 18], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
   });
 
-  const tiltY = interpolate(frame, [0, 85], [0, -8], {
+  const tiltY = interpolate(frame, [0, 28], [0, -8], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
