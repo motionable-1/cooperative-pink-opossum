@@ -23,8 +23,9 @@ const FULL_TEXT = "and appear at the top automatically?";
 
 const getVisibleChars = (frame: number): number => {
   if (frame < 0) return 0;
+  // Type ~1.3 chars per frame, start with 3 chars visible, finish typing by f27
   const charsPerFrame = FULL_TEXT.length / 27;
-  return Math.min(FULL_TEXT.length, Math.floor(frame * charsPerFrame + 3));
+  return Math.min(FULL_TEXT.length, Math.round(frame * charsPerFrame + 3));
 };
 
 export const SearchBarScene: React.FC = () => {
@@ -73,9 +74,10 @@ export const SearchBarScene: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transform: `scale(${zoomScale})`,
-          transformOrigin: `${originX}% 50%`,
+          transform: `scale(${Math.round(zoomScale * 1000) / 1000}) translateZ(0)`,
+          transformOrigin: `${Math.round(originX * 100) / 100}% 50%`,
           willChange: "transform",
+          backfaceVisibility: "hidden" as const,
         }}
       >
         {/* Purple glow behind bar — top */}
