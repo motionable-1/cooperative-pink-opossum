@@ -21,9 +21,9 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-// Large cards — fill the frame prominently
-const CARD_W = 640;
-const CARD_H = 370;
+// Card size (before 3D foreshortening makes them appear smaller)
+const CARD_W = 540;
+const CARD_H = 350;
 
 const GoogleAdsIcon = () => (
   <svg width="56" height="56" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
@@ -87,19 +87,13 @@ export const EveryDayScene: React.FC = () => {
   const CARDS_START = 126;
   const CARD_STAGGER_IN = 4;
 
-  // Stack: diagonal from bottom-left (front) to top-right (back)
-  // Centered on the frame, heavy overlap, clockwise tilt, 3D depth
-  const STACK_CENTER_X = 580;    // center of the stack on screen
-  const STACK_CENTER_Y = 340;    // slightly below vertical center
-  const STEP_X = 120;            // horizontal offset per card (tight overlap)
-  const STEP_Y = -80;            // vertical offset per card
-
-  const TILT = 15;               // CLOCKWISE tilt (positive = tops lean right)
-
-  // 3D perspective values
-  const PERSPECTIVE = 1200;      // perspective distance
-  const ROTATE_X = 8;            // subtle tilt backward
-  const ROTATE_Y = -6;           // slight left-side-forward
+  // 3D tilted plane — cards lie on a surface like a desk viewed from above
+  // A wrapper handles the global 3D rotation; cards just offset inside it
+  const PERSPECTIVE = 1500;
+  const PLANE_RX = 40;           // backward tilt — the desk surface angle
+  const PLANE_RZ = -22;          // counter-clockwise spin of the surface
+  const STEP_X = 120;            // right offset per card on the plane
+  const STEP_Y = -80;            // upward offset per card on the plane
 
   // Timeline: hold → front card spring-slides to corner → splash
   const STACK_HOLD_END = CARDS_START + 4 * CARD_STAGGER_IN + 32;
@@ -172,115 +166,165 @@ export const EveryDayScene: React.FC = () => {
       )}
 
       {/* ── 3D PERSPECTIVE CARD STACK ── */}
+      {/* Perspective container */}
       <div style={{
         position: "absolute", inset: 0,
-        perspective: PERSPECTIVE,
-        perspectiveOrigin: "50% 45%",
+        perspective: `${PERSPECTIVE}px`,
+        perspectiveOrigin: "50% 50%",
       }}>
-        {[...TOOLS].reverse().map((tool, reverseIdx) => {
-          const i = TOOLS.length - 1 - reverseIdx;
-          const isFront = i === 0; // ahrefs = front card, closest to corner
-
-          const cardAppear = CARDS_START + i * CARD_STAGGER_IN;
-          const enterSpring = frame >= cardAppear
-            ? spring({ frame: frame - cardAppear, fps: 30, config: { damping: 12, stiffness: 180, mass: 0.5 } })
+        {/* 3D tilted plane — all cards sit on this rotated surface */}
+        {(() => {
+          // Animate the whole plane in: spring-scale from 0.8
+          const planeAppear = CARDS_START;
+          const planeSpring = frame >= planeAppear
+            ? spring({ frame: frame - planeAppear, fps: 30, config: { damping: 14, stiffness: 120, mass: 0.6 } })
             : 0;
+          const planeScale = interpolate(planeSpring, [0, 1], [0.85, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          const planeOp = interpolate(planeSpring, [0, 1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-          if (enterSpring <= 0) return null;
-
-          // Stack position: front card bottom-left, back card top-right
-          const stackX = STACK_CENTER_X + (i - 1.5) * STEP_X - CARD_W / 2;
-          const stackY = STACK_CENTER_Y + (i - 1.5) * STEP_Y - CARD_H / 2;
-
-          // Each card scales slightly smaller as it goes back for 3D depth
-          const depthScale = 1 - i * 0.03;
-
-          // Entrance: fly in from bottom-right
-          const clampOpts = { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as const };
-          let x = interpolate(enterSpring, [0, 1], [stackX + 350, stackX], clampOpts);
-          let y = interpolate(enterSpring, [0, 1], [stackY + 200, stackY], clampOpts);
-          let opacity = interpolate(enterSpring, [0, 1], [0, 1], clampOpts);
-          let scale = interpolate(enterSpring, [0, 1], [0.75 * depthScale, depthScale], clampOpts);
-          let rotation = TILT;
-          let rx = ROTATE_X;
-          let ry = ROTATE_Y;
-
-          // Front card: after hold, nudges to bottom-left corner
-          if (isFront && frame >= SLIDE_START) {
-            const cornerX = 0;
-            const cornerY = 720 - CARD_H;
-
-            const slideSpring = spring({
-              frame: frame - SLIDE_START,
-              fps: 30,
-              config: { damping: 26, stiffness: 90, mass: 0.5 },
-            });
-
-            x = interpolate(slideSpring, [0, 1], [stackX, cornerX]);
-            y = interpolate(slideSpring, [0, 1], [stackY, cornerY]);
-            rotation = interpolate(slideSpring, [0, 1], [TILT, 0]);
-            rx = interpolate(slideSpring, [0, 1], [ROTATE_X, 0]);
-            ry = interpolate(slideSpring, [0, 1], [ROTATE_Y, 0]);
-            scale = depthScale;
-            opacity = 1;
-          }
-
-          // Other cards fade out when front card starts moving
-          if (!isFront && frame >= SLIDE_START) {
-            const fadeOutProg = interpolate(frame, [SLIDE_START + 4, SLIDE_START + 14], [1, 0], {
-              extrapolateLeft: "clamp", extrapolateRight: "clamp",
-              easing: Easing.in(Easing.quad),
-            });
-            opacity = fadeOutProg;
-          }
-
-          const zIndex = 10 + (TOOLS.length - i);
+          // When front card slides out, collapse the plane
+          const slideOutProg = frame >= SLIDE_START
+            ? interpolate(frame, [SLIDE_START, SLIDE_START + 14], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.quad) })
+            : 0;
+          const planeCollapseScale = interpolate(slideOutProg, [0, 1], [1, 0.92], { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as const });
 
           return (
-            <div
-              key={tool.name}
-              style={{
-                position: "absolute",
-                left: x, top: y, width: CARD_W, height: CARD_H,
-                backgroundColor: tool.bg,
-                borderRadius: 24,
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
-                opacity,
-                transform: `rotateX(${rx}deg) rotateY(${ry}deg) rotate(${rotation}deg) scale(${scale})`,
-                boxShadow: "0 20px 50px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.1)",
-                zIndex,
-                overflow: "hidden",
-              }}
-            >
-              {tool.hasGoogleIcon && <GoogleAdsIcon />}
-              {tool.hasGAIcon && <GAIcon />}
-              {tool.accentChar ? (
-                <span style={{ fontSize: 58, fontWeight: 800, fontFamily }}>
-                  <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
-                  <span style={{ color: tool.restColor }}>{tool.restText}</span>
-                </span>
-              ) : (
-                <span style={{ fontSize: tool.name.length > 10 ? 36 : 48, fontWeight: 700, color: tool.textColor, fontFamily }}>{tool.text}</span>
-              )}
-              {/* White overlay on front card — fades in before splash */}
-              {isFront && frame >= CARD_WHITE_START && (() => {
-                const whiteOp = interpolate(frame, [CARD_WHITE_START, CARD_WHITE_START + 10], [0, 1], {
-                  extrapolateLeft: "clamp", extrapolateRight: "clamp",
-                  easing: Easing.inOut(Easing.quad),
-                });
+            <div style={{
+              position: "absolute",
+              left: "50%", top: "50%",
+              transform: `translate(-50%, -50%) rotateX(${PLANE_RX}deg) rotateZ(${PLANE_RZ}deg) scale(${planeScale * planeCollapseScale})`,
+              transformStyle: "preserve-3d" as const,
+              opacity: planeOp > 0.01 ? planeOp : 0,
+            }}>
+              {[...TOOLS].reverse().map((tool, reverseIdx) => {
+                const i = TOOLS.length - 1 - reverseIdx;
+                const isFront = i === 0;
+
+                const cardAppear = CARDS_START + i * CARD_STAGGER_IN;
+                const enterSpring = frame >= cardAppear
+                  ? spring({ frame: frame - cardAppear, fps: 30, config: { damping: 12, stiffness: 180, mass: 0.5 } })
+                  : 0;
+
+                if (enterSpring <= 0) return null;
+
+                // Card position on the flat plane (before 3D rotation)
+                // Center the group: offset so midpoint of all cards is at origin
+                const midIdx = (TOOLS.length - 1) / 2; // 1.5 for 4 cards
+                const targetX = (i - midIdx) * STEP_X - CARD_W / 2;
+                const targetY = (i - midIdx) * STEP_Y - CARD_H / 2;
+                const liftZ = (TOOLS.length - 1 - i) * 10;
+
+                // Entrance: spring in from further along the diagonal
+                const clampOpts = { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as const };
+                const tx = interpolate(enterSpring, [0, 1], [targetX + 250, targetX], clampOpts);
+                const ty = interpolate(enterSpring, [0, 1], [targetY - 150, targetY], clampOpts);
+                const opacity = interpolate(enterSpring, [0, 1], [0, 1], clampOpts);
+                const cardScale = interpolate(enterSpring, [0, 1], [0.8, 1], clampOpts);
+
+                // When not front card, fade out during slide
+                const fadeOp = (!isFront && frame >= SLIDE_START)
+                  ? interpolate(frame, [SLIDE_START, SLIDE_START + 12], [1, 0], {
+                      ...clampOpts, easing: Easing.in(Easing.quad),
+                    })
+                  : 1;
+
+                // Front card fades out from the plane (it will reappear flat below)
+                const frontFadeOp = (isFront && frame >= SLIDE_START)
+                  ? interpolate(frame, [SLIDE_START, SLIDE_START + 8], [1, 0], {
+                      ...clampOpts, easing: Easing.in(Easing.quad),
+                    })
+                  : 1;
+
+                const zIndex = 10 + (TOOLS.length - i);
+
                 return (
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    backgroundColor: "#FFFFFF",
-                    opacity: whiteOp,
-                    borderRadius: 24,
-                  }} />
+                  <div
+                    key={tool.name}
+                    style={{
+                      position: "absolute",
+                      width: CARD_W, height: CARD_H,
+                      backgroundColor: tool.bg,
+                      borderRadius: 24,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
+                      opacity: opacity * fadeOp * frontFadeOp,
+                      transform: `translate3d(${tx}px, ${ty}px, ${liftZ}px) scale(${cardScale})`,
+                      boxShadow: "-20px 30px 50px rgba(0,0,0,0.15)",
+                      zIndex,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {tool.hasGoogleIcon && <GoogleAdsIcon />}
+                    {tool.hasGAIcon && <GAIcon />}
+                    {tool.accentChar ? (
+                      <span style={{ fontSize: 52, fontWeight: 800, fontFamily }}>
+                        <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
+                        <span style={{ color: tool.restColor }}>{tool.restText}</span>
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: tool.name.length > 10 ? 34 : 44, fontWeight: 700, color: tool.textColor, fontFamily }}>{tool.text}</span>
+                    )}
+                  </div>
                 );
-              })()}
+              })}
             </div>
           );
-        })}
+        })()}
       </div>
+
+      {/* ── FLAT FRONT CARD: appears after leaving the 3D plane ── */}
+      {frame >= SLIDE_START && (() => {
+        const slideSpring = spring({
+          frame: frame - SLIDE_START,
+          fps: 30,
+          config: { damping: 24, stiffness: 80, mass: 0.5 },
+        });
+        // Animate from roughly where the 3D card was to the corner
+        // The 3D plane center is at screen center, front card is bottom-left of that
+        const startX = 280;
+        const startY = 320;
+        const endX = 0;
+        const endY = 720 - CARD_H;
+        const x = interpolate(slideSpring, [0, 1], [startX, endX]);
+        const y = interpolate(slideSpring, [0, 1], [startY, endY]);
+        // Fade in as the 3D version fades out
+        const fadeIn = interpolate(frame, [SLIDE_START, SLIDE_START + 6], [0, 1], {
+          extrapolateLeft: "clamp", extrapolateRight: "clamp",
+        });
+        // White overlay
+        const whiteOp = frame >= CARD_WHITE_START
+          ? interpolate(frame, [CARD_WHITE_START, CARD_WHITE_START + 10], [0, 1], {
+              extrapolateLeft: "clamp", extrapolateRight: "clamp",
+              easing: Easing.inOut(Easing.quad),
+            })
+          : 0;
+
+        return (
+          <div style={{
+            position: "absolute",
+            left: x, top: y, width: CARD_W, height: CARD_H,
+            backgroundColor: "#2D5BE3",
+            borderRadius: 24,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
+            opacity: fadeIn,
+            boxShadow: "0 18px 44px rgba(0,0,0,0.22)",
+            zIndex: 50,
+            overflow: "hidden",
+          }}>
+            <span style={{ fontSize: 52, fontWeight: 800, fontFamily }}>
+              <span style={{ color: "#FF6B35" }}>a</span>
+              <span style={{ color: "#FFFFFF" }}>hrefs</span>
+            </span>
+            {whiteOp > 0 && (
+              <div style={{
+                position: "absolute", inset: 0,
+                backgroundColor: "#FFFFFF",
+                opacity: whiteOp,
+                borderRadius: 24,
+              }} />
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── WHITE SPLASH: white rectangle expands from card to fill frame ── */}
       {frame >= SPLASH_START && (() => {
