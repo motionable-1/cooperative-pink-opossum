@@ -58,8 +58,8 @@ const INTEGRATIONS = [
   },
 ];
 
-const TILE_W = 130;
-const TILE_H = 55;
+const TILE_W = 169;
+const TILE_H = 72;
 
 export const IntegrationIconsScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -175,12 +175,12 @@ export const IntegrationIconsScene: React.FC = () => {
               left: `calc(50% + ${item.x + floatX}px)`,
               width: TILE_W,
               height: TILE_H,
-              borderRadius: 14,
+              borderRadius: 18,
               backgroundColor: "#FFFFFF",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8,
+              gap: 10,
               transform: `rotate(${item.rot}deg) scale(${tileScale})`,
               opacity: tileOp,
               boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
@@ -189,13 +189,13 @@ export const IntegrationIconsScene: React.FC = () => {
           >
             <Img
               src={item.iconUrl}
-              style={{ width: 24, height: 24 }}
+              style={{ width: 31, height: 31 }}
             />
             <span
               style={{
                 fontFamily:
                   "Inter, system-ui, -apple-system, sans-serif",
-                fontSize: 13,
+                fontSize: 17,
                 fontWeight: 600,
                 color: "#000000",
               }}
