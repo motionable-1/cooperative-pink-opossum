@@ -11,19 +11,20 @@ const PURPLE = "#A855F7";
 export const HandsFreeScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Three pills that DROP from above and BOUNCE into place
-  // First pill lands first, then second, then third — stacking
+  // Bottom pill sits tight from the start.
+  // Middle pill falls and bounces on top of it.
+  // Top pill falls last and bounces on top of middle.
+  // Order in array: top (index 0) → middle (1) → bottom (2)
   const pills = [
-    { bg: PURPLE, color: "#FFFFFF", rotate: -6, xOff: -60, delay: 0 },
-    { bg: "#F5F5F5", color: PURPLE, rotate: 0, xOff: 20, delay: 8 },
-    { bg: PURPLE, color: "#FFFFFF", rotate: 0, xOff: -30, delay: 16 },
+    { bg: PURPLE, color: "#FFFFFF", rotate: -6, xOff: -60, falls: true, delay: 14 },
+    { bg: "#F5F5F5", color: PURPLE, rotate: 0, xOff: 20, falls: true, delay: 6 },
+    { bg: PURPLE, color: "#FFFFFF", rotate: 0, xOff: -30, falls: false, delay: 0 },
   ];
 
-  // Final stacked positions (centered vertically)
   const PILL_H = 80;
   const GAP = 12;
   const totalH = pills.length * PILL_H + (pills.length - 1) * GAP;
-  const startY = (720 - totalH) / 2;
+  const baseY = (720 - totalH) / 2;
 
   return (
     <div
@@ -36,25 +37,37 @@ export const HandsFreeScene: React.FC = () => {
       }}
     >
       {pills.map((pill, i) => {
-        // Bouncy spring — low damping for visible overshoot/bounce
-        const fallSpring = spring({
-          frame: Math.max(0, frame - pill.delay),
-          fps: 30,
-          config: { damping: 8, stiffness: 120, mass: 0.8 },
-        });
+        const finalY = baseY + i * (PILL_H + GAP);
 
-        // Fall from way above (-400px) to final Y position
-        const finalY = startY + i * (PILL_H + GAP);
-        const y = interpolate(fallSpring, [0, 1], [-500, finalY]);
+        let y: number;
+        let op: number;
+        let wobble: number;
 
-        // Opacity: instant on as soon as it starts falling
-        const op = interpolate(fallSpring, [0, 0.05], [0, 1], {
-          extrapolateLeft: "clamp",
-          extrapolateRight: "clamp",
-        });
+        if (!pill.falls) {
+          // Bottom pill: already sitting, just fade in instantly
+          const fadeIn = interpolate(frame, [0, 4], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          });
+          y = finalY;
+          op = fadeIn;
+          wobble = pill.rotate;
+        } else {
+          // Falling pills: drop from above with bouncy spring
+          const fallSpring = spring({
+            frame: Math.max(0, frame - pill.delay),
+            fps: 30,
+            config: { damping: 8, stiffness: 120, mass: 0.8 },
+          });
 
-        // Slight rotation wobble on landing
-        const wobble = interpolate(fallSpring, [0, 1], [pill.rotate - 4, pill.rotate]);
+          y = interpolate(fallSpring, [0, 1], [-450, finalY]);
+          op = interpolate(fallSpring, [0, 0.05], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          });
+          // Wobble rotation on landing
+          wobble = interpolate(fallSpring, [0, 1], [pill.rotate + 8, pill.rotate]);
+        }
 
         return (
           <div
