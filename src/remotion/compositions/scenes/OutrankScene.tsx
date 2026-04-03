@@ -64,7 +64,7 @@ export const OutrankScene: React.FC = () => {
   const gapLength = perimeter - litLength;
 
   const startOffset = -perimeter * 0.15;
-  const endOffset = startOffset - perimeter * 1.2;
+  const endOffset = startOffset - perimeter * 0.85;
   const dashOffset = interpolate(
     frame,
     [0, durationInFrames],
@@ -75,7 +75,7 @@ export const OutrankScene: React.FC = () => {
   const rotationProgress = interpolate(
     frame,
     [0, durationInFrames],
-    [0, 1.2],
+    [0, 0.85],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
   const glowAngle = 225 + rotationProgress * 360;
