@@ -11,20 +11,70 @@ const PURPLE = "#A855F7";
 export const HandsFreeScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Bottom pill sits tight from the start.
-  // Middle pill falls and bounces on top of it.
-  // Top pill falls last and bounces on top of middle.
-  // Order in array: top (index 0) → middle (1) → bottom (2)
-  const pills = [
-    { bg: PURPLE, color: "#FFFFFF", rotate: -6, xOff: -60, falls: true, delay: 14 },
-    { bg: "#F5F5F5", color: PURPLE, rotate: 0, xOff: 20, falls: true, delay: 6 },
-    { bg: PURPLE, color: "#FFFFFF", rotate: 0, xOff: -30, falls: false, delay: 0 },
-  ];
+  // Layout: 3 pills stacked vertically, centered on screen
+  // Bottom pill = BASE (appears instantly, never moves)
+  // Middle pill = falls from above, lands ON TOP of bottom pill
+  // Top pill = falls last, lands ON TOP of middle pill
+  //
+  // The base pill acts as a floor — nothing goes below it.
 
   const PILL_H = 80;
   const GAP = 12;
-  const totalH = pills.length * PILL_H + (pills.length - 1) * GAP;
-  const baseY = (720 - totalH) / 2;
+  const STEP = PILL_H + GAP;
+
+  // Base pill Y position (bottom of the stack)
+  const BASE_Y = 360 + STEP; // below center
+
+  // Final resting positions (bottom-up)
+  const bottomY = BASE_Y;
+  const middleY = BASE_Y - STEP;
+  const topY = BASE_Y - STEP * 2;
+
+  // ─── BOTTOM PILL: The base. Appears instantly. ───
+  const baseOp = interpolate(frame, [0, 4], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // ─── MIDDLE PILL: Falls from above, bounces, settles on base ───
+  const MID_DELAY = 6;
+  const midSpring = spring({
+    frame: Math.max(0, frame - MID_DELAY),
+    fps: 30,
+    config: { damping: 9, stiffness: 140, mass: 0.7 },
+  });
+  // Clamp so it never goes BELOW its resting position (can't pass through base)
+  const midRawY = interpolate(midSpring, [0, 1], [-400, middleY]);
+  const midY = Math.min(midRawY, middleY + 8); // allow tiny overshoot for bounce feel, but not past base
+  const midOp = interpolate(midSpring, [0, 0.05], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // ─── TOP PILL: Falls last, bounces, settles on middle ───
+  const TOP_DELAY = 14;
+  const topSpring = spring({
+    frame: Math.max(0, frame - TOP_DELAY),
+    fps: 30,
+    config: { damping: 9, stiffness: 140, mass: 0.7 },
+  });
+  const topRawY = interpolate(topSpring, [0, 1], [-400, topY]);
+  const topY2 = Math.min(topRawY, topY + 8);
+  const topOp = interpolate(topSpring, [0, 0.05], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Rotation wobble on landing
+  const topWobble = interpolate(topSpring, [0, 0.6, 1], [12, -8, -6]);
+  const midWobble = interpolate(midSpring, [0, 0.6, 1], [8, -3, 0]);
+
+  const pills = [
+    // Render order: bottom first (behind), then middle, then top (in front)
+    { y: bottomY, op: baseOp, rotate: 0, xOff: -30, bg: PURPLE, color: "#FFFFFF", zIndex: 1 },
+    { y: midY, op: midOp, rotate: midWobble, xOff: 20, bg: "#F5F5F5", color: PURPLE, zIndex: 2 },
+    { y: topY2, op: topOp, rotate: topWobble, xOff: -60, bg: PURPLE, color: "#FFFFFF", zIndex: 3 },
+  ];
 
   return (
     <div
@@ -36,67 +86,34 @@ export const HandsFreeScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {pills.map((pill, i) => {
-        const finalY = baseY + i * (PILL_H + GAP);
-
-        let y: number;
-        let op: number;
-        let wobble: number;
-
-        if (!pill.falls) {
-          // Bottom pill: already sitting, just fade in instantly
-          const fadeIn = interpolate(frame, [0, 4], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-          y = finalY;
-          op = fadeIn;
-          wobble = pill.rotate;
-        } else {
-          // Falling pills: drop from above with bouncy spring
-          const fallSpring = spring({
-            frame: Math.max(0, frame - pill.delay),
-            fps: 30,
-            config: { damping: 8, stiffness: 120, mass: 0.8 },
-          });
-
-          y = interpolate(fallSpring, [0, 1], [-450, finalY]);
-          op = interpolate(fallSpring, [0, 0.05], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-          // Wobble rotation on landing
-          wobble = interpolate(fallSpring, [0, 1], [pill.rotate + 8, pill.rotate]);
-        }
-
-        return (
-          <div
-            key={i}
+      {pills.map((pill, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: pill.y,
+            transform: `translateX(-50%) translateX(${pill.xOff}px) rotate(${pill.rotate}deg)`,
+            padding: "14px 44px",
+            borderRadius: 14,
+            backgroundColor: pill.bg,
+            opacity: pill.op,
+            whiteSpace: "nowrap",
+            zIndex: pill.zIndex,
+          }}
+        >
+          <span
             style={{
-              position: "absolute",
-              left: "50%",
-              top: y,
-              transform: `translateX(-50%) translateX(${pill.xOff}px) rotate(${wobble}deg)`,
-              padding: "14px 44px",
-              borderRadius: 14,
-              backgroundColor: pill.bg,
-              opacity: op,
-              whiteSpace: "nowrap",
+              fontSize: 52,
+              fontWeight: 800,
+              color: pill.color,
+              letterSpacing: -1,
             }}
           >
-            <span
-              style={{
-                fontSize: 52,
-                fontWeight: 800,
-                color: pill.color,
-                letterSpacing: -1,
-              }}
-            >
-              hands-free.
-            </span>
-          </div>
-        );
-      })}
+            hands-free.
+          </span>
+        </div>
+      ))}
     </div>
   );
 };
