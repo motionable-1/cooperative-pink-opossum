@@ -29,6 +29,14 @@ import { WhiteFlashScene } from "./scenes/WhiteFlashScene";
 import { ImageGridScene } from "./scenes/ImageGridScene";
 import { BrandColorsScene } from "./scenes/BrandColorsScene";
 import { ArticleCardsScene } from "./scenes/ArticleCardsScene";
+import { ArticleZoomScene } from "./scenes/ArticleZoomScene";
+import { ContentTableScene } from "./scenes/ContentTableScene";
+import { ComeBackScene } from "./scenes/ComeBackScene";
+import { PublishedScene } from "./scenes/PublishedScene";
+import { HandsFreeScene } from "./scenes/HandsFreeScene";
+import { PlannerDashScene } from "./scenes/PlannerDashScene";
+import { CalendarZoomScene } from "./scenes/CalendarZoomScene";
+import { RadialBurstScene } from "./scenes/RadialBurstScene";
 
 /*
  * Full animation sequence:
@@ -88,6 +96,14 @@ const SCENE_29_DURATION = 12;   // White flash transition
 const SCENE_30_DURATION = 55;   // Image grid gallery (3x3) on white
 const SCENE_31_DURATION = 95;   // "With your brand colors, No useless stock images." on black
 const SCENE_32_DURATION = 120;  // Floating article cards on purple gradient
+const SCENE_33_DURATION = 32;   // Article cards zoom with radial blur → white
+const SCENE_34_DURATION = 150;  // Content History table on purple (3D tilt + scroll)
+const SCENE_35_DURATION = 70;   // "Come back tomorrow to see your article" word reveal
+const SCENE_36_DURATION = 80;   // "PUBLISHED" glitch/trail → white on purple → purple on white
+const SCENE_37_DURATION = 45;   // "hands-free." stacked pills on black
+const SCENE_38_DURATION = 120;  // Outrank Content Planner dashboard slide-up
+const SCENE_39_DURATION = 90;   // Calendar cards 3D zoom (zoomed into day cards)
+const SCENE_40_DURATION = 30;   // Purple radial burst finale
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -120,6 +136,14 @@ const SCENE_29_START = SCENE_28_START + SCENE_28_DURATION;
 const SCENE_30_START = SCENE_29_START + SCENE_29_DURATION;
 const SCENE_31_START = SCENE_30_START + SCENE_30_DURATION;
 const SCENE_32_START = SCENE_31_START + SCENE_31_DURATION;
+const SCENE_33_START = SCENE_32_START + SCENE_32_DURATION;
+const SCENE_34_START = SCENE_33_START + SCENE_33_DURATION;
+const SCENE_35_START = SCENE_34_START + SCENE_34_DURATION;
+const SCENE_36_START = SCENE_35_START + SCENE_35_DURATION;
+const SCENE_37_START = SCENE_36_START + SCENE_36_DURATION;
+const SCENE_38_START = SCENE_37_START + SCENE_37_DURATION;
+const SCENE_39_START = SCENE_38_START + SCENE_38_DURATION;
+const SCENE_40_START = SCENE_39_START + SCENE_39_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -282,6 +306,46 @@ export const Main: React.FC = () => {
       {/* Scene 32: Floating article cards on purple gradient */}
       <Sequence from={SCENE_32_START} durationInFrames={SCENE_32_DURATION}>
         <ArticleCardsScene />
+      </Sequence>
+
+      {/* Scene 33: Article cards zoom with radial blur */}
+      <Sequence from={SCENE_33_START} durationInFrames={SCENE_33_DURATION}>
+        <ArticleZoomScene />
+      </Sequence>
+
+      {/* Scene 34: Content History table on purple (3D tilt) */}
+      <Sequence from={SCENE_34_START} durationInFrames={SCENE_34_DURATION}>
+        <ContentTableScene />
+      </Sequence>
+
+      {/* Scene 35: "Come back tomorrow to see your article" */}
+      <Sequence from={SCENE_35_START} durationInFrames={SCENE_35_DURATION}>
+        <ComeBackScene />
+      </Sequence>
+
+      {/* Scene 36: "PUBLISHED" glitch animation */}
+      <Sequence from={SCENE_36_START} durationInFrames={SCENE_36_DURATION}>
+        <PublishedScene />
+      </Sequence>
+
+      {/* Scene 37: "hands-free." stacked pills on black */}
+      <Sequence from={SCENE_37_START} durationInFrames={SCENE_37_DURATION}>
+        <HandsFreeScene />
+      </Sequence>
+
+      {/* Scene 38: Outrank Content Planner dashboard */}
+      <Sequence from={SCENE_38_START} durationInFrames={SCENE_38_DURATION}>
+        <PlannerDashScene />
+      </Sequence>
+
+      {/* Scene 39: Calendar cards 3D zoom */}
+      <Sequence from={SCENE_39_START} durationInFrames={SCENE_39_DURATION}>
+        <CalendarZoomScene />
+      </Sequence>
+
+      {/* Scene 40: Purple radial burst finale */}
+      <Sequence from={SCENE_40_START} durationInFrames={SCENE_40_DURATION}>
+        <RadialBurstScene />
       </Sequence>
     </AbsoluteFill>
   );
