@@ -98,15 +98,17 @@ export const EveryDayScene: React.FC = () => {
   // 3D perspective tilt — all cards share same rotation
   const TILT = -12;              // slight counter-clockwise rotation
 
-  // Hold duration before GA card does its thing
-  const STACK_HOLD_END = CARDS_START + 4 * CARD_STAGGER_IN + 30; // stack visible for ~30 frames
-  const GA_BOUNCE_START = STACK_HOLD_END;
-  const GA_SPLASH_START = GA_BOUNCE_START + 20;
+  // Hold duration before GA card separates
+  const STACK_HOLD_END = CARDS_START + 4 * CARD_STAGGER_IN + 30;
+  const GA_FLY_START = STACK_HOLD_END;        // GA separates from stack
+  const GA_FLY_DUR = 24;                      // 24 frames — slow enough to track visually
+  const GA_LAND = GA_FLY_START + GA_FLY_DUR;  // arrives at corner
+  const GA_SPLASH_START = GA_LAND + 10;       // brief hold then splash
   const GA_SPLASH_END = GA_SPLASH_START + 12;
 
-  // Spring for GA card bounce
-  const gaBounceSpring = frame >= GA_BOUNCE_START
-    ? spring({ frame: frame - GA_BOUNCE_START, fps: 30, config: { damping: 8, stiffness: 120, mass: 0.6 } })
+  // Spring for the settle at the corner — starts when card lands
+  const settleSpring = frame >= GA_LAND
+    ? spring({ frame: frame - GA_LAND, fps: 30, config: { damping: 10, stiffness: 200, mass: 0.4 } })
     : 0;
 
   return (
@@ -209,25 +211,53 @@ export const EveryDayScene: React.FC = () => {
         opacity = enterOp;
         scale = enterScale;
 
-        // GA card special behavior: after hold, flies to corner with spring bounce
-        if (isGA && frame >= GA_BOUNCE_START) {
+        // GA card: lifts off the stack, arcs to corner, settles
+        if (isGA && frame >= GA_FLY_START) {
           const cornerX = 0;
           const cornerY = 720 - CARD_H;
 
-          // Spring drives the whole motion: from stack position → overshoots past corner → settles at corner
-          // gaBounceSpring: 0 → overshoots past 1 → settles at 1 (damping=8 gives nice overshoot)
-          x = interpolate(gaBounceSpring, [0, 1], [stackX, cornerX]);
-          y = interpolate(gaBounceSpring, [0, 1], [stackY, cornerY]);
-          rotation = interpolate(gaBounceSpring, [0, 1], [TILT, 0]);
-          scale = interpolate(gaBounceSpring, [0, 0.5, 1], [1, 1.05, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          // LIFT phase (first 4 frames): card scales up in place, "lifting" off the stack
+          // This makes the z-index change feel natural — card is rising, not teleporting
+          const LIFT_DUR = 4;
+          const liftEnd = GA_FLY_START + LIFT_DUR;
+
+          if (frame < liftEnd) {
+            // Scale up slightly in place — "lifting off"
+            const liftProg = interpolate(frame, [GA_FLY_START, liftEnd], [0, 1], {
+              extrapolateLeft: "clamp", extrapolateRight: "clamp",
+              easing: Easing.out(Easing.quad),
+            });
+            x = stackX;
+            y = stackY;
+            rotation = TILT;
+            scale = interpolate(liftProg, [0, 1], [1, 1.12]);
+          } else if (frame < GA_LAND) {
+            // FLY phase: constant speed so every frame shows visible movement
+            const flyProg = interpolate(frame, [liftEnd, GA_LAND], [0, 1], {
+              extrapolateLeft: "clamp", extrapolateRight: "clamp",
+            });
+            x = interpolate(flyProg, [0, 1], [stackX, cornerX]);
+            y = interpolate(flyProg, [0, 1], [stackY, cornerY]);
+            rotation = interpolate(flyProg, [0, 1], [TILT, 0]);
+            // Slight scale arc — peaks mid-flight
+            scale = interpolate(flyProg, [0, 0.5, 1], [1.12, 1.14, 1.02], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          } else {
+            // SETTLE phase: spring at the corner
+            const overshootX = -15;
+            const overshootY = cornerY + 10;
+            x = interpolate(settleSpring, [0, 1], [overshootX, cornerX]);
+            y = interpolate(settleSpring, [0, 1], [overshootY, cornerY]);
+            rotation = interpolate(settleSpring, [0, 1], [-1.5, 0]);
+            scale = interpolate(settleSpring, [0, 0.3, 1], [1.02, 0.97, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          }
           opacity = 1;
         }
 
         // Z-index: front cards (low i) get higher z-index
         // But GA jumps to top when it starts bouncing
         let zIndex = 10 + (TOOLS.length - i);
-        if (isGA && frame >= GA_BOUNCE_START) {
-          zIndex = 50; // above all other cards
+        if (isGA && frame >= GA_FLY_START) {
+          zIndex = 50; // above all other cards when flying
         }
 
         return (
