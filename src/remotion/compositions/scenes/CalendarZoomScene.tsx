@@ -142,8 +142,8 @@ export const CalendarZoomScene: React.FC = () => {
     easing: Easing.inOut(Easing.quad),
   });
 
-  // 3D tilt builds from start — dramatic perspective
-  const tiltX = interpolate(frame, [0, 28], [2, 18], {
+  // 3D tilt builds smoothly — starts at 0 to match PlannerDash end state
+  const tiltX = interpolate(frame, [0, 28], [0, 18], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -255,6 +255,20 @@ export const CalendarZoomScene: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* White flash at end — crashes into radial burst */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "#FFFFFF",
+          opacity: interpolate(frame, [22, 28], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+          zIndex: 50,
+        }}
+      />
     </div>
   );
 };
