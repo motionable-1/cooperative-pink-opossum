@@ -49,7 +49,7 @@ export const ArticleCardsScene: React.FC = () => {
   const floatX = Math.cos(frame * 0.03) * 3;
 
   // Slow zoom in
-  const zoomScale = interpolate(frame, [0, 75], [0.94, 1.04], {
+  const zoomScale = interpolate(frame, [0, 40], [0.94, 1.02], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
