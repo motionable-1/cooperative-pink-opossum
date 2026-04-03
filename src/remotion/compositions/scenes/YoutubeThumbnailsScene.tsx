@@ -58,20 +58,24 @@ export const YoutubeThumbnailsScene: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      <Img
-        src={THUMB_COMPOSITE}
+      <div
         style={{
           position: "absolute",
-          width: "105%",
-          height: "105%",
-          left: "-2.5%",
-          top: "-2.5%",
-          objectFit: "cover",
+          inset: -40,
           opacity,
           transform: `scale(${finalScale}) rotate(${rotation}deg) translateY(${floatY}px)`,
           transformOrigin: "center center",
         }}
-      />
+      >
+        <Img
+          src={THUMB_COMPOSITE}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      </div>
     </div>
   );
 };
