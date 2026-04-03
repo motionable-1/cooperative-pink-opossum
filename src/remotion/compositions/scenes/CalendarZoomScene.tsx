@@ -122,7 +122,7 @@ export const CalendarZoomScene: React.FC = () => {
    */
 
   // Scale: zoom from full view → extreme close-up on card 12 in 1 sec
-  const zoomScale = interpolate(frame, [0, 28], [0.78, 4.5], {
+  const zoomScale = interpolate(frame, [0, 28], [0.78, 3.6], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
