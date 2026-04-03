@@ -21,12 +21,12 @@ const TOOLS = [
   { name: "Google Analytics", bg: "#FFFFFF", text: "Google Analytics", textColor: "#5F6368", hasGAIcon: true },
 ];
 
-// Bigger cards
-const CARD_W = 560;
-const CARD_H = 320;
+// Large cards — fill the frame prominently
+const CARD_W = 640;
+const CARD_H = 370;
 
 const GoogleAdsIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="56" height="56" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="18" y="4" width="8" height="24" rx="4" fill="#4285F4" transform="rotate(15 22 16)" />
     <rect x="6" y="4" width="8" height="24" rx="4" fill="#FBBC04" transform="rotate(15 10 16)" />
     <circle cx="10" cy="26" r="4" fill="#34A853" />
@@ -34,7 +34,7 @@ const GoogleAdsIcon = () => (
 );
 
 const GAIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+  <svg width="56" height="56" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
     <rect x="22" y="4" width="6" height="24" rx="3" fill="#F9AB00" />
     <rect x="13" y="10" width="6" height="18" rx="3" fill="#E37400" />
     <circle cx="7" cy="25" r="3.5" fill="#E37400" />
@@ -87,11 +87,11 @@ export const EveryDayScene: React.FC = () => {
   const CARDS_START = 126;
   const CARD_STAGGER_IN = 4;
 
-  // Stack positions — bigger cards, positioned to fill more of the frame
-  const STACK_BASE_X = 80;       // front card (ahrefs) left edge
-  const STACK_BASE_Y = 280;      // front card Y — lower, closer to bottom-left
-  const STEP_X = 180;            // horizontal offset per card
-  const STEP_Y = -110;           // vertical offset per card
+  // Stack positions — front card nearly at the bottom-left corner already
+  const STACK_BASE_X = 20;       // front card almost flush left
+  const STACK_BASE_Y = 330;      // front card almost at bottom (corner = 350)
+  const STEP_X = 160;            // horizontal offset per card
+  const STEP_Y = -100;           // vertical offset per card
 
   const TILT = -12;
 
@@ -196,14 +196,14 @@ export const EveryDayScene: React.FC = () => {
           const cornerX = 0;
           const cornerY = 720 - CARD_H;
 
-          // Single spring drives the whole transition
+          // Gentle spring for tiny nudge to corner
           const slideSpring = spring({
             frame: frame - SLIDE_START,
             fps: 30,
-            config: { damping: 22, stiffness: 120, mass: 0.6 },
+            config: { damping: 28, stiffness: 80, mass: 0.5 },
           });
 
-          // Interpolate position and rotation together
+          // Nudge position and flatten rotation
           x = interpolate(slideSpring, [0, 1], [stackX, cornerX]);
           y = interpolate(slideSpring, [0, 1], [stackY, cornerY]);
           rotation = interpolate(slideSpring, [0, 1], [TILT, 0]);
@@ -241,12 +241,12 @@ export const EveryDayScene: React.FC = () => {
             {tool.hasGoogleIcon && <GoogleAdsIcon />}
             {tool.hasGAIcon && <GAIcon />}
             {tool.accentChar ? (
-              <span style={{ fontSize: 52, fontWeight: 800, fontFamily }}>
+              <span style={{ fontSize: 58, fontWeight: 800, fontFamily }}>
                 <span style={{ color: tool.accentColor }}>{tool.accentChar}</span>
                 <span style={{ color: tool.restColor }}>{tool.restText}</span>
               </span>
             ) : (
-              <span style={{ fontSize: tool.name.length > 10 ? 32 : 42, fontWeight: 700, color: tool.textColor, fontFamily }}>{tool.text}</span>
+              <span style={{ fontSize: tool.name.length > 10 ? 36 : 48, fontWeight: 700, color: tool.textColor, fontFamily }}>{tool.text}</span>
             )}
             {/* White overlay on front card — fades in before splash */}
             {isFront && frame >= CARD_WHITE_START && (() => {
