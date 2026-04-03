@@ -262,7 +262,7 @@ export const CalendarZoomScene: React.FC = () => {
           position: "absolute",
           inset: 0,
           backgroundColor: "#FFFFFF",
-          opacity: interpolate(frame, [16, 22], [0, 1], {
+          opacity: interpolate(frame, [25, 30], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),
