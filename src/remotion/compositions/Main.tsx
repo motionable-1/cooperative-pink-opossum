@@ -41,6 +41,10 @@ import { BlogIntegrationsTextScene } from "./scenes/BlogIntegrationsTextScene";
 import { IntegrationIconsScene } from "./scenes/IntegrationIconsScene";
 import { IconsScatterScene } from "./scenes/IconsScatterScene";
 import { StartRankingScene } from "./scenes/StartRankingScene";
+import { TrafficCounterScene } from "./scenes/TrafficCounterScene";
+import { OutrankCompetitionScene } from "./scenes/OutrankCompetitionScene";
+import { FreeTrialScene } from "./scenes/FreeTrialScene";
+import { OutrankDomainScene } from "./scenes/OutrankDomainScene";
 
 /*
  * Full animation sequence:
@@ -113,6 +117,11 @@ const SCENE_42_DURATION = 35;   // "Auto-published on your BLOG with easy integr
 const SCENE_43_DURATION = 55;   // Integration icons floating around text
 const SCENE_44_DURATION = 28;   // Icons scatter + crosshair transition
 const SCENE_45_DURATION = 60;   // "Start ranking today." CTA with arrow
+const SCENE_46_DURATION = 90;   // Traffic counter 0→968k with purple arcs
+const SCENE_47_DURATION = 50;   // "Outrank the competition." gradient text
+const SCENE_48_DURATION = 8;    // Black transition
+const SCENE_49_DURATION = 55;   // "Start your FREE trial now."
+const SCENE_50_DURATION = 90;   // "outrank.so" domain hold
 
 const SCENE_2_START = SCENE_1_DURATION;
 const SCENE_3_START = SCENE_2_START + SCENE_2_DURATION;
@@ -158,6 +167,11 @@ const SCENE_42_START = SCENE_41_START + SCENE_41_DURATION;
 const SCENE_43_START = SCENE_42_START + SCENE_42_DURATION;
 const SCENE_44_START = SCENE_43_START + SCENE_43_DURATION;
 const SCENE_45_START = SCENE_44_START + SCENE_44_DURATION;
+const SCENE_46_START = SCENE_45_START + SCENE_45_DURATION;
+const SCENE_47_START = SCENE_46_START + SCENE_46_DURATION;
+const SCENE_48_START = SCENE_47_START + SCENE_47_DURATION;
+const SCENE_49_START = SCENE_48_START + SCENE_48_DURATION;
+const SCENE_50_START = SCENE_49_START + SCENE_49_DURATION;
 
 export const Main: React.FC = () => {
   return (
@@ -380,6 +394,31 @@ export const Main: React.FC = () => {
       {/* Scene 45: "Start ranking today." CTA with arrow */}
       <Sequence from={SCENE_45_START} durationInFrames={SCENE_45_DURATION}>
         <StartRankingScene />
+      </Sequence>
+
+      {/* Scene 46: Traffic counter 0→968k with purple arcs */}
+      <Sequence from={SCENE_46_START} durationInFrames={SCENE_46_DURATION}>
+        <TrafficCounterScene />
+      </Sequence>
+
+      {/* Scene 47: "Outrank the competition." */}
+      <Sequence from={SCENE_47_START} durationInFrames={SCENE_47_DURATION}>
+        <OutrankCompetitionScene />
+      </Sequence>
+
+      {/* Scene 48: Black transition */}
+      <Sequence from={SCENE_48_START} durationInFrames={SCENE_48_DURATION}>
+        <div style={{ position: "absolute", inset: 0, backgroundColor: "#000000" }} />
+      </Sequence>
+
+      {/* Scene 49: "Start your FREE trial now." */}
+      <Sequence from={SCENE_49_START} durationInFrames={SCENE_49_DURATION}>
+        <FreeTrialScene />
+      </Sequence>
+
+      {/* Scene 50: "outrank.so" domain hold */}
+      <Sequence from={SCENE_50_START} durationInFrames={SCENE_50_DURATION}>
+        <OutrankDomainScene />
       </Sequence>
     </AbsoluteFill>
   );
