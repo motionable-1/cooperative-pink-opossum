@@ -118,9 +118,10 @@ export const ContentTableScene: React.FC = () => {
             <div style={{ width: 100 }}>Date</div>
           </div>
 
-          {/* Rows */}
-          <div style={{ transform: `translateY(${scrollY}px)` }}>
-            {ROWS.map((row, idx) => {
+          {/* Rows — clipped so scroll doesn't bleed into header */}
+          <div style={{ overflow: "hidden", maxHeight: ROW_H * 5 + 20 }}>
+            <div style={{ transform: `translateY(${scrollY}px)` }}>
+              {ROWS.map((row, idx) => {
               const rowDelay = idx * 3;
               const rowSpring = spring({
                 frame: Math.max(0, frame - rowDelay - 8),
@@ -193,6 +194,7 @@ export const ContentTableScene: React.FC = () => {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       </div>
