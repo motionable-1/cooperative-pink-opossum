@@ -10,7 +10,6 @@ import { AreSearchingScene } from "./scenes/AreSearchingScene";
 import { SearchBarScene } from "./scenes/SearchBarScene";
 import { ExclamationScene } from "./scenes/ExclamationScene";
 import { MeetScene } from "./scenes/MeetScene";
-import { MeetWhiteScene } from "./scenes/MeetWhiteScene";
 import { NeonPillScene } from "./scenes/NeonPillScene";
 import { OutrankScene } from "./scenes/OutrankScene";
 import { ScaleYourScene } from "./scenes/ScaleYourScene";
@@ -236,10 +235,7 @@ export const Main: React.FC = () => {
         <MeetScene />
       </Sequence>
 
-      {/* Scene 13: "Meet !" white centered */}
-      <Sequence from={SCENE_13_START} durationInFrames={SCENE_13_DURATION}>
-        <MeetWhiteScene />
-      </Sequence>
+      {/* Scene 13: MERGED into Scene 12 */}
 
       {/* Scene 14: Neon pill outline drawing */}
       <Sequence from={SCENE_14_START} durationInFrames={SCENE_14_DURATION}>
